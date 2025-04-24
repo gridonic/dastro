@@ -23,6 +23,8 @@ export type DastroTypes<
 
 
 export interface DastroConfig<T extends DastroTypes> {
+  environment: string;
+  renderingMode: 'server' | 'static';
   i18n: {
     defaultLocale: T['SiteLocale'];
   };
@@ -32,7 +34,8 @@ export interface DastroConfig<T extends DastroTypes> {
     environment: string;
     allowEnvironmentSwitch: boolean;
   },
-  cookies: {
+  api: {
+    secretApiToken: string;
     signedCookieJwtSecret: string;
   }
 }

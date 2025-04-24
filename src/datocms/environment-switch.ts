@@ -25,7 +25,7 @@ export function environmentSwitch<T extends DastroTypes>(config: DastroConfig<T>
     try {
       const payload = jwt.verify(
         cookie.value,
-        config.cookies.signedCookieJwtSecret,
+        config.api.signedCookieJwtSecret,
       ) as JwtPayload;
 
       return payload.environment;
@@ -54,7 +54,7 @@ export function environmentSwitch<T extends DastroTypes>(config: DastroConfig<T>
     if (await testEnvironmentExists(environment)) {
       context.cookies.set(
         CUSTOM_DATO_ENVIRONMENT_COOKIE_NAME,
-        jwt.sign({environment}, config.cookies.signedCookieJwtSecret),
+        jwt.sign({environment}, config.api.signedCookieJwtSecret),
         cookieOptions(),
       );
     }

@@ -16,7 +16,7 @@ export function draftMode<T extends DastroTypes>(config: DastroConfig<T>) {
     try {
       const payload = jwt.verify(
         cookie.value,
-        config.cookies.signedCookieJwtSecret,
+        config.api.signedCookieJwtSecret,
       ) as JwtPayload;
 
       return payload.enabled;
@@ -34,7 +34,7 @@ export function draftMode<T extends DastroTypes>(config: DastroConfig<T>) {
   }
 
   function jwtToken() {
-    return jwt.sign({enabled: true}, config.cookies.signedCookieJwtSecret);
+    return jwt.sign({enabled: true}, config.api.signedCookieJwtSecret);
   }
 
   function cookieOptions(): AstroCookieSetOptions {
