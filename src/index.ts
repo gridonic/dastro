@@ -17,6 +17,6 @@ export {
   draftMode,
   environmentSwitch,
   datocms,
-  buildDastroContext
+  buildDastroContext,
 };
 
