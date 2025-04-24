@@ -1,0 +1,36 @@
+---
+import type { RecordLinkFragment } from '@generated/datocms.types';
+import { resolveRecordUrl } from '@/datocms/routing';
+
+interface Props {
+  // "record" is passed in when using inside StructuredText
+  record: RecordLinkFragment;
+  target?: string;
+  linkTitle?: string;
+  class?: string;
+}
+
+const {
+  record,
+  target = '_self',
+  class: classNames,
+  linkTitle = '',
+  ...rest
+} = Astro.props;
+---
+
+{
+  record?.__typename && (
+    <a
+      class="link"
+      class:list={classNames}
+      data-astro-prefetch
+      href={resolveRecordUrl(record, Astro.locals.locale)}
+      target={target}
+      title={linkTitle}
+      {...rest}
+    >
+      <slot>{record.title || 'Untitled'}</slot>
+    </a>
+  )
+}
