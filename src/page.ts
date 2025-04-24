@@ -1,8 +1,7 @@
-// import { datoFetch } from '@/datocms/datocms.ts';
 import type { TypedDocumentNode } from '@graphql-typed-document-node/core';
-import type {DastroTypes} from "./lib-types.ts";
+import type {DastroConfig, DastroTypes} from "./lib-types.ts";
 import type {AstroContext} from "./astro.context.ts";
-import { datoFetch } from './datocms.ts';
+import { datocms } from './datocms/datocms.ts';
 
 export type PageRecordType<T extends DastroTypes> = T['RecordLinkFragment']['__typename'];
 
@@ -62,12 +61,15 @@ export interface TranslatedSlugLocale<T extends DastroTypes> {
   locale?: T['SiteLocale'] | null;
   value: string;
 }
-//
+
 export async function getPageRecordsFor<T extends DastroTypes>(
+  config: DastroConfig<T>,
   query: AllRecordsQueryType<T>,
   context: AstroContext<'locals' | 'cookies'>,
 ): Promise<RoutingPageRecord<T>[]> {
   const PAGE_SIZE = 100;
+
+  const { datoFetch } = datocms(config);
 
   // const operationName =
   //   query.definitions.find((d) => d.kind === 'OperationDefinition')?.name

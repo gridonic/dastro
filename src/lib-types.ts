@@ -27,6 +27,14 @@ export interface DastroConfig<T extends DastroTypes> {
     defaultLocale: T['SiteLocale'];
   };
   pageDefinitions: Record<PageRecordType<T>, PageDefinition<T>>;
+  datocms: {
+    token: string;
+    environment: string;
+    allowEnvironmentSwitch: boolean;
+  },
+  cookies: {
+    signedCookieJwtSecret: string;
+  }
 }
 
 export interface ExportTypesRouting<T extends DastroTypes> {

@@ -86,6 +86,7 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>): Routing
       pageDefinition: PageDefinition<T>,
     ): Promise<Route<T>[]> {
       const pageRecords = await getPageRecordsFor(
+        config,
         pageDefinition.allRecordsQuery,
         context,
       );
