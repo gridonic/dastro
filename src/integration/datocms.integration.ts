@@ -7,7 +7,8 @@ import {
   loadCodegenConfig,
 } from '@graphql-codegen/cli';
 import type { Types } from '@graphql-codegen/plugin-helpers';
-import tsConfig from '../../tsconfig.json';
+// @ts-ignore
+import tsConfig from '../../../../tsconfig.json';
 
 export default function datoCmsIntegration(): AstroIntegration {
   return {
