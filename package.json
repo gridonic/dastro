@@ -8,7 +8,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./client": "./src/client/index.ts",
-    "./RecordLink": "./src/Components/RecordLink.astro"
+    "./components": "./src/components/index.ts",
+    "./components/RecordLink": "./src/components/RecordLink.astro"
   },
   "files": [
     "src"
@@ -18,14 +19,15 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "astro": "^5.7.2",
     "@datocms/cda-client": "^0.2.7",
     "@datocms/cma-client": "^4.0.1",
+    "astro": "*",
     "jsonwebtoken": "^9.0.2",
     "serialize-error": "^12.0.0",
     "typescript": "^5.8.3"
   },
   "devDependencies": {
+    "@astrojs/ts-plugin": "^1.10.4",
     "@graphql-codegen/cli": "^5.0.5",
     "@graphql-codegen/typed-document-node": "^5.1.1",
     "@graphql-codegen/typescript": "^4.1.6",
