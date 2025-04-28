@@ -1,10 +1,17 @@
 {
   "name": "dastro",
   "version": "1.0.0",
-  "main": "src/index.ts",
+  "sideEffects": false,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "exports": {
+    ".": "./src/index.ts",
+    "./RecordLink": "./src/Components/RecordLink.astro"
+  },
+  "files": [
+    "src"
+  ],
   "type": "module",
   "author": "",
   "license": "ISC",
@@ -23,5 +30,8 @@
     "@graphql-codegen/typescript": "^4.1.6",
     "@graphql-codegen/typescript-operations": "^4.6.0",
     "@types/jsonwebtoken": "^9.0.9"
+  },
+  "peerDependencies": {
+    "astro": "*"
   }
 }
