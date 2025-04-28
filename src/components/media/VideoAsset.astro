@@ -1,0 +1,91 @@
+---
+import {VideoAssetData} from "../component.types";
+
+interface Props {
+  data: VideoAssetData;
+  class?: string;
+  aspectRatio?: number;
+  videoResolution?: 'low' | 'medium' | 'high';
+}
+
+const {
+  data,
+  videoResolution,
+  aspectRatio,
+  class: classNames,
+  ...rest
+} = Astro.props;
+
+const video = data.video;
+
+function getVideoUrl(): string | null {
+  switch (videoResolution) {
+    case 'low':
+      return data.video?.urlLowRes ?? null;
+    case 'medium':
+      return data.video?.urlMediumRes ?? null;
+    case 'high':
+    default:
+      return data.video?.urlHighRes ?? null;
+  }
+}
+---
+
+<div
+  class="video-asset"
+  class:list={classNames}
+  {...rest}
+  style={{ aspectRatio }}
+>
+  {
+    video && (
+      <video
+        class="video"
+        width={video.width}
+        height={video.height}
+        autoplay
+        muted
+        loop
+        playsinline
+        poster={video.thumbnailUrl}
+      >
+        <source src={getVideoUrl()} type="video/mp4" />
+        Video is not supported
+      </video>
+    )
+  }
+</div>
+
+<!--{-->
+<!--  video && (-->
+<!--    <mux-player-->
+<!--      id="my-video"-->
+<!--      class="video"-->
+<!--      playback-id={video.muxPlaybackId}-->
+<!--      autoplay="muted"-->
+<!--      playsinline-->
+<!--      muted-->
+<!--      loop-->
+<!--      width={video.width}-->
+<!--      height={video.height}-->
+<!--    />-->
+<!--  )-->
+<!--}-->
+
+<!--<script>
+    import '@mux/mux-player';
+  </script>-->
+
+<style>
+  .video-asset > .video {
+      display: block;
+      object-fit: cover;
+      object-position: center;
+      height: 100%;
+
+      /* for mux player
+      --controls: none;
+      --media-object-fit: cover;
+      --media-object-position: center; */
+  }
+</style>

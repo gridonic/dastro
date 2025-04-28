@@ -1,0 +1,20 @@
+---
+import type { ComponentProps } from 'astro/types';
+import ImageAsset from './ImageAsset.astro';
+import VideoAsset from './VideoAsset.astro';
+import {ImageAssetData, VideoAssetData} from "../component.types";
+
+interface Props extends Omit<ComponentProps<typeof ImageAsset>, 'data'> {
+  data: VideoAssetData & ImageAssetData;
+  class?: string;
+  aspectRatio?: number;
+  videoResolution?: 'low' | 'medium' | 'high';
+}
+
+const { data, class: classNames, ...rest } = Astro.props;
+---
+
+<div class="media-asset" class:list={classNames}>
+  {data.responsiveImage && <ImageAsset data={data} {...rest} />}
+  {data.video && <VideoAsset data={data} {...rest} />}
+</div>

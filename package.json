@@ -19,9 +19,10 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@datocms/astro": "^0.6.2",
     "@datocms/cda-client": "^0.2.7",
     "@datocms/cma-client": "^4.0.1",
-    "astro": "*",
+    "astro": ">=5.x",
     "jsonwebtoken": "^9.0.2",
     "serialize-error": "^12.0.0",
     "typescript": "^5.8.3"
@@ -35,6 +36,6 @@
     "@types/jsonwebtoken": "^9.0.9"
   },
   "peerDependencies": {
-    "astro": "*"
+    "astro": ">=5.x"
   }
 }
