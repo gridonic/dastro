@@ -1,10 +1,9 @@
 ---
-import type { RecordLinkFragment } from '@generated/datocms.types';
-import { resolveRecordUrl } from '@/datocms/routing';
+import {type DastroTypes} from "../lib-types";
 
-interface Props {
+interface Props<T extends DastroTypes> {
   // "record" is passed in when using inside StructuredText
-  record: RecordLinkFragment;
+  record: T['RecordLinkFragment'];
   target?: string;
   linkTitle?: string;
   class?: string;
@@ -17,6 +16,8 @@ const {
   linkTitle = '',
   ...rest
 } = Astro.props;
+
+const { resolveRecordUrl } = Astro.locals.dastro.routing();
 ---
 
 {
