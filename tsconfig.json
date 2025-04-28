@@ -10,5 +10,5 @@
     "verbatimModuleSyntax": true,
     "jsx": "preserve"
   },
-  "include": [".astro/types.d.ts", "src"]
+  "include": [".astro/types.d.ts", "env.d.ts", "src"]
 }
