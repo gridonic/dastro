@@ -1,5 +1,5 @@
 import type {AstroContext} from "./astro.context.ts";
-import type {DastroConfig, DastroTypes, ExportTypesRouting, Routing} from './lib-types.ts';
+import type {DastroConfig, DastroTypes } from './lib-types.ts';
 import {
   getPageRecordsFor,
   type PageDefinition,
@@ -22,7 +22,7 @@ export interface RecordWithParent<T extends DastroTypes> {
 let pageDefinitionList: PageDefinition<any>[];
 let pageRecordTypes: PageRecordType<any>[];
 
-export function routing<T extends DastroTypes>(config: DastroConfig<T>): Routing {
+export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
   if (!pageDefinitionList) {
     pageDefinitionList = Object.values(config.pageDefinitions);
   }
@@ -132,5 +132,5 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>): Routing
     getAllRoutes,
     pageDefinitionList,
     pageRecordTypes
-  } satisfies ExportTypesRouting<T>
+  }
 }

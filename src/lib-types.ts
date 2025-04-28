@@ -40,30 +40,10 @@ export interface DastroConfig<T extends DastroTypes> {
   }
 }
 
-export interface ExportTypesRouting<T extends DastroTypes> {
-  resolveRecordUrl(
-    record: {
-      __typename: T['RecordLinkFragment']['__typename'];
-      _allTranslatedSlugLocales?: TranslatedSlugLocale<T>[] | null;
-      parent?: RecordWithParent<T> | null;
-    },
-    locale: T['SiteLocale'],
-  ): string | null;
-  getAllRoutes(
-    context: AstroContext<'locals' | 'cookies'>,
-  ): Promise<Route<T>[]>;
-  pageRecordTypes:  T["RecordLinkFragment"]["__typename"][];
-  pageDefinitionList: PageDefinition<T>[];
-}
-
 export type ExportTypes<T extends DastroTypes> = {
   PageDefinition: PageDefinition<T>;
   Page: Page<T>;
   PageRecordType: PageRecordType<T>;
   Route: Route<T>;
   RecordWithParent: RecordWithParent<T>;
-}
-
-export interface Routing {
-  // no declarations here, we will augment it in the integrating library
 }

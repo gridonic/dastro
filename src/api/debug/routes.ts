@@ -1,6 +1,6 @@
 
 import type { APIRoute } from 'astro';
-import type {DastroTypes, ExportTypesRouting} from "../../lib-types.ts";
+import type {DastroTypes} from "../../lib-types.ts";
 
 export const GET: APIRoute = async (context) => {
   const { routing, config } = context.locals.dastro;
