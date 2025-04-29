@@ -19,18 +19,16 @@ export interface RecordWithParent<T extends DastroTypes> {
   parent?: RecordWithParent<T> | null;
 }
 
-let pageDefinitionList: PageDefinition<any>[];
-let pageRecordTypes: PageRecordType<any>[];
 
 export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
-  if (!pageDefinitionList) {
-    pageDefinitionList = Object.values(config.pageDefinitions);
+  function pageDefinitionList(): PageDefinition<any>[] {
+    return Object.values(config.pageDefinitions);
   }
 
-  if (!pageRecordTypes) {
-    pageRecordTypes = pageDefinitionList.map(
+  function pageRecordTypes(): PageRecordType<any>[] {
+    return pageDefinitionList().map(
       (d) => d.type,
-    )
+    );
   }
 
   function resolveRecordUrl(
@@ -75,7 +73,7 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
   ): Promise<Route<T>[]> {
     const routes: Route<T>[] = [];
     await Promise.all(
-      pageDefinitionList.map(async (def) => {
+      pageDefinitionList().map(async (def) => {
         routes.push(...(await localizedRoutesForRecords(def)));
       }),
     );

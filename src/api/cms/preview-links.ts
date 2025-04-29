@@ -50,7 +50,7 @@ export const POST: APIRoute = async ({ url, request, locals }) => {
      */
     const { environmentId, item, itemType, locale } = await request.json();
 
-    const pageDefinition = pageDefinitionList.find(
+    const pageDefinition = pageDefinitionList().find(
       (p) => p.apiKey === itemType.attributes.api_key,
     );
 
