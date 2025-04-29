@@ -1,0 +1,48 @@
+---
+import type {Module} from "../component.types";
+
+interface Props {
+  module: Module;
+}
+
+const moduleComponents = Astro.locals.dastro.config.moduleComponents;
+const { module } = Astro.props;
+
+const Component = moduleComponents[module.__typename];
+---
+
+<header
+  class="header-module"
+  class:list={{
+    module: true,
+    [`-${module.__typename
+      .replace(/([a-z])([A-Z])/g, '$1-$2')
+      .slice(0, -7)
+      .toLowerCase()}`]: true,
+  }}
+  data-module={module.__typename
+    .replace(/([a-z])([A-Z])/g, '$1.$2')
+    .slice(0, -7)}
+>
+  {Component && <Component data={module} />}
+  {
+    !Component && module.__typename && (
+      <mark class="mark">No Component registered for {module?.__typename}</mark>
+    )
+  }
+</header>
+
+<style>
+    .header-module:has(.mark) {
+        position: relative;
+
+        > .mark {
+            display: block;
+            padding: var(--base-component-padding);
+            background-color: #ffad8f;
+            border-top: 1px solid Canvas;
+            font-size: 1.75rem;
+            color: Canvas;
+        }
+    }
+</style>

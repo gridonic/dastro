@@ -1,3 +1,10 @@
+export type AstroComponent = (props: any) => any;
+
+export interface Module {
+  __typename: string;
+}
+
+
 export interface ImageAssetData {
   responsiveImage?: {
     __typename?: 'ResponsiveImage',
@@ -22,4 +29,3 @@ export interface VideoAssetData {
     urlLowRes?: string | null
   } | null
 }
-

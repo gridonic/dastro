@@ -1,0 +1,17 @@
+---
+import ModuleComponent from './Module.astro';
+import type { Module} from "../component.types";
+
+interface Props {
+  modules: Module[];
+}
+
+const moduleComponents = Astro.locals.dastro.config.moduleComponents;
+const { modules } = Astro.props;
+
+function componentForModule(module: Module) {
+  return moduleComponents[module.__typename];
+}
+---
+
+{modules.map((m) => <ModuleComponent module={m} Component={componentForModule(m)} />)}
