@@ -1,5 +1,4 @@
 import type { AstroIntegration } from 'astro';
-import {GET} from "../api/debug/routes.ts";
 
 export default function dastroIntegration(): AstroIntegration {
   return {

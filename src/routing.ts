@@ -21,11 +21,11 @@ export interface RecordWithParent<T extends DastroTypes> {
 
 
 export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
-  function pageDefinitionList(): PageDefinition<any>[] {
+  function pageDefinitionList(): PageDefinition<T>[] {
     return Object.values(config.pageDefinitions);
   }
 
-  function pageRecordTypes(): PageRecordType<any>[] {
+  function pageRecordTypes(): PageRecordType<T>[] {
     return pageDefinitionList().map(
       (d) => d.type,
     );

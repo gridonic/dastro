@@ -1,6 +1,5 @@
-import type {Page, PageDefinition, PageRecordType, TranslatedSlugLocale} from "./page.ts";
+import type {Page, PageDefinition, PageRecordType } from "./page.ts";
 import type {RecordWithParent, Route} from "./routing.ts";
-import type {AstroContext} from "./astro.context.ts";
 
 export type LikeSiteLocale = string;
 export type LikeRecordLink = {
