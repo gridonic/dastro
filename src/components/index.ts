@@ -7,9 +7,10 @@ import RecordLink from './link/RecordLink.astro';
 
 import DefaultStructuredText from './common/DefaultStructuredText.astro';
 
+import MediaAsset from './media/MediaAsset.astro';
 import ImageAsset from './media/ImageAsset.astro';
 import VideoAsset from './media/VideoAsset.astro';
-import MediaAsset from './media/MediaAsset.astro';
+import VideoPlayer from './media/VideoPlayer.astro';
 
 import Modules from './module/Modules.astro';
 import HeaderModule from './module/HeaderModule.astro';
@@ -19,9 +20,10 @@ export {
   DebugView,
   RecordLink,
   DefaultStructuredText,
+  MediaAsset,
   ImageAsset,
   VideoAsset,
-  MediaAsset,
+  VideoPlayer,
   HeaderModule,
   Modules
 };

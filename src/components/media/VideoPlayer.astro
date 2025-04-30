@@ -1,0 +1,226 @@
+---
+import { YouTube, Vimeo } from 'astro-embed';
+import type {VideoPlayerData} from "../component.types";
+
+interface Props {
+  data: VideoPlayerData;
+  class?: string;
+}
+
+const { data, class: classNames, ...rest } = Astro.props;
+---
+
+<script>
+  import { registerComponent, BaseComponent } from 'dastro/client';
+
+  registerComponent(
+    '[data-video-player]',
+    class VideoPlayer extends BaseComponent {
+      init() {
+        const $placeholder = this.$el.querySelector(
+          '.placeholder',
+        ) as HTMLElement;
+        const $video = this.$el.querySelector('.video') as HTMLVideoElement;
+
+        if ($placeholder && $video) {
+          $placeholder.addEventListener('click', () => {
+            $placeholder.style.display = 'none';
+            $video.style.display = 'block';
+            $video.play();
+          });
+        }
+      }
+    },
+  );
+</script>
+
+<div class="video-player" class:list={classNames} {...rest} data-video-player>
+  {
+    data.video.__typename === 'VideoInlineRecord' && (
+      <div class="videowrapper">
+        <video
+          class="video"
+          width={data.video.videoAsset.video.width}
+          height={data.video.videoAsset.video.height}
+          {...(data.video.showControls ? { controls: true } : {})}
+          {...(data.video.autoplay ? { autoplay: true } : {})}
+          {...(data.video.loop ? { loop: true } : {})}
+          {...(data.video.muted ? { muted: true } : {})}
+          poster={
+            data.posterImage
+              ? `${data.posterImage.url}?&w=${data.video.videoAsset.video.width}&h=${data.video.videoAsset.video.height}&fit=crop`
+              : undefined
+          }
+        >
+          <source src={data.video.videoAsset.video.mp4Url} type="video/mp4" />
+          Video is not supported
+        </video>
+
+        {!data.video.autoplay && (
+          <div
+            class="placeholder"
+            style={`background-image: url(${data.posterImage?.url}?&w=${data.video.videoAsset.video.width}&h=${data.video.videoAsset.video.height}&fit=crop); aspect-ratio: ${data.video.videoAsset.video.width} / ${data.video.videoAsset.video.height}`}
+          >
+            <button class="button" type="button">
+              <span class="ui-hide-visually">Play</span>
+            </button>
+          </div>
+        )}
+      </div>
+    )
+  }
+  {
+    data.video.__typename === 'VideoExternalRecord' &&
+      data.video.videoReference.provider === 'youtube' && (
+        <YouTube
+          id={data.video.videoReference.providerUid}
+          poster={
+            data.posterImage
+              ? `${data.posterImage.url}?&w=1920&h=1080&fit=crop`
+              : undefined
+          }
+          posterQuality="max"
+        />
+      )
+  }
+  {
+    data.video.__typename === 'VideoExternalRecord' &&
+      data.video.videoReference.provider === 'vimeo' && (
+        <Vimeo
+          id={data.video.videoReference.providerUid}
+          poster={
+            data.posterImage
+              ? `${data.posterImage.url}?&w=1920&h=1080&fit=crop`
+              : undefined
+          }
+          posterQuality="max"
+        />
+      )
+  }
+</div>
+
+<style lang="scss">
+  @mixin before-and-after {
+    display: block;
+    font-weight: 600;
+    color: currentColor;
+    transition: var(--base-transition-all);
+
+    @media (--vs) {
+      font-size: 4rem;
+    }
+
+    @media (--vl) {
+      font-size: 8rem;
+    }
+  }
+
+  @mixin before {
+    content: 'PL';
+    transform: translateY(-20%);
+  }
+
+  @mixin after {
+    content: 'AY';
+    transform: translateY(20%);
+  }
+
+  @mixin play-button {
+    // Reset stuff
+    display: block;
+    appearance: none;
+    background: none;
+    text-decoration: none;
+    margin: 0;
+    padding: 0;
+    padding-block-end: 0;
+    padding-block-start: 0;
+    padding-inline-end: 0;
+    padding-inline-start: 0;
+    border: none;
+    background: radial-gradient(
+      50% 50% at 50% 50%,
+      rgba(0, 0, 0, 0) 47.5%,
+      rgba(0, 0, 0, 0.3) 100%
+    );
+
+    display: flex;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    color: var(--base-color-inverted-foreground);
+
+    @media (hover: hover) {
+      &:hover {
+        &::before,
+        &::after {
+          transform: translateY(0);
+        }
+      }
+    }
+
+    &::before,
+    &::after {
+      // Reset stuff
+      width: unset;
+      height: unset;
+      background: unset;
+      opacity: unset;
+      border: unset;
+      line-height: 1;
+      outline: none;
+      position: unset;
+
+      @include before-and-after;
+    }
+
+    &::before {
+      @include before;
+    }
+
+    &::after {
+      @include after;
+    }
+  }
+
+  .video-player {
+    > .videowrapper {
+      position: relative;
+
+      &:has(.placeholder) > .video {
+        display: none;
+      }
+
+      > .video {
+        width: 100%;
+        object-fit: cover;
+      }
+
+      > .placeholder > .button {
+        @include play-button;
+      }
+    }
+
+    :global(lite-youtube),
+    :global(lite-vimeo) {
+      width: 100%;
+      max-width: none !important; // We need to trump this for our fluid approach
+
+      &::before,
+      &::after {
+        display: block;
+        content: '';
+      }
+
+      &::before {
+        opacity: 0;
+      }
+
+      :global(.lty-playbtn),
+      :global(.ltv-playbtn) {
+        @include play-button;
+      }
+    }
+  }
+</style>

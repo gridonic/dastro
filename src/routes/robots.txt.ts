@@ -1,7 +1,7 @@
 import type {APIRoute} from "astro";
 
 export const GET: APIRoute = async ({ locals }) => {
-  const { config, routing } = locals.dastro;
+  const { config } = locals.dastro;
 
   const baseUrl = config.appBaseUrl.replace(/\/$/, '');
 
