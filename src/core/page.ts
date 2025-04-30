@@ -47,11 +47,11 @@ export interface Page<T extends DastroTypes> {
   __typename: PageRecordType<T>;
   id: string;
   title: string;
-  _seoMetaTags: SeoMetaTag[];
+  _seoMetaTags: MetaTag[];
   _allTranslatedSlugLocales?: TranslatedSlugLocale<T>[] | null;
 }
 
-export interface SeoMetaTag {
+export interface MetaTag {
   attributes?: Record<string, string> | null;
   content?: string | null;
   tag: string;

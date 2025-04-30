@@ -8,7 +8,7 @@ import { buildDastroContext } from "./core/context.ts";
 export type { Route } from "./core/routing.ts";
 export type {DastroTypes, DastroConfig, ExportTypes} from "./core/lib-types.ts";
 export type {AstroContext} from "./astro.context.ts";
-export type {SeoMetaTag} from './core/page.ts';
+export type {MetaTag} from './core/page.ts';
 
 export {
   dastroIntegration,

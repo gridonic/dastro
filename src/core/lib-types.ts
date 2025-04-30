@@ -5,6 +5,7 @@ import type {AstroComponent} from "../components";
 export type LikeSiteLocale = string;
 export type LikeRecordLink = {
   __typename: string;
+  title: string;
 };
 export type LikeAllPageTypes<T extends DastroTypes = any> =
   | Page<T>
@@ -27,6 +28,7 @@ export interface DastroConfig<T extends DastroTypes> {
   renderingMode: 'server' | 'static';
   i18n: {
     defaultLocale: T['SiteLocale'];
+    locales: T['SiteLocale'][];
   };
   datocms: {
     token: string;
@@ -36,6 +38,11 @@ export interface DastroConfig<T extends DastroTypes> {
   api: {
     secretApiToken: string;
     signedCookieJwtSecret: string;
+  },
+  dev: {
+    debugViewEnabled: boolean;
+    customerOnboardingEnabled: boolean;
+    preventSearchIndexing: boolean;
   },
   pageDefinitions: Record<PageRecordType<T>, PageDefinition<T>>;
   moduleComponents: Record<string, AstroComponent>;

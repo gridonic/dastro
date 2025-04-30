@@ -1,0 +1,137 @@
+---
+import '@/sass/styles.scss';
+
+import { Seo } from '@datocms/astro';
+
+import type {Page, MetaTag} from "../../core/page";
+import type {DastroTypes} from "../../core/lib-types";
+import {isSearchIndexingPrevented} from "../../core/page-indexing";
+import DebugView from './DebugView.astro';
+
+interface Props<T extends DastroTypes = DastroTypes> {
+  page: Page<T>;
+  locale: T['SiteLocale'];
+  bodyClass?: string;
+  faviconMetaTags: MetaTag[];
+}
+
+const { page, locale, bodyClass, faviconMetaTags } = Astro.props;
+
+const { routing, config} = Astro.locals.dastro;
+const { resolveRecordUrl } = routing();
+
+const debugViewEnabled = config.dev.debugViewEnabled;
+// const customerOnboardingEnabled = config.dev.customerOnboardingEnabled;
+
+const isPageExcludedFromIndexing = !!page._seoMetaTags.find(
+  (mt) =>
+    mt.attributes?.name === 'robots' && mt.attributes?.content === 'noindex',
+);
+
+function i18nLinkTags(): MetaTag[] {
+  // for single-locale apps, we do not need to specify alternatives
+  if (config.i18n.locales.length <= 1) {
+    return [];
+  }
+
+  const urlInCurrentLocale = resolveRecordUrl(page, locale) ?? '/';
+
+  return [
+    {
+      tag: 'meta',
+      attributes: { property: 'og:url', content: urlInCurrentLocale },
+    },
+    {
+      tag: 'meta',
+      attributes: { property: 'og:locale', content: locale },
+    },
+    {
+      tag: 'link',
+      attributes: { rel: 'canonical', href: urlInCurrentLocale },
+    },
+    ...config.i18n.locales.map((l) => ({
+      tag: 'link',
+      attributes: {
+        rel: 'alternate',
+        hreflang: l,
+        href: resolveRecordUrl(page, l) ?? '/',
+      },
+    })),
+  ];
+}
+---
+
+<!doctype html>
+<!--
+
+₍⸌̣ʷ̣̫⸍̣₎  Made with ♥ by gridonic.ch
+
+-->
+<html lang={locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <Seo
+      data={[
+        ...faviconMetaTags,
+        ...page._seoMetaTags,
+        ...i18nLinkTags(),
+      ]}
+    />
+    {
+      isSearchIndexingPrevented(config) && !isPageExcludedFromIndexing && (
+        <meta
+          id="development-indexing-turned-off"
+          name="robots"
+          content="noindex"
+        />
+      )
+    }
+    <slot name="head" />
+  </head>
+  <body class:list={bodyClass}>
+    <slot name="before" />
+    <!--<SkipLinks />-->
+    {debugViewEnabled && <DebugView />}
+    <slot name="body" />
+    <!--{customerOnboardingEnabled && <CustomerOnboarding />}-->
+    <slot name="after" />
+  </body>
+</html>
+
+<script>
+  // This script calculates the width of the browser's scrollbar and sets it as a
+  // CSS custom property (--scrollbar-width) on the root element.
+  // It exists to ensure that layout or styling adjustments (e.g., padding/margin)
+  // can account for the scrollbar width dynamically, particularly in scenarios
+  // where scrollbars may affect the alignment of elements (e.g., modals or fixed headers).
+  const scrollbarWidth =
+    window.innerWidth - document.documentElement.clientWidth;
+  document.documentElement.style.setProperty(
+    '--scrollbar-width',
+    `${scrollbarWidth}px`,
+  );
+
+  // Disable all transitions when resizing
+  let resizeTimer: number;
+
+  window.addEventListener('resize', () => {
+    document.documentElement.classList.add('disable-transitions');
+
+    clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(() => {
+      document.documentElement.classList.remove('disable-transitions');
+    }, 1500);
+  });
+</script>
+
+<style lang="scss">
+  .disable-transitions {
+    :global(*),
+    :global(*::before),
+    :global(*::after) {
+      transition: none !important;
+    }
+  }
+</style>

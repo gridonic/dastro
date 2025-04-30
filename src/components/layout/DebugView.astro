@@ -1,0 +1,842 @@
+---
+// @boilerplate:init Define debug grid
+const {environmentSwitch, draftMode, config} = Astro.locals.dastro;
+
+const { isDraftModeEnabled } = draftMode();
+const {
+  isDatoEnvironmentSwitchAllowed,
+  usesDefaultDatoEnvironment,
+  getDatoEnvironment,
+} = environmentSwitch();
+
+const env = config.environment || 'no env';
+const draftModeEnabled = isDraftModeEnabled(Astro);
+
+const datoEnvironment = {
+  switchAllowed: isDatoEnvironmentSwitchAllowed(),
+  isDefault: usesDefaultDatoEnvironment(Astro),
+  environment: getDatoEnvironment(Astro),
+};
+
+// const { onboarding } = Astro.locals.globalStore.siteInfo.customer;
+---
+
+<div
+  class="debug-view"
+  data-debug-view
+  data-environment={env}
+  data-draft-mode-enabled={draftModeEnabled}
+>
+  <div class="toggle">
+    <input
+      class="checkbox"
+      type="checkbox"
+      id="debug-view-show-panel"
+      name="debug-view-show-panel"
+      data-shortcut="d"
+    />
+    <label class="label" for="debug-view-show-panel">
+      <svg
+        class="icon"
+        viewBox="0 0 16 16"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g clip-path="url(#clip0_6080_3145)">
+          <path
+            d="M0.96875 8H15.0312"
+            stroke="white"
+            stroke-linecap="round"
+            stroke-linejoin="round"></path>
+          <path
+            d="M8 0.96875V15.0312"
+            stroke="white"
+            stroke-linecap="round"
+            stroke-linejoin="round"></path>
+        </g>
+        <defs>
+          <clipPath id="clip0_6080_3145">
+            <rect width="16" height="16" fill="white"></rect>
+          </clipPath>
+        </defs>
+      </svg>
+    </label>
+  </div>
+  <div class="panel">
+    <label class="toggle" for="debug-view-show-panel"
+      ><svg
+        class="icon"
+        viewBox="0 0 16 16"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M3.02815 3.02815L12.9718 12.9718"
+          stroke="white"
+          stroke-linecap="round"
+          stroke-linejoin="round"></path>
+        <path
+          d="M12.9718 3.02815L3.02816 12.9718"
+          stroke="white"
+          stroke-linecap="round"
+          stroke-linejoin="round"></path>
+      </svg>
+    </label>
+    <span class="environment">@ {env} environment</span>
+    <pre
+      class="variables"
+      data-debug-variables>
+      <span class="variable" data-variable="--fluid-rem" data-type="font-size" />
+      <span class="variable" data-variable="--fluid-outer-margin" data-type="height" />
+      <span class="variable" data-variable="--base-component-padding" data-type="padding" />
+      <span class="variable" data-variable="--scrollbar-width" data-type="width" />
+    </pre>
+
+    <div class="checkboxes">
+      <div class="checkbox">
+        <input
+          type="checkbox"
+          id="debug-view-show-variables"
+          name="debug-view-show-variables"
+          data-shortcut="v"
+        />
+        <label for="debug-view-show-variables">Variables</label>
+      </div>
+      <div class="checkbox">
+        <input
+          type="checkbox"
+          id="debug-view-show-grid"
+          name="debug-view-show-grid"
+          data-shortcut="g"
+        />
+        <label for="debug-view-show-grid">Grid</label>
+      </div>
+      <div class="checkbox">
+        <input
+          type="checkbox"
+          id="debug-view-show-module-names"
+          name="debug-view-show-module-names"
+          data-shortcut="n"
+        />
+        <label for="debug-view-show-module-names">Module Names</label>
+      </div>
+      <div class="checkbox">
+        <input
+          type="checkbox"
+          id="debug-view-show-module-outlines"
+          name="debug-view-show-module-outlines"
+          data-shortcut="o"
+        />
+        <label for="debug-view-show-module-outlines">Module Outlines</label>
+      </div>
+      <div class="checkbox">
+        <input
+          type="checkbox"
+          id="debug-view-show-box-model"
+          name="debug-view-show-box-model"
+          data-shortcut="b"
+        />
+        <label for="debug-view-show-box-model">Box Model</label>
+      </div>
+      <div class="checkbox">
+        <input
+          type="checkbox"
+          id="debug-view-show-content-height"
+          name="debug-view-show-content-height"
+          data-shortcut="h"
+        />
+        <label for="debug-view-show-content-height"
+          >Content Height <span data-contentheight-ratio></span></label
+        >
+      </div>
+    </div>
+
+    <!--{-->
+    <!--  onboarding?.enabled && (-->
+    <!--    <button-->
+    <!--      type="button"-->
+    <!--      class="ui-button -small"-->
+    <!--      onclick="document.querySelector('.customer-onboarding').classList.add('-visible')"-->
+    <!--    >-->
+    <!--      Show Onboarding Message-->
+    <!--    </button>-->
+    <!--  )-->
+    <!--}-->
+
+    <div
+      class="draft-mode"
+      class:list={`-${draftModeEnabled ? 'enabled' : 'disabled'}`}
+    >
+      <div>Draft Mode</div>
+      <div class="enabled">ENABLED</div>
+      <div class="disabled">disabled</div>
+      <button type="button" class="ui-button -small toggle"
+        >Toggle Draft Mode</button
+      >
+    </div>
+    {
+      datoEnvironment.switchAllowed && (
+        <div
+          class="dato-environment"
+          class:list={{ '-custom': !datoEnvironment.isDefault }}
+        >
+          <div>DatoCMS Environment</div>
+          <div class="value">{datoEnvironment.environment}</div>
+          <button type="button" class="ui-button -small switch">
+            Switch Environment
+          </button>
+        </div>
+      )
+    }
+  </div>
+
+  <div class="grids">
+    <div class="debug-grid-complete ui-grid">
+      <!-- Set number according available grid columns -->
+      {
+        Array.from({ length: 12 }, (_, i) => (
+          <div class="column" data-debug-grid-complete-column={i + 1} />
+        ))
+      }
+    </div>
+    <div class="debug-grid-column-names ui-grid">
+      <div class="column -line" style="grid-column: full-bleed;">
+        <div class="label">Middle</div>
+      </div>
+      <div
+        class="column -topline"
+        data-debug-grid-column-name="Full-Bleed"
+        style="grid-column: full-bleed; --color: #dcc0fff2;"
+      >
+      </div>
+      <div
+        class="column -bottomline"
+        data-debug-grid-column-name="Grid"
+        style="grid-column: grid; --color: #c9f29bf2;"
+      >
+      </div>
+      <div
+        class="column -topline"
+        data-debug-grid-column-name="Left"
+        style="grid-column: left; --color: #fbc093f2;"
+      >
+      </div>
+      <div
+        class="column -topline"
+        data-debug-grid-column-name="Right"
+        style="grid-column: right; --color: #fbc093f2;"
+      >
+      </div>
+    </div>
+  </div>
+
+  <div class="contentheight" data-contentheight></div>
+</div>
+
+<script>
+  import { registerComponent, BaseComponent } from 'dastro/client';
+
+  registerComponent(
+    '[data-debug-view]',
+    class DebugView extends BaseComponent {
+      private draftModeEnabled = false;
+      private environment: string = '';
+
+      init() {
+        window.addEventListener('DOMContentLoaded', () => this.recalculate());
+        window.addEventListener('resize', () => this.recalculate());
+
+        this.bindCheckboxEvents();
+        this.loadCheckboxState();
+        this.bindKeyboardShortcuts();
+        this.bindDraftModeEvents();
+        this.bindEnvironmentSwitchEvents();
+
+        console.info(
+          'Debug View Keyboard Shortcuts\n' +
+            '-----------------------------\n' +
+            'Ctrl + D: Debug Panel\n' +
+            'Ctrl + V: Variables\n' +
+            'Ctrl + G: Grid\n' +
+            'Ctrl + M: Module Names\n' +
+            'Ctrl + O: Module Outlines\n' +
+            'Ctrl + B: Box Model\n' +
+            'Ctrl + H: Content Height\n',
+        );
+
+        this.draftModeEnabled = this.$el.dataset.draftModeEnabled === 'true';
+        console.info(`Draft Mode enabled: ${this.draftModeEnabled.toString()}`);
+
+        this.environment = this.$el.dataset.environment ?? '?';
+        console.info(`Environment: ${this.environment}`);
+      }
+
+      bindCheckboxEvents() {
+        const checkboxes = this.$el.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach((checkbox) => {
+          checkbox.addEventListener(
+            'change',
+            this.saveCheckboxState.bind(this),
+          );
+          checkbox.addEventListener(
+            'update-checkbox',
+            this.saveCheckboxState.bind(this),
+          );
+        });
+      }
+
+      bindKeyboardShortcuts() {
+        window.addEventListener('keydown', (event) => {
+          if (event.ctrlKey && event.key.length === 1) {
+            const checkbox = this.$el.querySelector(
+              `input[type="checkbox"][data-shortcut="${event.key.toLowerCase()}"]`,
+            );
+
+            if (checkbox instanceof HTMLInputElement) {
+              event.preventDefault();
+              checkbox.checked = !checkbox.checked;
+
+              checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+          }
+        });
+      }
+
+      private saveCheckboxState(event: Event) {
+        const checkbox = event.target as HTMLInputElement;
+        if (checkbox) {
+          localStorage.setItem(checkbox.id, checkbox.checked.toString());
+        }
+      }
+
+      private loadCheckboxState() {
+        const checkboxes = this.$el.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach((checkbox) => {
+          const savedState = localStorage.getItem(checkbox.id);
+          if (savedState !== null) {
+            (checkbox as HTMLInputElement).checked = savedState === 'true';
+          }
+        });
+      }
+
+      private bindDraftModeEvents() {
+        const toggle = this.$el.querySelector('.draft-mode > .toggle');
+        toggle?.addEventListener('click', () => {
+          if (this.draftModeEnabled) {
+            window.location.href = '/api/cms/draft-mode/disable';
+          } else {
+            const token =
+              this.environment !== 'local'
+                ? prompt('Enter a token to toggle draft mode')
+                : '';
+            window.location.href = `/api/cms/draft-mode/enable?token=${token}`;
+          }
+        });
+      }
+
+      private bindEnvironmentSwitchEvents() {
+        const switcher = this.$el.querySelector('.dato-environment > .switch');
+        switcher?.addEventListener('click', () => {
+          const targetEnvironment = prompt('Enter target environment');
+
+          const token =
+            this.environment !== 'local'
+              ? prompt('Enter a token to toggle draft mode')
+              : '';
+
+          window.location.href = `/api/cms/environment/switch?token=${token}&environment=${targetEnvironment}`;
+        });
+      }
+
+      private recalculate() {
+        const debugVariablesElement = this.$el.querySelector(
+          '[data-debug-variables]',
+        );
+        if (!debugVariablesElement) {
+          return;
+        }
+        [...debugVariablesElement.children].forEach(($c) => {
+          if ($c instanceof HTMLElement) {
+            const variable = $c.dataset.variable;
+            const type = $c.dataset.type ?? 'height';
+            if (!variable) {
+              return;
+            }
+
+            const $temp = document.createElement('div');
+
+            // Special handling for rem
+            if (variable === '--fluid-rem') {
+              $temp.style.fontSize = `var(${variable})`;
+              document.documentElement.appendChild($temp);
+            } else {
+              $temp.style[type as any] = `var(${variable})`;
+              $c.append($temp);
+            }
+
+            const computedValue = window
+              .getComputedStyle($temp)
+              .getPropertyValue(type);
+
+            $temp.remove();
+            $c.innerHTML = `${variable}: <b>${computedValue}</b>`;
+          }
+        });
+
+        // Content Height
+        const container = document.querySelector('[data-contentheight]');
+        if (container) {
+          container.innerHTML = '';
+
+          const siteHeight = document.body.scrollHeight;
+          const viewportHeight = window.innerHeight;
+          const viewportCount = Math.floor(siteHeight / viewportHeight);
+
+          for (let i = 0; i < viewportCount; i++) {
+            const number = document.createElement('div');
+            number.classList.add('number');
+            number.innerText = (i + 1).toString();
+            container.appendChild(number);
+          }
+
+          const ratio = (siteHeight / viewportHeight).toFixed(2);
+          const ratioElement = document.querySelector(
+            '[data-contentheight-ratio]',
+          ) as HTMLElement;
+          ratioElement.innerText = `(${ratio} viewports)`;
+        }
+      }
+    },
+  );
+</script>
+
+<style lang="scss">
+  :root {
+    --debug-grid-name-line-opacity: 0.95;
+    --debug-grid-column-opacity: 0.25;
+    --debug-view-font-size: clamp(6px, 0.75rem, 10px);
+  }
+
+  .debug-view {
+    font-family: system-ui;
+    z-index: var(--z-debug);
+
+    > .toggle,
+    > .panel {
+      position: fixed;
+      bottom: 1rem;
+      left: 1rem;
+      border-radius: 0.2rem;
+      background: rgba(40, 30, 213, 1);
+      color: white;
+      z-index: calc(var(--z-debug) + 100);
+    }
+
+    > .toggle {
+      > .checkbox {
+        display: none;
+      }
+
+      > .label {
+        display: block;
+        padding: 0.5rem;
+        cursor: pointer;
+
+        > .icon {
+          width: 1rem;
+          height: 1rem;
+        }
+      }
+    }
+
+    > .panel {
+      width: max-content;
+      padding: 0.75rem 3rem 0.75rem 1rem;
+      font-size: var(--debug-view-font-size);
+      line-height: 125%;
+
+      body:has(input#debug-view-show-panel:not(:checked)) & {
+        display: none;
+      }
+
+      &::before,
+      > .environment {
+        display: inline-block;
+        padding-bottom: 0.5rem;
+        font-weight: bold;
+      }
+
+      @media (--vs) {
+        &::before {
+          content: 'Small Viewport (--vs)';
+        }
+      }
+
+      @media (--vl) {
+        &::before {
+          content: 'Large Viewport (--vl)';
+        }
+      }
+
+      > .toggle {
+        position: absolute;
+        top: 0.75rem;
+        right: 1rem;
+        cursor: pointer;
+
+        > .icon {
+          width: 1rem;
+          height: 1rem;
+        }
+      }
+
+      // Variables
+      > .variables {
+        margin-top: 0;
+        padding: 0.4rem 0.5rem;
+        background: Canvas;
+        border-radius: 0.125rem;
+        color: CanvasText;
+        white-space: normal;
+        line-height: 140%;
+        font-size: var(--debug-view-font-size);
+
+        body:has(input#debug-view-show-variables:not(:checked)) & {
+          display: none;
+        }
+
+        > .variable {
+          display: block;
+        }
+      }
+
+      > .checkboxes {
+        margin: 0 -0.35rem;
+
+        > .checkbox {
+          margin: 0.35rem;
+          display: flex;
+          gap: 0.25rem;
+        }
+      }
+
+      > .draft-mode {
+        margin-top: 1rem;
+        display: flex;
+        gap: 1rem;
+        padding: 0.5rem;
+
+        > .enabled,
+        > .disabled {
+          font-weight: bold;
+        }
+
+        &.-enabled {
+          background: var(--base-color-negative);
+
+          > .disabled {
+            display: none;
+          }
+        }
+
+        &.-disabled {
+          background: var(--base-color-positive);
+
+          > .enabled {
+            display: none;
+          }
+        }
+      }
+
+      > .dato-environment {
+        display: flex;
+        gap: 1rem;
+        padding: 0.5rem;
+
+        > .value {
+          font-weight: bold;
+        }
+
+        &.-custom {
+          background: var(--base-color-negative);
+
+          > .disabled {
+            display: none;
+          }
+        }
+
+        &:not(.-custom) {
+          background: var(--base-color-positive);
+
+          > .enabled {
+            display: none;
+          }
+        }
+      }
+    }
+
+    // Grids
+    > .grids {
+      pointer-events: none;
+
+      // Hide if checkbox is not ticked
+      body:has(input#debug-view-show-grid:not(:checked)) & {
+        display: none;
+      }
+
+      // Complete Grid
+      .debug-grid-complete {
+        position: fixed;
+        top: 0;
+        left: var(--fluid-outer-margin);
+        right: var(--fluid-outer-margin);
+        bottom: 0;
+        width: 100%;
+        height: 100%;
+        max-width: var(--fluid-max-width);
+        z-index: calc(var(--z-debug) - 2);
+
+        > .column {
+          display: flex;
+          align-items: end;
+          position: relative;
+          background-color: rgba(
+            251,
+            192,
+            147,
+            var(--debug-grid-column-opacity)
+          );
+
+          &:first-child,
+          &:last-child {
+            background-color: rgba(
+              161,
+              192,
+              255,
+              calc(var(--debug-grid-column-opacity) / 2)
+            );
+          }
+
+          &::before {
+            @media (--vl) {
+              display: inline-block;
+              margin: 0 auto;
+              content: attr(data-debug-grid-complete-column);
+              background: rgba(
+                251,
+                192,
+                147,
+                var(--debug-grid-name-line-opacity)
+              );
+              font-size: var(--debug-view-font-size);
+              line-height: 1;
+              color: GrayText;
+              padding: 0.25em 0.75em;
+              border-top-right-radius: 0.4em;
+              border-top-left-radius: 0.4em;
+            }
+          }
+
+          @for $i from 1 through 12 {
+            &:nth-child(#{$i}) {
+              grid-column: #{$i} / #{$i + 1};
+            }
+          }
+
+          // Hide excess columns on small screens
+          @media (--vs) {
+            @for $i from 5 through 12 {
+              &:nth-child(#{$i}) {
+                display: none;
+              }
+            }
+          }
+        }
+      }
+
+      // Gird Column Names
+      .debug-grid-column-names {
+        position: fixed;
+        top: 0;
+        left: var(--fluid-outer-margin);
+        right: var(--fluid-outer-margin);
+        width: 100%;
+        max-width: var(--fluid-max-width);
+        z-index: calc(var(--z-debug) - 2);
+
+        > .column {
+          display: flex;
+          justify-content: space-between;
+          font-size: var(--debug-view-font-size);
+          line-height: 1;
+          color: GrayText;
+
+          &.-line {
+            position: relative;
+
+            > .label {
+              position: absolute;
+              top: 1em;
+              left: 50%;
+              transform: translateX(-50%);
+              padding: 0.25em 0.5em;
+              white-space: nowrap;
+              background-color: rgba(255, 255, 255, 0.5);
+              border-radius: 0.4em;
+
+              &::before {
+                position: absolute;
+                top: -1em;
+                left: 50%;
+                transform: translateX(-50%);
+                display: block;
+                content: '';
+                width: 0.3em;
+                height: 1em;
+                background-color: var(--color, GrayText);
+              }
+            }
+          }
+
+          &:not(.-line) {
+            border-width: 0;
+            border-style: solid;
+            border-color: var(--color);
+            border-top-width: 0.3em;
+
+            &.-bottomline {
+              border-top-width: 0;
+              border-bottom-width: 0.3em;
+
+              &::before,
+              &::after {
+                padding: 0.3em 0.5em 0;
+              }
+
+              &::before {
+                border-top-right-radius: 0.4em;
+              }
+
+              &::after {
+                border-top-left-radius: 0.4em;
+              }
+            }
+
+            &.-topline {
+              &::before {
+                border-bottom-right-radius: 0.4em;
+              }
+
+              &::after {
+                border-bottom-left-radius: 0.4em;
+              }
+            }
+          }
+
+          &::before,
+          &::after {
+            display: inline-block;
+            content: attr(data-debug-grid-column-name);
+            padding: 0 0.5em 0.3em;
+            background-color: var(--color);
+          }
+        }
+      }
+    }
+
+    // Content Height
+    > .contentheight {
+      // Hide if checkbox is not ticked
+      body:has(input#debug-view-show-content-height:not(:checked)) & {
+        display: none;
+      }
+
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        #f37178 3rem,
+        transparent 3rem,
+        transparent calc(50% - 3rem),
+        #f37178 calc(50% - 3rem),
+        #f37178 50%,
+        #00e599 50%,
+        #00e599 calc(50% + 3rem),
+        transparent calc(50% + 3rem),
+        transparent calc(100% - 3rem),
+        #00e599 calc(100% - 3rem)
+      );
+      background-size: 100% 200vh;
+      background-repeat: repeat-y;
+      z-index: var(--z-debug);
+      opacity: 0.25;
+      pointer-events: none;
+
+      :global(> .number) {
+        display: flex;
+        height: 100vh;
+        align-items: center;
+        justify-content: center;
+        font-size: 26rem;
+        color: #00e599;
+
+        &:nth-child(odd) {
+          color: #f37178;
+        }
+      }
+    }
+  }
+
+  // Module Names
+  :global(body:has(input#debug-view-show-module-names:checked) [data-module]) {
+    position: relative;
+
+    &::before {
+      content: attr(data-module);
+      display: block;
+      position: absolute;
+      top: 50%;
+      right: 0;
+      grid-column: full-bleed;
+      transform: translateY(-50%) rotate(180deg);
+      overflow: hidden;
+      writing-mode: tb-rl;
+      white-space: nowrap;
+      background: CanvasText;
+      color: Canvas;
+      padding: 1em;
+      font-size: var(--debug-view-font-size);
+      line-height: 1.25;
+      font-family: system-ui;
+      font-weight: bold;
+      z-index: calc(var(--z-debug) - 1);
+    }
+  }
+
+  // Box Model
+  :global(
+    body:has(input#debug-view-show-box-model:checked)
+      :is(.header, .main, .footer)
+      *
+  ),
+  :global(
+    body:has(input#debug-view-show-box-model:checked)
+      :is(.header, .main, .footer)
+      *::before
+  ),
+  :global(
+    body:has(input#debug-view-show-box-model:checked)
+      :is(.header, .main, .footer)
+      *::after
+  ) {
+    outline: 1px dotted rgba(80, 225, 255, 0.9);
+  }
+
+  // Module Outlines
+  :global(
+    body:has(input#debug-view-show-module-outlines:checked) [data-module]
+  ) {
+    outline: 0.25rem solid rgba(186, 225, 255, 0.9);
+    outline-offset: -0.25rem;
+  }
+</style>
