@@ -2,7 +2,7 @@
 import type { ComponentProps } from 'astro/types';
 import ImageAsset from './ImageAsset.astro';
 import VideoAsset from './VideoAsset.astro';
-import {ImageAssetData, VideoAssetData} from "../component.types";
+import type {ImageAssetData, VideoAssetData} from "../component.types";
 
 interface Props extends Omit<ComponentProps<typeof ImageAsset>, 'data'> {
   data: VideoAssetData & ImageAssetData;
