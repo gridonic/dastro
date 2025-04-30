@@ -7,27 +7,32 @@ export default function dastroIntegration(): AstroIntegration {
       'astro:config:setup': ({ injectRoute }) => {
         injectRoute({
           pattern: '/api/debug/routes',
-          entrypoint: 'node_modules/dastro/src/api/debug/routes.ts'
+          entrypoint: 'dastro/api/debug/routes.ts'
         });
 
         injectRoute({
           pattern: '/api/cms/draft-mode/enable',
-          entrypoint: 'node_modules/dastro/src/api/cms/draft-mode/enable.ts'
+          entrypoint: 'dastro/api/cms/draft-mode/enable.ts'
         });
 
         injectRoute({
           pattern: '/api/cms/draft-mode/disable',
-          entrypoint: 'node_modules/dastro/src/api/cms/draft-mode/disable.ts'
+          entrypoint: 'dastro/api/cms/draft-mode/disable.ts'
         });
 
         injectRoute({
           pattern: '/api/cms/environment/switch',
-          entrypoint: 'node_modules/dastro/src/api/cms/environment/switch.ts'
+          entrypoint: 'dastro/api/cms/environment/switch.ts'
         });
 
         injectRoute({
           pattern: '/api/cms/preview-links',
-          entrypoint: 'node_modules/dastro/src/api/cms/preview-links.ts'
+          entrypoint: 'dastro/api/cms/preview-links.ts'
+        });
+
+        injectRoute({
+          pattern: '/sitemap.xml',
+          entrypoint: 'dastro/sitemap.xml.ts'
         });
       }
     },
