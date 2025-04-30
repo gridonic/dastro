@@ -1,7 +1,7 @@
 import jwt, { type JwtPayload } from 'jsonwebtoken';
 import type { AstroCookieSetOptions } from 'astro';
 import { executeQuery } from '@datocms/cda-client';
-import type {DastroConfig, DastroTypes} from "../lib-types.ts";
+import type {DastroConfig, DastroTypes} from "../core/lib-types.ts";
 import type {AstroContext} from "../astro.context.ts";
 
 export function environmentSwitch<T extends DastroTypes>(config: DastroConfig<T>) {

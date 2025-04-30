@@ -1,6 +1,6 @@
 import type {Page, PageDefinition, PageRecordType } from "./page.ts";
 import type {RecordWithParent, Route} from "./routing.ts";
-import type {AstroComponent} from "./components";
+import type {AstroComponent} from "../components";
 
 export type LikeSiteLocale = string;
 export type LikeRecordLink = {

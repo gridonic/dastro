@@ -1,7 +1,7 @@
 import type { TypedDocumentNode } from '@graphql-typed-document-node/core';
 import type {DastroConfig, DastroTypes} from "./lib-types.ts";
-import type {AstroContext} from "./astro.context.ts";
-import { datocms } from './datocms/datocms.ts';
+import type {AstroContext} from "../astro.context.ts";
+import { datocms } from '../datocms/datocms.ts';
 
 export type PageRecordType<T extends DastroTypes> = T['RecordLinkFragment']['__typename'];
 

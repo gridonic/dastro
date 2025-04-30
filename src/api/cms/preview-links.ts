@@ -6,8 +6,8 @@ import {
   json,
   withCORS,
 } from '../utils';
-import type {DastroTypes} from "../../lib-types.ts";
-import type {RecordWithParent} from "../../routing.ts";
+import type {DastroTypes} from "../../core/lib-types.ts";
+import type {RecordWithParent} from "../../core/routing.ts";
 import {executeQuery} from "@datocms/cda-client";
 
 type PreviewLink = {

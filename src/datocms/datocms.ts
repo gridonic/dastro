@@ -1,6 +1,6 @@
 import type { TypedDocumentNode } from '@graphql-typed-document-node/core';
 import { executeQuery } from '@datocms/cda-client';
-import type {DastroConfig, DastroTypes} from "../lib-types.ts";
+import type {DastroConfig, DastroTypes} from "../core/lib-types.ts";
 import type {AstroContext} from "../astro.context.ts";
 import {draftMode} from "./draft-mode.ts";
 import {environmentSwitch} from "./environment-switch.ts";

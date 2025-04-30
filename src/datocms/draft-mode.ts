@@ -1,7 +1,7 @@
 import jwt, { type JwtPayload } from 'jsonwebtoken';
 import type { AstroCookieSetOptions } from 'astro';
 import type {AstroContext} from "../astro.context.ts";
-import type {DastroConfig, DastroTypes} from "../lib-types.ts";
+import type {DastroConfig, DastroTypes} from "../core/lib-types.ts";
 
 export function draftMode<T extends DastroTypes>(config: DastroConfig<T>) {
   const DRAFT_MODE_COOKIE_NAME = 'draft_mode';

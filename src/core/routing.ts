@@ -1,4 +1,4 @@
-import type {AstroContext} from "./astro.context.ts";
+import type {AstroContext} from "../astro.context.ts";
 import type {DastroConfig, DastroTypes } from './lib-types.ts';
 import {
   getPageRecordsFor,

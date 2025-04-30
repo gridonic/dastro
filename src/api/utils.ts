@@ -1,6 +1,6 @@
 import {ApiError} from '@datocms/cma-client';
 import {serializeError} from 'serialize-error';
-import type {DastroConfig, DastroTypes} from "../lib-types.ts";
+import type {DastroConfig, DastroTypes} from "../core/lib-types.ts";
 
 export function checkSecretApiTokenCorrectness(dastroConfig: DastroConfig<DastroTypes>, token: string | null): boolean {
   return dastroConfig.environment === 'local' || token === dastroConfig.api.secretApiToken;
