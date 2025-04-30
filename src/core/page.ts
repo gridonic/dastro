@@ -28,7 +28,7 @@ export type AllRecordsQueryType<T extends DastroTypes> = TypedDocumentNode<
 >;
 
 export interface PageDefinition<
-  T extends DastroTypes, TPage extends Page<T> | undefined | null = T['AllPageTypes']
+  T extends DastroTypes
 > {
   type: PageRecordType<T>;
   apiKey: string;
@@ -39,8 +39,9 @@ export interface PageDefinition<
   component: (props: { page: any; locale: T['SiteLocale'] }) => any;
   load: (
     slug: string | undefined,
+    locale: T['SiteLocale'],
     astro: AstroContext<'locals' | 'cookies'>,
-  ) => Promise<TPage | null>;
+  ) => Promise<Page<T> | null>;
 }
 
 export interface Page<T extends DastroTypes> {

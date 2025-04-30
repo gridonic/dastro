@@ -7,19 +7,13 @@ export type LikeRecordLink = {
   __typename: string;
   title: string;
 };
-export type LikeAllPageTypes<T extends DastroTypes = any> =
-  | Page<T>
-  | undefined
-  | null;
 
 export type DastroTypes<
   TSiteLocale extends LikeSiteLocale = LikeSiteLocale,
   TRecordLinkFragment extends LikeRecordLink = LikeRecordLink,
-  TAllPageTypes extends LikeAllPageTypes = LikeAllPageTypes
 > = {
   SiteLocale: TSiteLocale;
   RecordLinkFragment: TRecordLinkFragment;
-  AllPageTypes: TAllPageTypes;
 };
 
 

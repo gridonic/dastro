@@ -68,6 +68,52 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
       .join('/')}`;
   }
 
+  async function pageRecordForUrl(context: AstroContext<'locals' | 'cookies'>, url: string) {
+    const { locales, defaultLocale } = config.i18n;
+
+    const regexLocaleUnion = locales
+      .filter((l) => l !== defaultLocale)
+      .join('|');
+
+    const regexPathPrefixUnion = [
+      ...new Set(
+        pageDefinitionList()
+          .flatMap((def) => Object.values(def.paths))
+          .filter((p) => !!p),
+      ),
+    ].join('|');
+
+    const urlRegex = new RegExp(
+      `^(?:\\/(${regexLocaleUnion}))?(?:\\/(${regexPathPrefixUnion}))?(?:\\/(.*))?$`,
+    );
+
+    const match = url.match(urlRegex) ?? [];
+
+    const locale = (match[1] || defaultLocale) as T['SiteLocale'];
+    let pathPrefix = match[2] ?? '';
+    let fullSlug = match[3]?.replace(/\/$/, '');
+    let slug = fullSlug?.split('/').pop();
+
+    // TODO: refactor this so it can be handled directly via url regex (but we need to add tests for this)
+    //  -> handle the case where we want a default page that has the same slug as a path prefix
+    if (!fullSlug && !slug && pathPrefix) {
+      fullSlug = slug = pathPrefix;
+      pathPrefix = '';
+    }
+
+    const pageDefinition: PageDefinition<T> | null =
+      pageDefinitionList().find((def) => pathPrefix === def.paths[locale]) ?? null;
+
+    return {
+      page: pageDefinition ? await pageDefinition.load(slug, locale, context) : null,
+      pageDefinition,
+      locale,
+      pathPrefix,
+      fullSlug,
+      slug,
+    };
+  }
+
   async function getAllRoutes(
     context: AstroContext<'locals' | 'cookies'>,
   ): Promise<Route<T>[]> {
@@ -127,8 +173,9 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
 
   return {
     resolveRecordUrl,
+    pageRecordForUrl,
     getAllRoutes,
     pageDefinitionList,
-    pageRecordTypes
+    pageRecordTypes,
   }
 }
