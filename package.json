@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "sideEffects": false,
   "scripts": {
+    "dev": "npm run astro:check:watch",
+    "astro:check": "astro check",
+    "astro:check:watch": "astro check --watch --preserveWatchOutput",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "exports": {
@@ -19,6 +22,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@astrojs/check": "^0.9.4",
     "@astrojs/ts-plugin": "^1.10.4",
     "@datocms/astro": "^0.6.2",
     "@datocms/cda-client": "^0.2.7",
