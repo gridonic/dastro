@@ -30,8 +30,9 @@ const { module, Component } = Astro.props;
   }
 </section>
 
-<style>
-  .content-module:has(.mark) {
+<style lang="scss">
+  .content-module {
+    &:has(.mark) {
       position: relative;
 
       > .mark {
@@ -42,5 +43,6 @@ const { module, Component } = Astro.props;
         font-size: 1.75rem;
         color: Canvas;
       }
+    }
   }
 </style>

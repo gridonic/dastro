@@ -76,16 +76,20 @@ function getVideoUrl(): string | null {
     import '@mux/mux-player';
   </script>-->
 
-<style>
-  .video-asset > .video {
+<style lang="scss">
+  .video-asset {
+    > .video {
       display: block;
       object-fit: cover;
       object-position: center;
       height: 100%;
+      align-self: center;
+      justify-self: center;
 
-      /* for mux player
+      // for mux player
       --controls: none;
       --media-object-fit: cover;
-      --media-object-position: center; */
+      --media-object-position: center;
+    }
   }
 </style>

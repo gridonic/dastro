@@ -32,17 +32,19 @@ const Component = moduleComponents[module.__typename];
   }
 </header>
 
-<style>
-    .header-module:has(.mark) {
-        position: relative;
+<style lang="scss">
+  .header-module {
+    &:has(.mark) {
+      position: relative;
 
-        > .mark {
-            display: block;
-            padding: var(--base-component-padding);
-            background-color: #ffad8f;
-            border-top: 1px solid Canvas;
-            font-size: 1.75rem;
-            color: Canvas;
-        }
+      > .mark {
+        display: block;
+        padding: var(--base-component-padding);
+        background-color: #ffad8f;
+        border-top: 1px solid Canvas;
+        font-size: 1.75rem;
+        color: Canvas;
+      }
     }
+  }
 </style>

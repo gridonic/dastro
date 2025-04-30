@@ -17,13 +17,13 @@ const {data, class: classNames, ...rest} = Astro.props;
     <Image data={data.responsiveImage} {...rest}/>}
 </div>
 
-<style>
+<style lang="scss">
   .image-asset {
     display: inline-block;
     width: 100%;
-  }
 
-  .image-asset :global(img) {
-      max-width: none !important; /* We need to trump this for our fluid approach */
+    :global(img) {
+      max-width: none !important; // We need to trump this for our fluid approach
+    }
   }
 </style>
