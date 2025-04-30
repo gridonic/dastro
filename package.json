@@ -12,12 +12,13 @@
     ".": "./src/index.ts",
     "./client": "./src/client/index.ts",
     "./components": "./src/components/index.ts",
-    "./sitemap.xml.ts": "./src/pages/sitemap.xml.ts",
-    "./api/debug/routes.ts": "./src/api/debug/routes.ts",
-    "./api/cms/draft-mode/enable.ts": "./src/api/cms/draft-mode/enable.ts",
-    "./api/cms/draft-mode/disable.ts": "./src/api/cms/draft-mode/disable.ts",
-    "./api/cms/environment/switch.ts": "./src/api/cms/environment/switch.ts",
-    "./api/cms/preview-links.ts": "./src/api/cms/preview-links.ts"
+    "./routes/sitemap.xml.ts": "./src/routes/sitemap.xml.ts",
+    "./routes/robots.txt.ts": "./src/routes/robots.txt.ts",
+    "./routes/debug/routes.ts": "./src/routes/debug/routes.ts",
+    "./routes/cms/draft-mode/enable.ts": "./src/routes/cms/draft-mode/enable.ts",
+    "./routes/cms/draft-mode/disable.ts": "./src/routes/cms/draft-mode/disable.ts",
+    "./routes/cms/environment/switch.ts": "./src/routes/cms/environment/switch.ts",
+    "./routes/cms/preview-links.ts": "./src/routes/cms/preview-links.ts"
   },
   "files": [
     "src"
