@@ -19,7 +19,13 @@ export function withCORS(responseInit?: ResponseInit): ResponseInit {
 }
 
 export function json(response: unknown, init?: ResponseInit): Response {
-  return new Response(JSON.stringify(response), init);
+  return new Response(JSON.stringify(response), {
+    ...init,
+    headers: {
+      ...init?.headers,
+      'Content-Type': 'application/json',
+    },
+  });
 }
 
 export function handleUnexpectedError(error: unknown) {

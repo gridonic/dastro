@@ -12,7 +12,7 @@ interface Props<T extends DastroTypes = DastroTypes> {
   page: Page<T>;
   locale: T['SiteLocale'];
   bodyClass?: string;
-  faviconMetaTags: MetaTag[];
+  faviconMetaTags?: MetaTag[];
 }
 
 const { page, locale, bodyClass, faviconMetaTags } = Astro.props;
@@ -74,7 +74,7 @@ function i18nLinkTags(): MetaTag[] {
     <meta name="generator" content={Astro.generator} />
     <Seo
       data={[
-        ...faviconMetaTags,
+        ...faviconMetaTags ?? [],
         ...page._seoMetaTags,
         ...i18nLinkTags(),
       ]}
