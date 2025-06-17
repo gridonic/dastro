@@ -117,14 +117,11 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
   async function getAllRoutes(
     context: AstroContext<'locals' | 'cookies'>,
   ): Promise<Route<T>[]> {
-    const routes: Route<T>[] = [];
-    await Promise.all(
-      pageDefinitionList().map(async (def) => {
-        routes.push(...(await localizedRoutesForRecords(def)));
-      }),
-    );
-
-    return routes;
+    return (
+      await Promise.all(
+        pageDefinitionList().map(async (def) => localizedRoutesForRecords(def)),
+      )
+    ).flat();
 
     async function localizedRoutesForRecords(
       pageDefinition: PageDefinition<T>,
