@@ -1,4 +1,8 @@
-import type { AstroIntegration } from 'astro';
+import type { AstroIntegration, AstroUserConfig } from 'astro';
+import netlify from '@astrojs/netlify';
+import node from '@astrojs/node';
+import { envField } from 'astro/config';
+import { datoCmsIntegration } from 'dastro';
 
 interface Options {
   injectedRoutes?: {
@@ -17,10 +21,151 @@ interface Options {
 }
 
 export default function dastroIntegration(options?: Options): AstroIntegration {
+  function outputConfiguration(): {
+    output: AstroUserConfig['output'];
+    adapter?: AstroUserConfig['adapter'];
+  } {
+    const renderingMode = (process.env.RENDERING_MODE ??
+      'static') as ImportMetaEnv['RENDERING_MODE'];
+
+    console.debug('[Config]', `Rendering mode: ${renderingMode}`);
+
+    if (renderingMode === 'static') {
+      return {
+        output: 'static',
+      };
+    }
+
+    const adapterToUse =
+      process.env.NETLIFY === 'true' ? 'netlify' : ('node' as const);
+    console.debug('[Config]', `Adapter: ${adapterToUse}`);
+
+    return {
+      output: renderingMode,
+      adapter:
+        adapterToUse === 'netlify'
+          ? netlify()
+          : node({
+            mode: 'standalone',
+          }),
+    };
+  }
+
   return {
     name: 'dastro',
     hooks:{
       'astro:config:setup': ({ injectRoute, updateConfig }) => {
+        updateConfig({
+          site: process.env.APP_BASE_URL,
+
+          integrations: [
+            datoCmsIntegration(),
+          ],
+
+          prefetch: true,
+          experimental: {
+            clientPrerender: true,
+          },
+
+          // Note: Changing the scoped style strategy to "attribute" will break dastro components where classes can be passed! Use 'class' or 'when'
+          scopedStyleStrategy: 'class',
+
+          env: {
+            schema: {
+              APP_BASE_URL: envField.string({
+                access: 'public',
+                context: 'server',
+                url: true,
+              }),
+              ENVIRONMENT: envField.enum({
+                access: 'public',
+                context: 'client',
+                values: ['local', 'preview', 'production'],
+              }),
+              NODE_VERSION: envField.string({
+                access: 'public',
+                context: 'server',
+                default: '20',
+              }),
+              RENDERING_MODE: envField.enum({
+                access: 'public',
+                context: 'server',
+                values: ['server', 'static'],
+              }),
+              DATO_CMS_GRAPHQL_HOST: envField.string({
+                access: 'public',
+                context: 'server',
+                url: true,
+              }),
+              DATO_CMS_TOKEN: envField.string({
+                access: 'secret',
+                context: 'server',
+              }),
+              DATO_CMS_ENVIRONMENT: envField.string({
+                access: 'public',
+                context: 'server',
+              }),
+              SECRET_API_TOKEN: envField.string({
+                access: 'secret',
+                context: 'server',
+              }),
+              SIGNED_COOKIE_JWT_SECRET: envField.string({
+                access: 'secret',
+                context: 'server',
+              }),
+              ALLOW_DATO_ENVIRONMENT_SWITCH: envField.boolean({
+                access: 'secret',
+                context: 'server',
+                default: false,
+              }),
+              DEVELOPMENT_DEBUG_VIEW_ENABLED: envField.boolean({
+                access: 'public',
+                context: 'server',
+                default: false,
+              }),
+              DEVELOPMENT_CUSTOMER_ONBOARDING_ENABLED: envField.boolean({
+                access: 'public',
+                context: 'server',
+                default: false,
+              }),
+              DEVELOPMENT_PREVENT_SEARCH_INDEXING: envField.boolean({
+                access: 'public',
+                context: 'server',
+                default: false,
+              }),
+            }
+          },
+
+          vite: {
+            server: {
+              https: {
+                cert:
+                  process.env.SSL_GRIDONIC_TEST_PEM_CERT_PATH ||
+                  process.env.LOCAL_DEVELOPMENT_PATH_CERT,
+                key:
+                  process.env.SSL_GRIDONIC_TEST_PEM_KEY_PATH ||
+                  process.env.LOCAL_DEVELOPMENT_PATH_CERT_KEY,
+              },
+              headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': '*',
+              },
+            },
+            css: {
+              preprocessorOptions: {
+                scss: {
+                  api: 'modern-compiler',
+                  additionalData: '@use "src/sass/globals.scss" as *;',
+                  loadPaths: ['.'],
+                },
+              },
+            },
+          },
+
+
+          ...outputConfiguration(),
+        })
+
         const { overwrite } = options?.injectedRoutes ?? {};
         if (!overwrite?.debugRoutes) {
           injectRoute({
@@ -70,11 +215,6 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
             entrypoint: 'dastro/routes/robots.txt.ts'
           });
         }
-
-        // Note: Changing the scoped style strategy to "attribute" will break dastro components where classes can be passed! Use 'class' or 'when'
-        updateConfig({
-          scopedStyleStrategy: 'class'
-        });
       }
     },
   };
