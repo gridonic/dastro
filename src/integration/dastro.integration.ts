@@ -20,7 +20,7 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
   return {
     name: 'dastro',
     hooks:{
-      'astro:config:setup': ({ injectRoute }) => {
+      'astro:config:setup': ({ injectRoute, updateConfig }) => {
         const { overwrite } = options?.injectedRoutes ?? {};
         if (!overwrite?.debugRoutes) {
           injectRoute({
@@ -70,6 +70,11 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
             entrypoint: 'dastro/routes/robots.txt.ts'
           });
         }
+
+        // Note: Changing the scoped style strategy to "attribute" will break dastro components where classes can be passed! Use 'class' or 'when'
+        updateConfig({
+          scopedStyleStrategy: 'class'
+        });
       }
     },
   };
