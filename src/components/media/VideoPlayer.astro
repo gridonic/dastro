@@ -25,6 +25,7 @@ const { data, class: classNames, ...rest } = Astro.props;
         if ($placeholder && $video) {
           $placeholder.addEventListener('click', () => {
             $placeholder.style.display = 'none';
+            $placeholder.classList.add('-hidden');
             $video.style.display = 'block';
             $video.play();
           });
@@ -46,6 +47,7 @@ const { data, class: classNames, ...rest } = Astro.props;
           {...(data.video.autoplay ? { autoplay: true } : {})}
           {...(data.video.loop ? { loop: true } : {})}
           {...(data.video.muted ? { muted: true } : {})}
+          {...(data.video.autoplay ? { playsinline: true } : {})}
           poster={
             data.posterImage
               ? `${data.posterImage.url}?&w=${data.video.videoAsset.video.width}&h=${data.video.videoAsset.video.height}&fit=crop`
@@ -197,6 +199,10 @@ const { data, class: classNames, ...rest } = Astro.props;
         object-fit: cover;
       }
 
+      > .placeholder {
+        background-size: cover;
+      }
+
       > .placeholder > .button {
         @include play-button;
       }
@@ -220,6 +226,33 @@ const { data, class: classNames, ...rest } = Astro.props;
       :global(.lty-playbtn),
       :global(.ltv-playbtn) {
         @include play-button;
+      }
+    }
+
+    @media (hover: hover) {
+      :global(> .videowrapper),
+      :global(> .videowrapper > .placeholder),
+      :global(> lite-youtube),
+      :global(> lite-vimeo) {
+        overflow: hidden;
+        clip-path: inset(0%);
+        background-size: 100%;
+        background-position: center;
+        transition:
+          clip-path var(--base-transition-duration)
+            var(--base-transition-easing),
+          background-size var(--base-transition-duration-slow)
+            var(--base-transition-easing);
+      }
+
+      &:hover {
+        &:not(:has(.placeholder.-hidden)):global(> .videowrapper),
+        :global(> .videowrapper > .placeholder),
+        :global(> lite-youtube:not(:has(iframe))),
+        :global(> lite-vimeo:not(:has(iframe))) {
+          clip-path: inset(1%);
+          background-size: 104%;
+        }
       }
     }
   }

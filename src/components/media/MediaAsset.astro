@@ -18,3 +18,11 @@ const { data, class: classNames, ...rest } = Astro.props;
   {data.responsiveImage && <ImageAsset data={data} {...rest} />}
   {data.video && <VideoAsset data={data} {...rest} />}
 </div>
+
+<style lang="scss">
+  .media-asset {
+    .image-asset {
+      display: block;
+    }
+  }
+</style>
