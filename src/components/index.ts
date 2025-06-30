@@ -1,4 +1,4 @@
-export type { AstroComponent } from './component.types';
+export type { AstroComponent, ClassValue } from './component.types';
 
 import LayoutBase from './layout/LayoutBase.astro';
 import DebugView from './layout/DebugView.astro';

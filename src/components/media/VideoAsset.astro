@@ -1,9 +1,9 @@
 ---
-import type {VideoAssetData} from "../component.types";
+import type {ClassValue, VideoAssetData} from "../component.types";
 
 interface Props {
   data: VideoAssetData;
-  class?: string;
+  class?: ClassValue;
   aspectRatio?: number;
   videoResolution?: 'low' | 'medium' | 'high';
 }

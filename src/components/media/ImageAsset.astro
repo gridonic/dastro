@@ -1,17 +1,17 @@
 ---
 import type {ComponentProps} from 'astro/types';
 import {Image} from '@datocms/astro';
-import type {ImageAssetData} from "../component.types";
+import type {ClassValue, ImageAssetData} from "../component.types";
 
 interface Props extends Omit<ComponentProps<typeof Image>, 'data'> {
   data: ImageAssetData;
-  class?: string;
+  class?: ClassValue;
 }
 
-const {data, class: classNames, ...rest} = Astro.props;
+const {data, class: classNames, ...rest } = Astro.props;
 ---
 
-<div class="image-asset" class:list={classNames} {...rest}>
+<div class="image-asset" class:list={classNames}>
   <!-- @see https://github.com/datocms/astro-datocms/tree/main/src/Image -->
   {data.responsiveImage &&
     <Image data={data.responsiveImage} {...rest}/>}

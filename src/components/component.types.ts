@@ -1,9 +1,12 @@
+import type {AstroBuiltinAttributes} from "astro";
+
 export type AstroComponent = (props: any) => any;
+
+export type ClassValue = AstroBuiltinAttributes['class:list'];
 
 export interface Module {
   __typename: string;
 }
-
 
 export interface ImageAssetData {
   responsiveImage?: {

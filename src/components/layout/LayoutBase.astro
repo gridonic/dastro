@@ -7,11 +7,12 @@ import type {Page, MetaTag} from "../../core/page";
 import type {DastroTypes} from "../../core/lib-types";
 import {isSearchIndexingPrevented} from "../../core/page-indexing";
 import DebugView from './DebugView.astro';
+import type {ClassValue} from "../component.types.ts";
 
 interface Props<T extends DastroTypes = DastroTypes> {
   page: Page<T>;
   locale: T['SiteLocale'];
-  bodyClass?: string;
+  bodyClass?: ClassValue;
   faviconMetaTags?: MetaTag[];
 }
 

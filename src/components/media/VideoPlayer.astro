@@ -1,13 +1,13 @@
 ---
 import { YouTube, Vimeo } from 'astro-embed';
-import type {VideoPlayerData} from "../component.types";
+import type {ClassValue, VideoPlayerData} from "../component.types";
 
 interface Props {
   data: VideoPlayerData;
-  class?: string;
+  class?: ClassValue;
 }
 
-const { data, class: classNames, ...rest } = Astro.props;
+const { data, class: classNames } = Astro.props;
 ---
 
 <script>
@@ -35,7 +35,7 @@ const { data, class: classNames, ...rest } = Astro.props;
   );
 </script>
 
-<div class="video-player" class:list={classNames} {...rest} data-video-player>
+<div class="video-player" class:list={classNames} data-video-player>
   {
     data.video.__typename === 'VideoInlineRecord' && (
       <div class="videowrapper">
