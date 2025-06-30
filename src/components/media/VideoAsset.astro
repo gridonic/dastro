@@ -33,7 +33,10 @@ function getVideoUrl(): string | null {
 
 <div
   class="video-asset"
-  class:list={classNames}
+  class:list={[
+    classNames,
+    { '-fill-height': aspectRatio && aspectRatio < 1 }
+  ]}
   {...rest}
   style={{ aspectRatio }}
 >
@@ -90,6 +93,18 @@ function getVideoUrl(): string | null {
       --controls: none;
       --media-object-fit: cover;
       --media-object-position: center;
+    }
+
+    &:not(.-fill-height) {
+      > .video {
+        width: 100%;
+      }
+    }
+
+    &.-fill-height {
+      > .video {
+        height: 100%;
+      }
     }
   }
 </style>
