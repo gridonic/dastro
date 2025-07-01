@@ -1,4 +1,4 @@
-import dastroIntegration from "./integration/dastro.integration.ts";
+import dastroIntegration, { dastroAdapterConfig } from "./integration/dastro.integration.ts";
 import datoCmsIntegration from "./integration/datocms.integration.ts";
 import { routing } from "./core/routing.ts";
 import {draftMode} from "./datocms/draft-mode.ts";
@@ -13,6 +13,7 @@ export type {MetaTag} from './core/page.ts';
 export {
   dastroIntegration,
   datoCmsIntegration,
+  dastroAdapterConfig,
   routing,
   draftMode,
   environmentSwitch,

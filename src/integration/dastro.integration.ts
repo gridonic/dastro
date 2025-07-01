@@ -21,41 +21,13 @@ interface Options {
 }
 
 export default function dastroIntegration(options?: Options): AstroIntegration {
-  function outputConfiguration(): {
-    output: AstroUserConfig['output'];
-    adapter?: AstroUserConfig['adapter'];
-  } {
-    const renderingMode = (process.env.RENDERING_MODE ??
-      'static') as ImportMetaEnv['RENDERING_MODE'];
-
-    console.debug('[Config]', `Rendering mode: ${renderingMode}`);
-
-    if (renderingMode === 'static') {
-      return {
-        output: 'static',
-      };
-    }
-
-    const adapterToUse =
-      process.env.NETLIFY === 'true' ? 'netlify' : ('node' as const);
-    console.debug('[Config]', `Adapter: ${adapterToUse}`);
-
-    return {
-      output: renderingMode,
-      adapter:
-        adapterToUse === 'netlify'
-          ? netlify()
-          : node({
-            mode: 'standalone',
-          }),
-    };
-  }
-
   return {
     name: 'dastro',
     hooks:{
       'astro:config:setup': ({ injectRoute, updateConfig }) => {
         updateConfig({
+          output: 'server',
+
           site: process.env.APP_BASE_URL,
 
           integrations: [
@@ -161,9 +133,6 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
               },
             },
           },
-
-
-          ...outputConfiguration(),
         })
 
         const { overwrite } = options?.injectedRoutes ?? {};
@@ -218,4 +187,17 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
       }
     },
   };
+}
+
+export function dastroAdapterConfig(): AstroUserConfig['adapter'] {
+  const adapterToUse: 'netlify' | 'node' =
+    process.env.NETLIFY === 'true' ? 'netlify' : 'node';
+
+  console.debug('[Config]', `Adapter: ${adapterToUse}`);
+
+  return adapterToUse === 'netlify'
+    ? netlify()
+    : node({
+      mode: 'standalone',
+    });
 }
