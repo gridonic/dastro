@@ -1,6 +1,7 @@
 import type {Page, PageDefinition, PageRecordType } from "./page.ts";
 import type {RecordWithParent, Route} from "./routing.ts";
 import type {AstroComponent} from "../components";
+import type {TranslationMessages} from "./translations.ts";
 
 export type LikeSiteLocale = string;
 export type LikeRecordLink = {
@@ -23,6 +24,7 @@ export interface DastroConfig<T extends DastroTypes> {
   i18n: {
     defaultLocale: T['SiteLocale'];
     locales: T['SiteLocale'][];
+    messages: Record<T['SiteLocale'], TranslationMessages<T>>;
   };
   datocms: {
     token: string;
