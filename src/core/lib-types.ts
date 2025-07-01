@@ -19,7 +19,6 @@ export type DastroTypes<
 
 export interface DastroConfig<T extends DastroTypes> {
   environment: string;
-  renderingMode: 'server' | 'static';
   appBaseUrl: string;
   i18n: {
     defaultLocale: T['SiteLocale'];

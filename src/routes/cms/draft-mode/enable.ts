@@ -5,13 +5,6 @@ import {checkSecretApiTokenCorrectness, handleUnexpectedError, invalidRequestRes
  * This route handler enables Draft Mode and redirects to the given URL.
  */
 export const GET: APIRoute = async (event) => {
-  if (event.locals.dastro.config.renderingMode === 'static') {
-    return invalidRequestResponse(
-      'Draft mode not supported with static rendering',
-      501,
-    );
-  }
-
   const { enableDraftMode } = event.locals.dastro.draftMode();
   const { isDatoEnvironmentSwitchAllowed, switchDatoEnvironment } = event.locals.dastro.environmentSwitch();
 

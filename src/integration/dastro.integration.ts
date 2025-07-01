@@ -59,11 +59,6 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
                 context: 'server',
                 default: '20',
               }),
-              RENDERING_MODE: envField.enum({
-                access: 'public',
-                context: 'server',
-                values: ['server', 'static'],
-              }),
               DATO_CMS_GRAPHQL_HOST: envField.string({
                 access: 'public',
                 context: 'server',
