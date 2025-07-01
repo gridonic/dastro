@@ -17,7 +17,6 @@ export type DastroTypes<
   RecordLinkFragment: TRecordLinkFragment;
 };
 
-
 export interface DastroConfig<T extends DastroTypes> {
   environment: string;
   appBaseUrl: string;
@@ -50,4 +49,5 @@ export type ExportTypes<T extends DastroTypes> = {
   PageRecordType: PageRecordType<T>;
   Route: Route<T>;
   RecordWithParent: RecordWithParent<T>;
+  TranslationMessages: TranslationMessages<T>;
 }
