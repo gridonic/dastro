@@ -1,8 +1,10 @@
+import pgk from '../../package.json';
 import type { AstroIntegration, AstroUserConfig } from 'astro';
 import netlify from '@astrojs/netlify';
 import node from '@astrojs/node';
 import { envField } from 'astro/config';
 import { datoCmsIntegration } from 'dastro';
+import chalk from "chalk";
 
 interface Options {
   injectedRoutes?: {
@@ -24,7 +26,9 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
   return {
     name: 'dastro',
     hooks:{
-      'astro:config:setup': ({ injectRoute, updateConfig }) => {
+      'astro:config:setup': ({ injectRoute, updateConfig, logger }) => {
+        logger.info(chalk.bgGreen(` Using dastro ${chalk.bold(`v${pgk.version}`)} `));
+
         updateConfig({
           output: 'server',
 
