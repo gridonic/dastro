@@ -1,5 +1,6 @@
 import dastroIntegration, { dastroAdapterConfig } from "./integration/dastro.integration.ts";
 import datoCmsIntegration from "./integration/datocms.integration.ts";
+import { caching } from "./core/caching.ts";
 import { routing } from "./core/routing.ts";
 import { translations } from "./core/translations.ts";
 import {draftMode} from "./datocms/draft-mode.ts";
@@ -16,6 +17,7 @@ export {
   dastroIntegration,
   datoCmsIntegration,
   dastroAdapterConfig,
+  caching,
   routing,
   translations,
   draftMode,
