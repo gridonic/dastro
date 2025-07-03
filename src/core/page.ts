@@ -1,7 +1,11 @@
+
 import type { TypedDocumentNode } from '@graphql-typed-document-node/core';
 import type {DastroConfig, DastroTypes} from "./lib-types.ts";
 import type {AstroContext} from "../astro.context.ts";
 import { datocms } from '../datocms/datocms.ts';
+import type {AstroGlobal} from "astro";
+import {routing} from "./routing.ts";
+import {caching} from "./caching.ts";
 
 export type PageRecordType<T extends DastroTypes> = T['RecordLinkFragment']['__typename'];
 
@@ -102,4 +106,69 @@ export async function getPageRecordsFor<T extends DastroTypes>(
   } while (loadedCount < result.meta.count);
 
   return pageRecords;
+}
+
+export async function renderPage<T extends DastroTypes>(
+  context: AstroGlobal,
+  dastroConfig: DastroConfig<T>,
+  initGlobalDataStore: (
+    locale: T['SiteLocale'],
+    context: AstroContext<'locals' | 'cookies'>,
+  ) => Promise<any>,
+) {
+  const { resolveRecordUrl, pageRecordForUrl } = routing(dastroConfig);
+  const { setCachingHeaders } = caching(dastroConfig);
+
+  setCachingHeaders(context);
+
+  const url = context.url.pathname;
+  const { page, pageDefinition, locale, slug } = await pageRecordForUrl(
+    context,
+    url,
+  );
+
+  // TODO: comment in for debugging routing
+  // console.debug('resolved url infos: ', {
+  //   pageId: page?.id ?? '-',
+  //   pageType: pageDefinition?.type,
+  //   locale,
+  //   slug,
+  //   fullSlug,
+  //   pathPrefix,
+  // });
+
+  // Make the page, locale and data store available for all components
+  context.locals.locale = locale;
+  context.locals.globalStore = await initGlobalDataStore(locale, context);
+  context.locals.page = page;
+
+  if (!pageDefinition || !page) {
+    console.warn(
+      `page (${pageDefinition?.type}, ${locale}, ${slug}): loaded page is empty`,
+    );
+    return context.rewrite('/404');
+  }
+
+  // Resolve url of the loaded page and check against url -> must match (e.g., for hierarchical pages)
+  const actualUrl = url.replace(/\/$/, '');
+  const expectedUrl = (resolveRecordUrl(page, locale) ?? '/').replace(
+    /\/$/,
+    '',
+  );
+  if (expectedUrl !== actualUrl) {
+    console.warn(
+      `page (${pageDefinition?.type}, ${locale}, ${slug}): page for slug found, but does not match full url`,
+      {
+        actualUrl,
+        expectedUrl,
+      },
+    );
+    return context.rewrite('/404');
+  }
+
+  return {
+    Component: pageDefinition.component,
+    page,
+    locale,
+  };
 }
