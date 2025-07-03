@@ -7,7 +7,7 @@ import {environmentSwitch} from "./environment-switch.ts";
 
 export function datocms<T extends DastroTypes>(config: DastroConfig<T>) {
   async function datoFetch<TResult, TVariables>(
-    context: AstroContext<'cookies'>,
+    context: AstroContext<'locals' | 'cookies' | 'response'>,
     query: TypedDocumentNode<TResult, TVariables>,
     variables?: TVariables,
   ) {

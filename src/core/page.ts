@@ -40,7 +40,7 @@ export interface PageDefinition<
   load: (
     slug: string | undefined,
     locale: T['SiteLocale'],
-    astro: AstroContext<'locals' | 'cookies'>,
+    astro: AstroContext<'locals' | 'cookies' | 'response'>,
   ) => Promise<Page<T> | null>;
 }
 
@@ -66,7 +66,7 @@ export interface TranslatedSlugLocale<T extends DastroTypes> {
 export async function getPageRecordsFor<T extends DastroTypes>(
   config: DastroConfig<T>,
   query: AllRecordsQueryType<T>,
-  context: AstroContext<'locals' | 'cookies'>,
+  context: AstroContext<'locals' | 'cookies' | 'response'>,
 ): Promise<RoutingPageRecord<T>[]> {
   const PAGE_SIZE = 100;
 

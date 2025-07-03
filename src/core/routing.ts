@@ -68,7 +68,7 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
       .join('/')}`;
   }
 
-  async function pageRecordForUrl(context: AstroContext<'locals' | 'cookies'>, url: string) {
+  async function pageRecordForUrl(context: AstroContext<'locals' | 'cookies' | 'response'>, url: string) {
     const { locales, defaultLocale } = config.i18n;
 
     const regexLocaleUnion = locales
@@ -115,7 +115,7 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
   }
 
   async function getAllRoutes(
-    context: AstroContext<'locals' | 'cookies'>,
+    context: AstroContext<'locals' | 'cookies' | 'response'>,
   ): Promise<Route<T>[]> {
     return (
       await Promise.all(
