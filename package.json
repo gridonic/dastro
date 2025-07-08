@@ -18,7 +18,8 @@
     "./routes/cms/draft-mode/enable.ts": "./src/routes/cms/draft-mode/enable.ts",
     "./routes/cms/draft-mode/disable.ts": "./src/routes/cms/draft-mode/disable.ts",
     "./routes/cms/environment/switch.ts": "./src/routes/cms/environment/switch.ts",
-    "./routes/cms/preview-links.ts": "./src/routes/cms/preview-links.ts"
+    "./routes/cms/preview-links.ts": "./src/routes/cms/preview-links.ts",
+    "./middleware/html-streaming-prevention.middleware.ts": "./src/middleware/html-streaming-prevention.middleware.ts"
   },
   "files": [
     "src"

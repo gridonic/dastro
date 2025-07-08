@@ -7,6 +7,7 @@ import { datoCmsIntegration } from 'dastro';
 import chalk from "chalk";
 
 interface Options {
+  htmlStreamingEnabled?: boolean;
   injectedRoutes?: {
     // If we want to define the endpoint in our project, we must mark that we want to overwrite it.
     // Marked routes will not be injected, so we can define it in our project.
@@ -18,7 +19,7 @@ interface Options {
       previewLinks?: boolean;
       sitemap?: boolean;
       robots?: boolean;
-    }
+    };
   }
 }
 
@@ -26,7 +27,7 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
   return {
     name: 'dastro',
     hooks:{
-      'astro:config:setup': ({ injectRoute, updateConfig, logger }) => {
+      'astro:config:setup': ({ injectRoute, updateConfig, addMiddleware, logger }) => {
         logger.info(chalk.bgGreen(` Using dastro ${chalk.bold(`v${pgk.version}`)} `));
 
         updateConfig({
@@ -132,7 +133,7 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
               },
             },
           },
-        })
+        });
 
         const { overwrite } = options?.injectedRoutes ?? {};
         if (!overwrite?.debugRoutes) {
@@ -181,6 +182,16 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
           injectRoute({
             pattern: '/robots.txt',
             entrypoint: 'dastro/routes/robots.txt.ts'
+          });
+        }
+
+        const htmlStreamingEnabled = options?.htmlStreamingEnabled ?? false;
+        if (!htmlStreamingEnabled) {
+          logger.info(`Html Streaming is disabled by using a custom middleware. Use ${chalk.italic('htmlStreamingEnabled')} to enable it.`);
+
+          addMiddleware({
+            entrypoint: 'dastro/middleware/html-streaming-prevention.middleware.ts',
+            order: 'post'
           });
         }
       }
