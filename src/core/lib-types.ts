@@ -36,7 +36,6 @@ export interface DastroConfig<T extends DastroTypes> {
   },
   dev: {
     debugViewEnabled: boolean;
-    customerOnboardingEnabled: boolean;
     preventSearchIndexing: boolean;
   },
   pageDefinitions: Record<PageRecordType<T>, PageDefinition<T>>;

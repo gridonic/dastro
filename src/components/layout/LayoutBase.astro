@@ -22,7 +22,6 @@ const { routing, config} = Astro.locals.dastro;
 const { resolveRecordUrl } = routing();
 
 const debugViewEnabled = config.dev.debugViewEnabled;
-// const customerOnboardingEnabled = config.dev.customerOnboardingEnabled;
 
 const isPageExcludedFromIndexing = !!page._seoMetaTags.find(
   (mt) =>
@@ -74,7 +73,6 @@ function i18nLinkTags(): MetaTag[] {
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <link rel="preconnect" href="https://www.datocms-assets.com" />
-    <Seo
       data={[
         ...faviconMetaTags ?? [],
         ...page._seoMetaTags,
@@ -97,7 +95,6 @@ function i18nLinkTags(): MetaTag[] {
     <!--<SkipLinks />-->
     {debugViewEnabled && <DebugView />}
     <slot name="body" />
-    <!--{customerOnboardingEnabled && <CustomerOnboarding />}-->
     <slot name="after" />
   </body>
 </html>

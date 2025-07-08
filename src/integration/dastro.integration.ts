@@ -95,11 +95,6 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
                 context: 'server',
                 default: false,
               }),
-              DEVELOPMENT_CUSTOMER_ONBOARDING_ENABLED: envField.boolean({
-                access: 'public',
-                context: 'server',
-                default: false,
-              }),
               DEVELOPMENT_PREVENT_SEARCH_INDEXING: envField.boolean({
                 access: 'public',
                 context: 'server',
