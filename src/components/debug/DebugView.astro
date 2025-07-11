@@ -41,7 +41,6 @@ const dastroVersion = pkg.version;
       <svg
         class="icon"
         viewBox="0 0 16 16"
-        fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
         <g clip-path="url(#clip0_6080_3145)">
@@ -69,7 +68,6 @@ const dastroVersion = pkg.version;
     ><svg
       class="icon"
       viewBox="0 0 16 16"
-      fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
@@ -178,46 +176,6 @@ const dastroVersion = pkg.version;
         </div>
       )
     }
-  </div>
-
-  <div class="grids">
-    <div class="debug-grid-complete ui-grid">
-      <!-- Set number according available grid columns -->
-      {
-        Array.from({ length: 12 }, (_, i) => (
-          <div class="column" data-debug-grid-complete-column={i + 1} />
-        ))
-      }
-    </div>
-    <div class="debug-grid-column-names ui-grid">
-      <div class="column -line" style="grid-column: full-bleed;">
-        <div class="label">Middle</div>
-      </div>
-      <div
-        class="column -topline"
-        data-debug-grid-column-name="Full-Bleed"
-        style="grid-column: full-bleed; --color: #dcc0fff2;"
-      >
-      </div>
-      <div
-        class="column -bottomline"
-        data-debug-grid-column-name="Grid"
-        style="grid-column: grid; --color: #c9f29bf2;"
-      >
-      </div>
-      <div
-        class="column -topline"
-        data-debug-grid-column-name="Left"
-        style="grid-column: left; --color: #fbc093f2;"
-      >
-      </div>
-      <div
-        class="column -topline"
-        data-debug-grid-column-name="Right"
-        style="grid-column: right; --color: #fbc093f2;"
-      >
-      </div>
-    </div>
   </div>
 
   <div class="contentheight" data-contentheight></div>
@@ -565,175 +523,6 @@ const dastroVersion = pkg.version;
 
           > .enabled {
             display: none;
-          }
-        }
-      }
-    }
-
-    // Grids
-    > .grids {
-      pointer-events: none;
-
-      // Hide if checkbox is not ticked
-      body:has(input#debug-view-show-grid:not(:checked)) & {
-        display: none;
-      }
-
-      // Complete Grid
-      .debug-grid-complete {
-        position: fixed;
-        top: 0;
-        left: var(--fluid-outer-margin);
-        right: var(--fluid-outer-margin);
-        bottom: 0;
-        width: 100%;
-        height: 100%;
-        max-width: var(--fluid-max-width);
-        z-index: calc(var(--z-debug) - 2);
-
-        > .column {
-          display: flex;
-          align-items: end;
-          position: relative;
-          background-color: rgba(
-                  251,
-                  192,
-                  147,
-                  var(--debug-grid-column-opacity)
-          );
-
-          &:first-child,
-          &:last-child {
-            background-color: rgba(
-                    161,
-                    192,
-                    255,
-                    calc(var(--debug-grid-column-opacity) / 2)
-            );
-          }
-
-          &::before {
-            @media (--vl) {
-              display: inline-block;
-              margin: 0 auto;
-              content: attr(data-debug-grid-complete-column);
-              background: rgba(
-                      251,
-                      192,
-                      147,
-                      var(--debug-grid-name-line-opacity)
-              );
-              font-size: var(--debug-view-font-size);
-              line-height: 1;
-              color: GrayText;
-              padding: 0.25em 0.75em;
-              border-top-right-radius: 0.4em;
-              border-top-left-radius: 0.4em;
-            }
-          }
-
-          @for $i from 1 through 12 {
-            &:nth-child(#{$i}) {
-              grid-column: #{$i} / #{$i + 1};
-            }
-          }
-
-          // Hide excess columns on small screens
-          @media (--vs) {
-            @for $i from 5 through 12 {
-              &:nth-child(#{$i}) {
-                display: none;
-              }
-            }
-          }
-        }
-      }
-
-      // Gird Column Names
-      .debug-grid-column-names {
-        position: fixed;
-        top: 0;
-        left: var(--fluid-outer-margin);
-        right: var(--fluid-outer-margin);
-        width: 100%;
-        max-width: var(--fluid-max-width);
-        z-index: calc(var(--z-debug) - 2);
-
-        > .column {
-          display: flex;
-          justify-content: space-between;
-          font-size: var(--debug-view-font-size);
-          line-height: 1;
-          color: GrayText;
-
-          &.-line {
-            position: relative;
-
-            > .label {
-              position: absolute;
-              top: 1em;
-              left: 50%;
-              transform: translateX(-50%);
-              padding: 0.25em 0.5em;
-              white-space: nowrap;
-              background-color: rgba(255, 255, 255, 0.5);
-              border-radius: 0.4em;
-
-              &::before {
-                position: absolute;
-                top: -1em;
-                left: 50%;
-                transform: translateX(-50%);
-                display: block;
-                content: '';
-                width: 0.3em;
-                height: 1em;
-                background-color: var(--color, GrayText);
-              }
-            }
-          }
-
-          &:not(.-line) {
-            border-width: 0;
-            border-style: solid;
-            border-color: var(--color);
-            border-top-width: 0.3em;
-
-            &.-bottomline {
-              border-top-width: 0;
-              border-bottom-width: 0.3em;
-
-              &::before,
-              &::after {
-                padding: 0.3em 0.5em 0;
-              }
-
-              &::before {
-                border-top-right-radius: 0.4em;
-              }
-
-              &::after {
-                border-top-left-radius: 0.4em;
-              }
-            }
-
-            &.-topline {
-              &::before {
-                border-bottom-right-radius: 0.4em;
-              }
-
-              &::after {
-                border-bottom-left-radius: 0.4em;
-              }
-            }
-          }
-
-          &::before,
-          &::after {
-            display: inline-block;
-            content: attr(data-debug-grid-column-name);
-            padding: 0 0.5em 0.3em;
-            background-color: var(--color);
           }
         }
       }
