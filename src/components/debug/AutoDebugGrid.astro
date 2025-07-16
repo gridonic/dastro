@@ -34,7 +34,15 @@
       protected connected() {
         window.addEventListener('resize', () => this.requestGridRefresh());
 
-        this.requestGridRefresh();
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              this.requestGridRefresh();
+            }
+          });
+        });
+
+        observer.observe(this);
       }
 
       private requestGridRefresh() {
