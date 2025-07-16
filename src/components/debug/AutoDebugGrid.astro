@@ -1,0 +1,242 @@
+---
+---
+
+<debug-grid class="debug-grid-complete ui-grid">
+  <div class="debug-grid-complete ui-grid"></div>
+  <div class="debug-grid-column-names ui-grid">
+    <div class="column -line" data-grid-middle>
+      <div class="label">Middle</div>
+    </div>
+  </div>
+</debug-grid>
+
+<script>
+  import { BaseCustomElement } from 'dastro/client';
+
+  const colors = [
+    '#FF6B6B',
+    '#4ECDC4',
+    '#45B7D1',
+    '#96CEB4',
+    '#FFEEAD',
+    '#D4A5A5',
+    '#9B59B6',
+    '#3498DB',
+    '#E67E22',
+    '#1ABC9C',
+  ];
+
+  customElements.define(
+    'debug-grid',
+    class extends BaseCustomElement {
+      private timeout: NodeJS.Timeout | null = null;
+
+      protected connected() {
+        window.addEventListener('resize', () => this.requestGridRefresh());
+
+        this.requestGridRefresh();
+      }
+
+      private requestGridRefresh() {
+        if (this.timeout) {
+          clearTimeout(this.timeout);
+        }
+
+        this.timeout = setTimeout(() => {
+          this.refreshGrid();
+          this.timeout = null;
+        }, 50);
+      }
+
+      private refreshGrid() {
+        const $columnContainer = this.$('.debug-grid-complete');
+        const $columnNameContainer = this.$('.debug-grid-column-names');
+
+        const gridTemplateColumns =
+          window.getComputedStyle(this).gridTemplateColumns;
+
+        const columnCount = (gridTemplateColumns.match(/\[/g)?.length ?? 1) - 1;
+        const columnNames = [
+          ...new Set(
+            gridTemplateColumns.matchAll(/([\w-]+?)-start/g).map((m) => m[1]),
+          ),
+        ].filter((n) => n !== 'col');
+
+        [
+          ...$columnContainer.querySelectorAll(
+            '[data-debug-grid-complete-column]',
+          ),
+        ].forEach((c) => c.remove());
+        Array.from({ length: columnCount }, (_, i) => {
+          const column = document.createElement('div');
+          column.classList.add('column');
+          column.setAttribute(
+            'data-debug-grid-complete-column',
+            (i + 1).toString(),
+          );
+          column.style.gridColumn = `${i + 1} / ${i + 2}`;
+
+          $columnContainer.appendChild(column);
+        });
+
+        [
+          ...$columnNameContainer.querySelectorAll(
+            '[data-debug-grid-column-name]',
+          ),
+        ].forEach((c) => c.remove());
+
+        columnNames.forEach((name) => {
+          const column = document.createElement('div');
+          column.classList.add('column');
+          column.classList.add('-topline');
+          column.classList.add(
+            columnNames.indexOf(name) === 0 ? '-bottomline' : '-topline',
+          );
+          column.setAttribute('data-debug-grid-column-name', name);
+          column.style.gridColumn = name;
+
+          const colorIndex = columnNames.indexOf(name) % colors.length;
+          column.style.setProperty('--color', colors[colorIndex]);
+
+          $columnNameContainer.appendChild(column);
+        });
+      }
+    },
+  );
+</script>
+
+<style lang="scss">
+  .debug-grid-complete {
+    position: fixed;
+    top: 0;
+    left: var(--fluid-outer-margin);
+    right: var(--fluid-outer-margin);
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    max-width: var(--fluid-max-width);
+    z-index: calc(var(--z-debug) - 2);
+
+    :global(> .column) {
+      display: flex;
+      align-items: end;
+      position: relative;
+      background-color: rgba(251, 192, 147, var(--debug-grid-column-opacity));
+
+      &:first-child,
+      &:last-child {
+        background-color: rgba(
+                161,
+                192,
+                255,
+                calc(var(--debug-grid-column-opacity) / 2)
+        );
+      }
+
+      &::before {
+        @media (--vl) {
+          display: inline-block;
+          margin: 0 auto;
+          content: attr(data-debug-grid-complete-column);
+          background: rgba(251, 192, 147, var(--debug-grid-name-line-opacity));
+          font-size: var(--debug-view-font-size);
+          line-height: 1;
+          color: GrayText;
+          padding: 0.25em 0.75em;
+          border-top-right-radius: 0.4em;
+          border-top-left-radius: 0.4em;
+        }
+      }
+    }
+  }
+
+  // Gird Column Names
+  .debug-grid-column-names {
+    position: fixed;
+    top: 0;
+    left: var(--fluid-outer-margin);
+    right: var(--fluid-outer-margin);
+    width: 100%;
+    max-width: var(--fluid-max-width);
+    z-index: calc(var(--z-debug) - 2);
+
+    :global(> .column) {
+      display: flex;
+      justify-content: space-between;
+      font-size: var(--debug-view-font-size);
+      line-height: 1;
+      color: GrayText;
+      margin-bottom: 0.5rem;
+
+      &.-line {
+        position: relative;
+
+        > .label {
+          position: absolute;
+          top: 1em;
+          left: 50%;
+          transform: translateX(-50%);
+          padding: 0.25em 0.5em;
+          white-space: nowrap;
+          background-color: rgba(255, 255, 255, 0.5);
+          border-radius: 0.4em;
+
+          &::before {
+            position: absolute;
+            top: -1em;
+            left: 50%;
+            transform: translateX(-50%);
+            display: block;
+            content: '';
+            width: 0.3em;
+            height: 1em;
+            background-color: var(--color, GrayText);
+          }
+        }
+      }
+
+      &:not(.-line) {
+        border-width: 0;
+        border-style: solid;
+        border-color: var(--color);
+        border-top-width: 0.3em;
+
+        &.-bottomline {
+          border-top-width: 0;
+          border-bottom-width: 0.3em;
+
+          &::before,
+          &::after {
+            padding: 0.3em 0.5em 0;
+          }
+
+          &::before {
+            border-top-right-radius: 0.4em;
+          }
+
+          &::after {
+            border-top-left-radius: 0.4em;
+          }
+        }
+
+        &.-topline {
+          &::before {
+            border-bottom-right-radius: 0.4em;
+          }
+
+          &::after {
+            border-bottom-left-radius: 0.4em;
+          }
+        }
+      }
+
+      &::before,
+      &::after {
+        display: inline-block;
+        content: attr(data-debug-grid-column-name);
+        padding: 0 0.5em 0.3em;
+        background-color: var(--color);
+      }
+    }
+  }
+</style>

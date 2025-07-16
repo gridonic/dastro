@@ -8,6 +8,8 @@ import type {DastroTypes} from "../../core/lib-types";
 import {isSearchIndexingPrevented} from "../../core/page-indexing";
 import DebugView from '../debug/DebugView.astro';
 import type {ClassValue} from "../component.types.ts";
+import DebugGridContainer from "../debug/DebugGridContainer.astro";
+import AutoDebugGrid from "../debug/AutoDebugGrid.astro";
 
 interface Props<T extends DastroTypes = DastroTypes> {
   page: Page<T>;
@@ -69,17 +71,20 @@ function i18nLinkTags(): MetaTag[] {
 -->
 <html lang={locale.replace('_', '-')}>
   <head>
+    <slot name="head:before" />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <link rel="preconnect" href="https://www.datocms-assets.com" />
-    <Seo
-      data={[
-        ...faviconMetaTags ?? [],
-        ...page._seoMetaTags,
-        ...i18nLinkTags(),
-      ]}
-    />
+    <slot name="head:seo">
+      <Seo
+        data={[
+          ...faviconMetaTags ?? [],
+          ...page._seoMetaTags,
+          ...i18nLinkTags(),
+        ]}
+      />
+    </slot>
     {
       isSearchIndexingPrevented(config) && !isPageExcludedFromIndexing && (
         <meta
@@ -89,14 +94,25 @@ function i18nLinkTags(): MetaTag[] {
         />
       )
     }
-    <slot name="head" />
+    <slot name="head:after" />
   </head>
   <body class:list={bodyClass}>
-    <slot name="before" />
-    <!--<SkipLinks />-->
-    {debugViewEnabled && <DebugView />}
+    <slot name="body:before" />
+    <slot name="body:skip-links">
+      <!--<SkipLinks />-->
+    </slot>
     <slot name="body" />
-    <slot name="after" />
+    {
+      debugViewEnabled && (
+        <slot name="body:debug-view">
+          <DebugGridContainer>
+            <AutoDebugGrid />
+          </DebugGridContainer>
+          <DebugView />
+        </slot>
+      )
+    }
+    <slot name="body:after" />
   </body>
 </html>
 
