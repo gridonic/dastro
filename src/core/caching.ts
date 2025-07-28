@@ -58,7 +58,7 @@ export function caching<T extends DastroTypes>(config: DastroConfig<T>) {
       // @see https://developers.netlify.com/guides/how-to-do-advanced-caching-and-isr-with-astro/
       context.response.headers.set(
         'Netlify-Vary',
-        `cookie=${DRAFT_MODE_COOKIE_NAME}|${CUSTOM_DATO_ENVIRONMENT_COOKIE_NAME}`,
+        `query,cookie=${DRAFT_MODE_COOKIE_NAME}|${CUSTOM_DATO_ENVIRONMENT_COOKIE_NAME}`,
       );
 
       // Tell the browser to always check the freshness of the cache
