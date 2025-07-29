@@ -29,12 +29,12 @@
   "license": "ISC",
   "description": "",
   "peerDependencies": {
-    "astro": "^5.10.2"
+    "astro": "^5.12.5"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
-    "@astrojs/netlify": "6.4.0",
-    "@astrojs/node": "9.2.2",
+    "@astrojs/netlify": "^6.5.3",
+    "@astrojs/node": "^9.3.1",
     "@datocms/astro": "^0.6.2",
     "@datocms/cda-client": "^0.2.7",
     "@datocms/cma-client": "^5.0.0",
