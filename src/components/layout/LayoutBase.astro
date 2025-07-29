@@ -71,11 +71,17 @@ function i18nLinkTags(): MetaTag[] {
 -->
 <html lang={locale.replace('_', '-')}>
   <head>
-    <slot name="head:before" />
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <meta name="generator" content={Astro.generator} />
-    <link rel="preconnect" href="https://www.datocms-assets.com" />
+    <slot name="head:before" />
+    <slot name="head:viewport" >
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+    </slot>
+    <slot name="head:generator">
+      <meta name="generator" content={Astro.generator} />
+    </slot>
+    <slot name="head:preconnect">
+      <link rel="preconnect" href="https://www.datocms-assets.com" />
+    </slot>
     <slot name="head:seo">
       <Seo
         data={[
