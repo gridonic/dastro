@@ -8,17 +8,18 @@ export const GET: APIRoute = async (context) => {
     return invalidRequestResponse('Invalid token', 401);
   }
 
-  const { routing, config } = context.locals.dastro;
+  const { routing, i18n } = context.locals.dastro;
   const { getAllRoutes } = routing();
+  const { isDefaultLocale, areLocalesEqual } = i18n();
 
   const routes = await getAllRoutes(context);
 
   return json([...routes].sort((a, b) => {
-    if (a.locale === b.locale) {
+    if (areLocalesEqual(a.locale, b.locale)) {
       return (a.url ?? '').localeCompare(b.url ?? '');
     }
 
-    if (a.locale === config.i18n.defaultLocale) {
+    if (isDefaultLocale(a.locale)) {
       return -1;
     }
 

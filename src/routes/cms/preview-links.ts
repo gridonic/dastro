@@ -32,6 +32,7 @@ export const OPTIONS: APIRoute = () => {
  */
 export const POST: APIRoute = async ({ url, request, locals }) => {
   const { pageDefinitionList, resolveRecordUrl } = locals.dastro.routing();
+  const { normalizedSiteLocale, defaultLocale } = locals.dastro.i18n();
   const { config } = locals.dastro;
 
   try {
@@ -48,7 +49,8 @@ export const POST: APIRoute = async ({ url, request, locals }) => {
      * along with information about which locale they are currently viewing in
      * the interface
      */
-    const { environmentId, item, itemType, locale } = await request.json();
+    const { environmentId, item, itemType, locale: apiLocale } = await request.json();
+    const siteLocale = normalizedSiteLocale(apiLocale);
 
     const pageDefinition = pageDefinitionList().find(
       (p) => p.apiKey === itemType.attributes.api_key,
@@ -68,7 +70,7 @@ export const POST: APIRoute = async ({ url, request, locals }) => {
         item.attributes.parent_id,
         {
           apiKey: pageDefinition.apiKey,
-          locale,
+          locale: siteLocale ?? '',
           environmentId,
           token: config.datocms.token
         },
@@ -87,7 +89,7 @@ export const POST: APIRoute = async ({ url, request, locals }) => {
         })),
         parent,
       },
-      locale,
+      siteLocale ?? defaultLocale,
     );
 
     const response: WebPreviewsResponse = { previewLinks: [] };

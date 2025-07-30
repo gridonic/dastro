@@ -20,8 +20,9 @@ interface Props<T extends DastroTypes = DastroTypes> {
 
 const { page, locale, bodyClass, faviconMetaTags } = Astro.props;
 
-const { routing, config} = Astro.locals.dastro;
+const { routing, config, i18n } = Astro.locals.dastro;
 const { resolveRecordUrl } = routing();
+const { normalizedIsoLocale, locales } = i18n();
 
 const debugViewEnabled = config.dev.debugViewEnabled;
 
@@ -32,7 +33,7 @@ const isPageExcludedFromIndexing = !!page._seoMetaTags.find(
 
 function i18nLinkTags(): MetaTag[] {
   // for single-locale apps, we do not need to specify alternatives
-  if (config.i18n.locales.length <= 1) {
+  if (locales.length <= 1) {
     return [];
   }
 
@@ -51,7 +52,7 @@ function i18nLinkTags(): MetaTag[] {
       tag: 'link',
       attributes: { rel: 'canonical', href: urlInCurrentLocale },
     },
-    ...config.i18n.locales.map((l) => ({
+    ...locales.map((l) => ({
       tag: 'link',
       attributes: {
         rel: 'alternate',
@@ -69,7 +70,7 @@ function i18nLinkTags(): MetaTag[] {
 ₍⸌̣ʷ̣̫⸍̣₎  Made with ♥ by gridonic.ch
 
 -->
-<html lang={locale.replace('_', '-')}>
+<html lang={normalizedIsoLocale(locale)}>
   <head>
     <meta charset="UTF-8" />
     <slot name="head:before" />

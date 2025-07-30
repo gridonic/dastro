@@ -1,4 +1,5 @@
 import type {DastroConfig, DastroTypes} from "./lib-types.ts";
+import {i18n} from "./i18n.ts";
 
 export type TranslationMessages<T extends DastroTypes> = Record<string, any> & {
   locales: Record<T['SiteLocale'], string>;
@@ -19,7 +20,7 @@ type TranslationKeys = string;
 //   | (string & {});
 
 export function translations<T extends DastroTypes>(config: DastroConfig<T>, siteLocale: T['SiteLocale']) {
-  const { defaultLocale, messages } = config.i18n;
+  const { defaultLocale, messages, isDefaultLocale } = i18n(config);
 
   function t(
     key: TranslationKeys,
@@ -33,7 +34,7 @@ export function translations<T extends DastroTypes>(config: DastroConfig<T>, sit
       value = value[part];
 
       if (value === undefined) {
-        if (locale !== defaultLocale) {
+        if (!isDefaultLocale(locale)) {
           return t(key, replacements, defaultLocale);
         }
         return key;

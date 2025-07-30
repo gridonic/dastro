@@ -1,5 +1,6 @@
 import type {AstroContext} from "../astro.context.ts";
 import type {DastroConfig, DastroTypes } from './lib-types.ts';
+import {i18n} from "./i18n.ts";
 import {
   getPageRecordsFor,
   type PageDefinition,
@@ -21,6 +22,8 @@ export interface RecordWithParent<T extends DastroTypes> {
 
 
 export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
+  const { isDefaultLocale, areLocalesEqual } = i18n(config);
+
   function pageDefinitionList(): PageDefinition<T>[] {
     return Object.values(config.pageDefinitions);
   }
@@ -47,7 +50,7 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
 
     // Special case: Home
     if (record.__typename === 'PageRecord' && slug === 'home') {
-      if (locale !== config.i18n.defaultLocale) {
+      if (!isDefaultLocale(locale)) {
         return `/${locale}`;
       }
       return '/';
@@ -56,7 +59,7 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
     // General Route definition
     const routeDefinition = config.pageDefinitions[record.__typename];
     const localeUrlPart =
-      !locale || locale === config.i18n.defaultLocale ? undefined : locale;
+      !locale || isDefaultLocale(locale) ? undefined : locale;
 
     return `/${[
       localeUrlPart, // Locale
@@ -69,10 +72,10 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
   }
 
   async function pageRecordForUrl(context: AstroContext<'locals' | 'cookies'>, url: string) {
-    const { locales, defaultLocale } = config.i18n;
+    const { locales, defaultLocale } = i18n(config);
 
     const regexLocaleUnion = locales
-      .filter((l) => l !== defaultLocale)
+      .filter((l) => !isDefaultLocale(l))
       .join('|');
 
     const regexPathPrefixUnion = [
@@ -164,7 +167,7 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
   }
 
   function slugFromRecord(rec: RecordWithParent<T>, locale: T['SiteLocale']) {
-    return rec._allTranslatedSlugLocales?.find((tl) => tl.locale === locale)
+    return rec._allTranslatedSlugLocales?.find((tl) => tl.locale && areLocalesEqual(tl.locale, locale))
       ?.value;
   }
 

@@ -4,8 +4,9 @@ import type {DastroTypes} from "../core/lib-types.ts";
 import {isSearchIndexingPrevented} from "../core/page-indexing.ts";
 
 export const GET: APIRoute = async (context) => {
-  const { config, routing } = context.locals.dastro;
+  const { config, routing, i18n } = context.locals.dastro;
   const { resolveRecordUrl, getAllRoutes } = routing();
+  const { locales } = i18n();
 
   const baseUrl = config.appBaseUrl.replace(/\/$/, '');
   const routesToIndex = await getRoutesToIndex();
@@ -55,11 +56,11 @@ ${localizedAlternates(route)
 
   function localizedAlternates(route: Route<DastroTypes>) {
     // for single-locale apps, we do not need to specify alternatives
-    if (config.i18n.locales.length <= 1) {
+    if (locales.length <= 1) {
       return [];
     }
 
-    return config.i18n.locales
+    return locales
       .map((l) => {
         const href = resolveRecordUrl(route.record, l);
         return href

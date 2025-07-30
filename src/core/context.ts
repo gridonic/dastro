@@ -5,6 +5,7 @@ import {routing} from "./routing.ts";
 import {translations} from "./translations.ts";
 import type {DastroConfig, DastroTypes} from "./lib-types.ts";
 import {caching} from "./caching.ts";
+import {i18n} from "./i18n.ts";
 
 export function buildDastroContext<T extends DastroTypes>(dastroConfig: DastroConfig<T>) {
   return {
@@ -15,5 +16,6 @@ export function buildDastroContext<T extends DastroTypes>(dastroConfig: DastroCo
     environmentSwitch: () => environmentSwitch(dastroConfig),
     datocms: () => datocms(dastroConfig),
     translations: (siteLocale: T['SiteLocale']) => translations(dastroConfig, siteLocale),
+    i18n: () => i18n(dastroConfig),
   }
 }

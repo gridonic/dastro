@@ -8,6 +8,7 @@ import { environmentSwitch } from "./datocms/environment-switch.ts";
 import { datocms } from "./datocms/datocms.ts";
 import { buildDastroContext } from "./core/context.ts";
 import { renderPage } from './core/page.ts';
+import {i18n} from "./core/i18n.ts";
 export type { Route } from "./core/routing.ts";
 export type {DastroTypes, DastroConfig, ExportTypes} from "./core/lib-types.ts";
 export type {AstroContext} from "./astro.context.ts";
@@ -21,6 +22,7 @@ export {
   caching,
   routing,
   translations,
+  i18n,
   draftMode,
   environmentSwitch,
   datocms,
