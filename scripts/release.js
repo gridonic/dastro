@@ -35,7 +35,7 @@ const collectChangelogEntries = () => {
   return new Promise((resolve) => {
     console.log("\n📝 Please enter changelog entries (one per line, type nothing when finished):");
     const changelogEntries = [];
-    
+
     const askForEntry = () => {
       rl.question("  - ", (entry) => {
         if (entry.toLowerCase() === '') {
@@ -53,7 +53,7 @@ const collectChangelogEntries = () => {
         }
       });
     };
-    
+
     askForEntry();
   });
 };
@@ -64,10 +64,10 @@ const getCommitMessagesSinceLastVersion = () => {
     // Get the latest version tag
     const latestTag = execSync("git describe --tags --abbrev=0", { encoding: "utf8" }).trim();
     console.log(`\n📋 Commits since ${latestTag}:`);
-    
+
     // Get commit messages between the latest tag and HEAD
     const commits = execSync(`git log ${latestTag}..HEAD --oneline`, { encoding: "utf8" }).trim();
-    
+
     if (commits) {
       commits.split('\n').forEach(commit => {
         console.log(`  ${commit}`);
@@ -98,10 +98,10 @@ const getCommitMessagesSinceLastVersion = () => {
 const updateChangelog = (newVersion, changelogEntries) => {
   const changelogPath = join(__dirname, "..", "CHANGELOG.md");
   const currentContent = readFileSync(changelogPath, "utf-8");
-  
-  const newEntry = `### ${newVersion}\n\n${changelogEntries.map(entry => `- ${entry}`).join('\n')}\n\n`;
+
+  const newEntry = `### [${newVersion}](https://github.com/gridonic/dastro/compare/${currentVersion}...${newVersion})\n\n${changelogEntries.map(entry => `- ${entry}`).join('\n')}\n\n`;
   const updatedContent = newEntry + currentContent;
-  
+
   writeFileSync(changelogPath, updatedContent);
   console.log(`\n✅ CHANGELOG.md updated with version ${newVersion}`);
 };
@@ -131,7 +131,7 @@ const runRelease = async () => {
     const newVersion = await new Promise((resolve) => {
       rl.question("Enter new version: ", resolve);
     });
-    
+
     console.log(`New version will be: ${newVersion}`);
 
     // Validate semantic versioning format
