@@ -1,3 +1,7 @@
+### [1.0.2](https://github.com/gridonic/dastro/compare/1.0.1...1.0.2)
+
+- Configure and add commands for local development and release management
+
 ### [1.0.1](https://github.com/gridonic/dastro/compare/v1.0.0...v1.0.1)
 
 - Fixes errors due to locales with variants (de-CH) due to hyphen / underscore inconsistencies
