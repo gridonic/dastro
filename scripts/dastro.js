@@ -13,7 +13,8 @@ switch (command) {
         execSync("npm ci", {stdio: "inherit"});
         break;
     case "upgrade":
-        const command = `🔄 Running command: npm install dastro@github:gridonic/dastro#${getLatestRemoteVersionTag()}`;
+        const command = `npm install dastro@github:gridonic/dastro#${getLatestRemoteVersionTag()}`;
+        console.log(`🔄 Running command: ${command}`);
         execSync(command, {stdio: "inherit"});
         console.log(`\n✅ Upgraded to latest version: ${getLatestRemoteVersionTag()}`);
         break;

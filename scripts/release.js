@@ -99,7 +99,7 @@ const updateChangelog = (newVersion, changelogEntries) => {
   const changelogPath = join(__dirname, "..", "CHANGELOG.md");
   const currentContent = readFileSync(changelogPath, "utf-8");
 
-  const newEntry = `### [${newVersion}](https://github.com/gridonic/dastro/compare/${currentVersion}...${newVersion})\n\n${changelogEntries.map(entry => `- ${entry}`).join('\n')}\n\n`;
+  const newEntry = `### [${newVersion}](https://github.com/gridonic/dastro/compare/v${currentVersion}...v${newVersion})\n\n${changelogEntries.map(entry => `- ${entry}`).join('\n')}\n\n`;
   const updatedContent = newEntry + currentContent;
 
   writeFileSync(changelogPath, updatedContent);

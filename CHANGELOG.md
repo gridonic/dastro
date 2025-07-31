@@ -1,4 +1,4 @@
-### [1.0.2](https://github.com/gridonic/dastro/compare/1.0.1...1.0.2)
+### [1.0.2](https://github.com/gridonic/dastro/compare/v1.0.1...v1.0.2)
 
 - Configure and add commands for local development and release management
 
