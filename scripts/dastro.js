@@ -25,10 +25,8 @@ switch (command) {
         execSync(command, {stdio: "inherit"});
         console.log(`\n✅ Upgraded to latest version: ${getLatestRemoteVersionTag()}`);
         break;
-    case "version":
-        console.log(`ℹ️ Current version: ${getPackageVersion()}`);
-        break;
-    case "latest":
+    case "info":
+        console.log(`ℹ️ Installed version: v${getPackageVersion()}`);
         console.log(`ℹ️ Latest version: ${getLatestRemoteVersionTag()}`);
         break;
     default:
@@ -38,8 +36,7 @@ switch (command) {
         console.log("  link - link the local dastro package");
         console.log("  unlink - unlink the local dastro package");
         console.log("  upgrade - upgrade to the latest version of the dastro package");
-        console.log("  version - show the current version of the dastro package");
-        console.log("  latest - show the latest version of the dastro package");
+        console.log("  info - show current and latest version information");
         break;
 }
 
