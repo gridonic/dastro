@@ -1,8 +1,15 @@
 #!/usr/bin/env node
 
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 import {execSync} from "child_process";
 
 const command = process.argv[2];
+
+// Get the directory of the current script
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 switch (command) {
     case "link":
@@ -18,15 +25,28 @@ switch (command) {
         execSync(command, {stdio: "inherit"});
         console.log(`\n✅ Upgraded to latest version: ${getLatestRemoteVersionTag()}`);
         break;
+    case "version":
+        console.log(`ℹ️ Current version: ${getPackageVersion()}`);
+        break;
+    case "latest":
+        console.log(`ℹ️ Latest version: ${getLatestRemoteVersionTag()}`);
+        break;
     default:
+        console.log("⚠️ Command not found\n");
         console.log("Usage: dastro <command>");
         console.log("Commands:");
         console.log("  link - link the local dastro package");
         console.log("  unlink - unlink the local dastro package");
         console.log("  upgrade - upgrade to the latest version of the dastro package");
+        console.log("  version - show the current version of the dastro package");
+        console.log("  latest - show the latest version of the dastro package");
         break;
 }
 
+function getPackageVersion() {
+    const packageJson = JSON.parse(readFileSync(join(__dirname, "..", "package.json"), "utf8"));
+    return packageJson.version;
+}
 
 function getLatestRemoteVersionTag() {
     const remoteTags = execSync("git ls-remote --tags git@github.com:gridonic/dastro.git", { encoding: "utf8" });
