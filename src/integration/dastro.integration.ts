@@ -5,6 +5,7 @@ import node from '@astrojs/node';
 import { envField } from 'astro/config';
 import { datoCmsIntegration } from 'dastro';
 import chalk from "chalk";
+import type { ViteDevServer, Plugin } from 'vite';
 
 interface Options {
   htmlStreamingEnabled?: boolean;
@@ -104,6 +105,7 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
           },
 
           vite: {
+            plugins: [watchDastroInNodeModulesVitePlugin()],
             server: {
               https: {
                 cert:
@@ -189,7 +191,14 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
             order: 'post'
           });
         }
-      }
+      },
+      'astro:server:setup': async ({ server }) => {
+        server.watcher.on('all', (_, path) => {
+          if (path.includes('node_modules/dastro')) {
+            server.restart();
+          }
+        });
+      },
     },
   };
 }
@@ -205,4 +214,21 @@ export function dastroAdapterConfig(): AstroUserConfig['adapter'] {
     : node({
       mode: 'standalone',
     });
+}
+
+function watchDastroInNodeModulesVitePlugin(): Plugin {
+  return {
+    name: 'watch-dastro-in-node-modules',
+    configureServer(server: ViteDevServer) {
+      // makes sure that when developing locally, changes in dastro in node_modules trigger dev server update
+      server.watcher.options = {
+        ...server.watcher.options,
+        ignored: [
+          ...(server.watcher.options.ignored as string[])
+            .filter(pattern => pattern !== '**/node_modules/**'),
+          /node_modules\/(?!dastro).*/,
+        ],
+      };
+    },
+  };
 }
