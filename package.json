@@ -6,7 +6,8 @@
     "dev": "npm run astro:check:watch",
     "astro:check": "astro check",
     "astro:check:watch": "astro check --watch --preserveWatchOutput",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "release": "node scripts/release"
   },
   "bin": {
     "dastro": "scripts/dastro.js"
