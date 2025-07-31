@@ -20,22 +20,39 @@ switch (command) {
         execSync("npm ci", {stdio: "inherit"});
         break;
     case "upgrade":
-        const command = `npm install dastro@github:gridonic/dastro#${getLatestRemoteVersionTag()}`;
-        console.log(`🔄 Running command: ${command}`);
-        execSync(command, {stdio: "inherit"});
+        const cmd = `npm install dastro@github:gridonic/dastro#${getLatestRemoteVersionTag()}`;
+        console.log(`🔄 Running command: ${cmd}`);
+        execSync(cmd, {stdio: "inherit"});
         console.log(`\n✅ Upgraded to latest version: ${getLatestRemoteVersionTag()}`);
+        break;
+    case "radar":
+        const radarUrl = "https://boilerplate-radar.gridonic.io";
+        console.log(`🔗 Opening Boilerplate Radar: ${radarUrl}`);
+        try {
+            execSync(`open "${radarUrl}"`, {stdio: "inherit"});
+        } catch (error) {
+            console.log(`⚠️ Could not open browser automatically. Please visit: ${radarUrl}`);
+        }
         break;
     case "info":
         console.log(`ℹ️ Installed version: v${getPackageVersion()}`);
         console.log(`ℹ️ Latest version: ${getLatestRemoteVersionTag()}`);
+        console.log(`ℹ️ Boilerplate Radar: https://boilerplate-radar.gridonic.io`);
         break;
     default:
-        console.log("⚠️ Command not found\n");
-        console.log("Usage: dastro <command>");
+        if (command && command !== "help") {
+            console.log(`⚠️ Command not found: ${command}\n`);
+        }
+
+        console.log(`⭐️ Welcome to Dastro v${getPackageVersion()}\n`);
+
+        console.log("Usage: dastro <command>\n");
         console.log("Commands:");
+        console.log("  help - show this help message");
         console.log("  link - link the local dastro package");
         console.log("  unlink - unlink the local dastro package");
         console.log("  upgrade - upgrade to the latest version of the dastro package");
+        console.log("  radar - open the boilerplate radar in your browser");
         console.log("  info - show current and latest version information");
         break;
 }
