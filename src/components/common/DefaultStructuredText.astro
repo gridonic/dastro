@@ -1,27 +1,30 @@
 ---
-import { StructuredText } from '@datocms/astro';
+import {StructuredText} from '@datocms/astro';
 import type { ComponentProps } from 'astro/types';
 import RecordLink from '../link/RecordLink.astro';
 
-type StructuredTextProps = ComponentProps<typeof StructuredText>;
-
-interface Props {
-  data: StructuredTextProps['data'];
+interface Props extends ComponentProps<typeof StructuredText> {
 }
 
-const { data } = Astro.props;
+const { data, linkToRecordComponents, inlineRecordComponents, ...rest } = Astro.props;
 
 const { pageRecordTypes } = Astro.locals.dastro.routing();
+
+const pageTypeLinkToRecordComponents = pageRecordTypes().reduce(
+  (acc, t) => ({ ...acc, [t]: RecordLink }),
+  {},
+);
 ---
 
 <StructuredText
   data={data}
-  linkToRecordComponents={pageRecordTypes().reduce(
-    (acc, t) => ({ ...acc, [t]: RecordLink }),
-    {},
-  )}
-  inlineRecordComponents={pageRecordTypes().reduce(
-    (acc, t) => ({ ...acc, [t]: RecordLink }),
-    {},
-  )}
+  linkToRecordComponents={{
+    ...pageTypeLinkToRecordComponents,
+    ...linkToRecordComponents,
+  }}
+  inlineRecordComponents={{
+    ...pageTypeLinkToRecordComponents,
+    ...inlineRecordComponents,
+  }}
+  {...rest}
 />
