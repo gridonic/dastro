@@ -1,3 +1,7 @@
+### [1.0.4](https://github.com/gridonic/dastro/compare/v1.0.3...v1.0.4)
+
+- Add more information and commands in cli
+
 ### [1.0.3](https://github.com/gridonic/dastro/compare/v1.0.2...v1.0.3)
 
 - Add new cli commands
