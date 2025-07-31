@@ -1,3 +1,8 @@
+### [1.0.3](https://github.com/gridonic/dastro/compare/v1.0.2...v1.0.3)
+
+- Add new cli commands
+- Allow to pass on props of Datocms Structured Text in DefaultStructuredText
+
 ### [1.0.2](https://github.com/gridonic/dastro/compare/v1.0.1...v1.0.2)
 
 - Configure and add commands for local development and release management
