@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { readFileSync } from "fs";
+import { readFileSync, lstatSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import {execSync} from "child_process";
@@ -42,6 +42,18 @@ switch (command) {
     default:
         if (command && command !== "help") {
             console.log(`⚠️ Command not found: ${command}\n`);
+        }
+
+        // Check if dastro package is a symlink (local development)
+        try {
+            const stats = lstatSync('node_modules/dastro');
+            if (stats.isSymbolicLink()) {
+                console.log("\x1b[33m⚠️  Warning: You are using a local development version of dastro (symlinked)\x1b[0m");
+                console.log("\x1b[33m   Run 'dastro unlink' to switch back to the published version\x1b[0m\n");
+            }
+        } catch (error) {
+            // Package doesn't exist or can't be accessed, ignore
+            console.log(error);
         }
 
         console.log(`⭐️ Welcome to Dastro v${getPackageVersion()}\n`);

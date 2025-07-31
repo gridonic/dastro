@@ -6,6 +6,7 @@ import { envField } from 'astro/config';
 import { datoCmsIntegration } from 'dastro';
 import chalk from "chalk";
 import type { ViteDevServer, Plugin } from 'vite';
+import {lstatSync} from "fs";
 
 interface Options {
   htmlStreamingEnabled?: boolean;
@@ -30,6 +31,20 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
     hooks:{
       'astro:config:setup': ({ injectRoute, updateConfig, addMiddleware, logger }) => {
         logger.info(chalk.bgGreen(` Using dastro ${chalk.bold(`v${pgk.version}`)} `));
+
+        const stats = lstatSync("node_modules/dastro");
+        if (stats.isSymbolicLink()) {
+          logger.info(
+            chalk.yellow(
+              "⚠️ Warning: You are using a local development version of dastro (symlinked)"
+            )
+          );
+          logger.info(
+            chalk.yellow(
+              "   Run 'dastro unlink' to switch back to the published version"
+            )
+          );
+        }
 
         updateConfig({
           output: 'server',
