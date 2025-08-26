@@ -1,3 +1,8 @@
+### [1.0.5](https://github.com/gridonic/dastro/compare/v1.0.4...v1.0.5)
+
+- Allow configuration of multiple graphql projects
+- Add new project creation script
+
 ### [1.0.4](https://github.com/gridonic/dastro/compare/v1.0.3...v1.0.4)
 
 - Add more information and commands in cli
