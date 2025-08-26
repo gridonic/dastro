@@ -1,5 +1,5 @@
 import dastroIntegration, { dastroAdapterConfig } from "./integration/dastro.integration.ts";
-import datoCmsIntegration from "./integration/datocms.integration.ts";
+import graphqlIntegration from "./integration/graphql.integration.ts";
 import { caching } from "./core/caching.ts";
 import { routing } from "./core/routing.ts";
 import { translations } from "./core/translations.ts";
@@ -17,7 +17,7 @@ export type {TranslationMessages} from './core/translations.ts';
 
 export {
   dastroIntegration,
-  datoCmsIntegration,
+  graphqlIntegration,
   dastroAdapterConfig,
   caching,
   routing,

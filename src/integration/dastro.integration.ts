@@ -3,7 +3,7 @@ import type { AstroIntegration, AstroUserConfig } from 'astro';
 import netlify from '@astrojs/netlify';
 import node from '@astrojs/node';
 import { envField } from 'astro/config';
-import { datoCmsIntegration } from 'dastro';
+import { graphqlIntegration } from 'dastro';
 import chalk from "chalk";
 import type { ViteDevServer, Plugin } from 'vite';
 import {lstatSync} from "fs";
@@ -52,7 +52,7 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
           site: process.env.APP_BASE_URL,
 
           integrations: [
-            datoCmsIntegration(),
+            graphqlIntegration(),
           ],
 
           prefetch: true,
