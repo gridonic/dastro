@@ -1,3 +1,8 @@
+### [1.0.7](https://github.com/gridonic/dastro/compare/v1.0.6...v1.0.7)
+
+- remove og:locale insertion
+- UPGRADE: you should make sure that in your language switcher, lang and hreflang use normalizeIsoLocale(locale) instead of locale only
+
 ### [1.0.6](https://github.com/gridonic/dastro/compare/v1.0.5...v1.0.6)
 
 - Use locale without variants
