@@ -1,3 +1,7 @@
+### [1.0.6](https://github.com/gridonic/dastro/compare/v1.0.5...v1.0.6)
+
+- Use locale without variants
+
 ### [1.0.5](https://github.com/gridonic/dastro/compare/v1.0.4...v1.0.5)
 
 - Allow configuration of multiple graphql projects
