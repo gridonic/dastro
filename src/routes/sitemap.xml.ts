@@ -6,7 +6,7 @@ import {isSearchIndexingPrevented} from "../core/page-indexing.ts";
 export const GET: APIRoute = async (context) => {
   const { config, routing, i18n } = context.locals.dastro;
   const { resolveRecordUrl, getAllRoutes } = routing();
-  const { locales } = i18n();
+  const { normalizedIsoLocale, locales } = i18n();
 
   const baseUrl = config.appBaseUrl.replace(/\/$/, '');
   const routesToIndex = await getRoutesToIndex();
@@ -65,7 +65,7 @@ ${localizedAlternates(route)
         const href = resolveRecordUrl(route.record, l);
         return href
           ? {
-              hreflang: l,
+              hreflang: normalizedIsoLocale(l),
               href,
             }
           : null;

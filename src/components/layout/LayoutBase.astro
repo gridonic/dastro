@@ -37,27 +37,28 @@ function i18nLinkTags(): MetaTag[] {
     return [];
   }
 
+  const baseUrl = config.appBaseUrl.replace(/\/$/, '');
   const urlInCurrentLocale = resolveRecordUrl(page, locale) ?? '/';
 
   return [
     {
       tag: 'meta',
-      attributes: { property: 'og:url', content: urlInCurrentLocale },
+      attributes: { property: 'og:url', content: `${baseUrl}${urlInCurrentLocale}` },
     },
     {
       tag: 'meta',
-      attributes: { property: 'og:locale', content: locale },
+      attributes: { property: 'og:locale', content: normalizedIsoLocale(locale) ?? locale },
     },
     {
       tag: 'link',
-      attributes: { rel: 'canonical', href: urlInCurrentLocale },
+      attributes: { rel: 'canonical', href: `${baseUrl}${urlInCurrentLocale}` },
     },
     ...locales.map((l) => ({
       tag: 'link',
       attributes: {
         rel: 'alternate',
-        hreflang: l,
-        href: resolveRecordUrl(page, l) ?? '/',
+        hreflang: normalizedIsoLocale(l) ?? l,
+        href: `${baseUrl}${resolveRecordUrl(page, l) ?? ''}`,
       },
     })),
   ];
