@@ -81,6 +81,13 @@ async function createProject() {
             }
         } while (validationError);
 
+        // Get DatoCMS token from user
+        console.log("\n🔑 DatoCMS Configuration");
+        const datocmsToken = await askQuestionWithDefault(
+            "Enter your DatoCMS Content Delivery API token (leave blank to use boilerplate token)",
+            ""
+        );
+
         console.log(`\n📁 Creating project: ${projectName}\n`);
 
         // Clone the repository template
@@ -132,6 +139,17 @@ async function createProject() {
         const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
         packageJson.name = projectName;
         writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+
+        // Update .env.example with DatoCMS token if provided
+        if (datocmsToken.trim()) {
+            console.log("📝 Updating DatoCMS token in .env.example...");
+            const envExamplePath = join(projectPath, ".env.example");
+            if (existsSync(envExamplePath)) {
+                let envContent = readFileSync(envExamplePath, "utf8");
+                envContent = envContent.replace(/DATO_CMS_TOKEN=.*/, `DATO_CMS_TOKEN=${datocmsToken}`);
+                writeFileSync(envExamplePath, envContent);
+            }
+        }
 
         // Copy .env.example to .env
         console.log("📋 Setting up environment file...");
