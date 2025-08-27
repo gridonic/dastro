@@ -46,10 +46,6 @@ function i18nLinkTags(): MetaTag[] {
       attributes: { property: 'og:url', content: `${baseUrl}${urlInCurrentLocale}` },
     },
     {
-      tag: 'meta',
-      attributes: { property: 'og:locale', content: normalizedIsoLocale(locale) ?? locale },
-    },
-    {
       tag: 'link',
       attributes: { rel: 'canonical', href: `${baseUrl}${urlInCurrentLocale}` },
     },
