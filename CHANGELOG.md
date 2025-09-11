@@ -1,3 +1,7 @@
+### [1.0.8](https://github.com/gridonic/dastro/compare/v1.0.7...v1.0.8)
+
+- allow to add all rest parameters to a in record link
+
 ### [1.0.7](https://github.com/gridonic/dastro/compare/v1.0.6...v1.0.7)
 
 - remove og:locale insertion
