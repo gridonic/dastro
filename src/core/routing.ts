@@ -1,13 +1,14 @@
-import type {AstroContext} from "../astro.context.ts";
-import type {DastroConfig, DastroTypes } from './lib-types.ts';
-import {i18n} from "./i18n.ts";
+import type { AstroContext } from '../astro.context.ts';
+import type { DastroConfig, DastroTypes } from './lib-types.ts';
+import { i18n } from './i18n.ts';
 import {
   getPageRecordsFor,
   type PageDefinition,
   type PageRecordType,
   type RoutingPageRecord,
-  type TranslatedSlugLocale
-} from "./page.ts";
+  type TranslatedSlugLocale,
+} from './page.ts';
+import { slugify } from '../util/route.util.ts';
 
 export interface Route<T extends DastroTypes> {
   locale: T['SiteLocale'];
@@ -20,7 +21,6 @@ export interface RecordWithParent<T extends DastroTypes> {
   parent?: RecordWithParent<T> | null;
 }
 
-
 export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
   const { isDefaultLocale, areLocalesEqual } = i18n(config);
 
@@ -29,9 +29,7 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
   }
 
   function pageRecordTypes(): PageRecordType<T>[] {
-    return pageDefinitionList().map(
-      (d) => d.type,
-    );
+    return pageDefinitionList().map((d) => d.type);
   }
 
   function resolveRecordUrl(
@@ -71,7 +69,10 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
       .join('/')}`;
   }
 
-  async function pageRecordForUrl(context: AstroContext<'locals' | 'cookies'>, url: string) {
+  async function pageRecordForUrl(
+    context: AstroContext<'locals' | 'cookies'>,
+    url: string,
+  ) {
     const { locales, defaultLocale } = i18n(config);
 
     const regexLocaleUnion = locales
@@ -105,10 +106,13 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
     }
 
     const pageDefinition: PageDefinition<T> | null =
-      pageDefinitionList().find((def) => pathPrefix === def.paths[locale]) ?? null;
+      pageDefinitionList().find((def) => pathPrefix === def.paths[locale]) ??
+      null;
 
     return {
-      page: pageDefinition ? await pageDefinition.load(slug, locale, context) : null,
+      page: pageDefinition
+        ? await pageDefinition.load(slug, locale, context)
+        : null,
       pageDefinition,
       locale,
       pathPrefix,
@@ -137,7 +141,7 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
 
       return pageRecords.flatMap((record) =>
         (record._allTranslatedSlugLocales ?? [])
-          .map(({locale}) => {
+          .map(({ locale }) => {
             if (!locale) {
               return null;
             }
@@ -145,10 +149,10 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
             const url = resolveRecordUrl(record, locale);
             return url
               ? {
-                url,
-                locale,
-                record,
-              }
+                  url,
+                  locale,
+                  record,
+                }
               : null;
           })
           .filter(<T>(item: T | null): item is T => !!item),
@@ -156,19 +160,25 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
     }
   }
 
-  function getParentSlugs(rec: RecordWithParent<T>, locale: T['SiteLocale']): string[] {
+  function getParentSlugs(
+    rec: RecordWithParent<T>,
+    locale: T['SiteLocale'],
+  ): string[] {
     if (!rec.parent) {
       return [];
     }
 
     const parentSlug = slugFromRecord(rec.parent, locale);
 
-    return parentSlug ? [parentSlug, ...getParentSlugs(rec.parent, locale)] : [];
+    return parentSlug
+      ? [...getParentSlugs(rec.parent, locale), parentSlug]
+      : [];
   }
 
   function slugFromRecord(rec: RecordWithParent<T>, locale: T['SiteLocale']) {
-    return rec._allTranslatedSlugLocales?.find((tl) => tl.locale && areLocalesEqual(tl.locale, locale))
-      ?.value;
+    return rec._allTranslatedSlugLocales?.find(
+      (tl) => tl.locale && areLocalesEqual(tl.locale, locale),
+    )?.value;
   }
 
   return {
@@ -177,5 +187,6 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
     getAllRoutes,
     pageDefinitionList,
     pageRecordTypes,
-  }
+    slugify,
+  };
 }
