@@ -1,3 +1,9 @@
+### [1.0.9](https://github.com/gridonic/dastro/compare/v1.0.8...v1.0.9)
+
+- Add utils, for now a slugify helper
+- Init testing using vitest
+- Allow to pass any attribute to RecordLink
+
 ### [1.0.8](https://github.com/gridonic/dastro/compare/v1.0.7...v1.0.8)
 
 - allow to add all rest parameters to a in record link
