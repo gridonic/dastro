@@ -13,6 +13,7 @@ export function buildTestPageRecord(
   opts: {
     localeCount?: 1 | 2 | 3;
     locale?: DastroTypes['SiteLocale'];
+    type?: string;
     overrides?: Partial<Page<DastroTypes> & TestPageRecord>;
   } = {},
 ): Page<DastroTypes> & TestPageRecord {
@@ -20,12 +21,13 @@ export function buildTestPageRecord(
     localeCount = 2,
     locale = defaultTestLocale,
     overrides = {},
+    type = 'PageRecord',
   } = opts ?? {};
 
   const defaultRecordData: Page<DastroTypes> & TestPageRecord = {
     id: `${name}-id`,
     seo: null,
-    __typename: 'PageRecord',
+    __typename: type,
     title: `Title: ${name}`,
     _allTranslatedSlugLocales: [
       {

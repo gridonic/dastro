@@ -3,7 +3,10 @@ import type { DastroConfig, DastroTypes } from './lib-types.ts';
 export function i18n<T extends DastroTypes>(config: DastroConfig<T>) {
   const { defaultLocale, locales, messages } = config.i18n;
 
-  function normalizedIsoLocale(locale: T['SiteLocale'], keepVariant = false): string | null {
+  function normalizedIsoLocale(
+    locale: T['SiteLocale'],
+    keepVariant = false,
+  ): string | null {
     if (!locale) {
       return null;
     }
@@ -12,14 +15,16 @@ export function i18n<T extends DastroTypes>(config: DastroConfig<T>) {
   }
 
   function normalizedSiteLocale(
-    locale: string | T['SiteLocale']
+    locale: string | T['SiteLocale'],
   ): T['SiteLocale'] | null {
     return (locale?.replace(/-/g, '_') as T['SiteLocale']) ?? null;
   }
 
   function areLocalesEqual(a: T['SiteLocale'], b: T['SiteLocale']): boolean {
     return (
-      normalizedIsoLocale(a, true)?.localeCompare(normalizedIsoLocale(b, true) ?? '') === 0
+      normalizedIsoLocale(a, true)?.localeCompare(
+        normalizedIsoLocale(b, true) ?? '',
+      ) === 0
     );
   }
 
@@ -35,5 +40,6 @@ export function i18n<T extends DastroTypes>(config: DastroConfig<T>) {
     defaultLocale,
     locales,
     messages,
+    routingStrategy: config.i18n.routingStrategy,
   };
 }

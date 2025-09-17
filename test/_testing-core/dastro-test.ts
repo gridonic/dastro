@@ -5,11 +5,15 @@ import {
   type ContainerRenderOptions,
   experimental_AstroContainer as AstroContainer,
 } from 'astro/container';
+import type { DeepPartial } from '../../src/util/type.util.ts';
 
-export const defaultTestLocale = 'de';
+export const defaultTestLocale: DastroTypes['SiteLocale'] = 'de';
 
 export function dastroTest(
-  opts: { config?: Partial<DastroConfig<DastroTypes>>; locale?: string } = {},
+  opts: {
+    config?: DeepPartial<DastroConfig<DastroTypes>>;
+    locale?: string;
+  } = {},
 ) {
   const { locale = defaultTestLocale, config } = opts ?? {};
 
@@ -32,6 +36,7 @@ export function dastroTest(
     i18n: {
       locales: ['de', 'en'],
       defaultLocale: defaultTestLocale,
+      routingStrategy: 'prefix-except-default',
       messages: {
         de: { locales: {} },
         en: { locales: {} },
@@ -57,13 +62,34 @@ export function dastroTest(
           return null;
         },
       },
+      ArticleRecord: {
+        type: 'ArticleRecord',
+        apiKey: 'article',
+        allRecordsQuery: undefined as any, // TODO
+        paths: {
+          de: 'themen',
+          fr: 'sujets',
+          en: 'topics',
+        },
+        component: 'ArticlePage' as any,
+        async load(
+          _: string | undefined,
+          _locale: any,
+          _context: AstroContext<'locals' | 'cookies'>,
+        ) {
+          // TODO: return some page test data here
+          return null;
+        },
+      },
     },
     moduleComponents: {},
   };
 
   const dastroConfig = merge(defaultConfig, config || {});
 
-  const dastroContext = buildDastroContext(dastroConfig);
+  const dastroContext = buildDastroContext(
+    dastroConfig as DastroConfig<DastroTypes>,
+  );
 
   const astroContext: AstroContext<'locals' | 'cookies' | 'response'> = {
     response: {} as any, // TODO: need a mock or something
@@ -86,7 +112,7 @@ export function dastroTest(
 export async function dastroContainerTest(
   opts: { config?: Partial<DastroConfig<DastroTypes>>; locale?: string } = {},
 ) {
-  const baseTest = dastroTest();
+  const baseTest = dastroTest(opts);
   const container = await AstroContainer.create();
 
   async function renderToString(

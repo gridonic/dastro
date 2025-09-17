@@ -1,13 +1,14 @@
-
 import type { TypedDocumentNode } from '@graphql-typed-document-node/core';
-import type {DastroConfig, DastroTypes} from "./lib-types.ts";
-import type {AstroContext} from "../astro.context.ts";
+import type { DastroConfig, DastroTypes } from './lib-types.ts';
+import type { AstroContext } from '../astro.context.ts';
 import { datocms } from '../datocms/datocms.ts';
-import type {AstroGlobal} from "astro";
-import {routing} from "./routing.ts";
-import {caching} from "./caching.ts";
+import type { AstroGlobal } from 'astro';
+import { routing } from './routing.ts';
+import { caching } from './caching.ts';
+import { i18n } from './i18n.ts';
 
-export type PageRecordType<T extends DastroTypes> = T['RecordLinkFragment']['__typename'];
+export type PageRecordType<T extends DastroTypes> =
+  T['RecordLinkFragment']['__typename'];
 
 export type RoutingPageRecord<T extends DastroTypes> = {
   __typename: PageRecordType<T>;
@@ -31,9 +32,7 @@ export type AllRecordsQueryType<T extends DastroTypes> = TypedDocumentNode<
   any
 >;
 
-export interface PageDefinition<
-  T extends DastroTypes
-> {
+export interface PageDefinition<T extends DastroTypes> {
   type: PageRecordType<T>;
   apiKey: string;
   allRecordsQuery: AllRecordsQueryType<T>;
@@ -113,9 +112,10 @@ export async function renderPage<T extends DastroTypes>(
   dastroConfig: DastroConfig<T>,
   initGlobalDataStore: (
     locale: T['SiteLocale'],
-    context: AstroContext<'locals' | 'cookies'>,
+    context: AstroContext<'locals' | 'cookies' | 'redirect' | 'request'>,
   ) => Promise<any>,
 ) {
+  const { routingStrategy, locales, defaultLocale } = i18n(dastroConfig);
   const { resolveRecordUrl, pageRecordForUrl } = routing(dastroConfig);
   const { setCachingHeaders } = caching(dastroConfig);
 
@@ -136,6 +136,30 @@ export async function renderPage<T extends DastroTypes>(
   //   fullSlug,
   //   pathPrefix,
   // });
+
+  if (routingStrategy === 'prefix-always' && !locale) {
+    // if on the root page, redirect to the user's preferred locale
+    if (url === '/') {
+      const acceptLanguage =
+        context.request.headers.get('Accept-Language') ?? '';
+
+      const preferredLanguage = acceptLanguage
+        .split(',')
+        .map((lang) => lang.split(';')[0].trim().substring(0, 2).toLowerCase())
+        .find((lang) => locales.includes(lang as DastroTypes['SiteLocale']));
+
+      const redirectLocale = preferredLanguage ?? defaultLocale;
+
+      if (process.env.NODE_ENV === 'development') {
+        console.debug(redirectLocale);
+      }
+
+      return context.redirect(`/${redirectLocale}${url}`);
+    }
+
+    // All non-root pages need a locale
+    return context.rewrite('/404');
+  }
 
   // Make the page, locale and data store available for all components
   context.locals.locale = locale;

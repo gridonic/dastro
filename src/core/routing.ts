@@ -22,7 +22,7 @@ export interface RecordWithParent<T extends DastroTypes> {
 }
 
 export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
-  const { isDefaultLocale, areLocalesEqual } = i18n(config);
+  const { isDefaultLocale, areLocalesEqual, routingStrategy } = i18n(config);
 
   function pageDefinitionList(): PageDefinition<T>[] {
     return Object.values(config.pageDefinitions);
@@ -48,6 +48,10 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
 
     // Special case: Home
     if (record.__typename === 'PageRecord' && slug === 'home') {
+      if (routingStrategy === 'prefix-always') {
+        return `/${locale}`;
+      }
+
       if (!isDefaultLocale(locale)) {
         return `/${locale}`;
       }
@@ -57,7 +61,11 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
     // General Route definition
     const routeDefinition = config.pageDefinitions[record.__typename];
     const localeUrlPart =
-      !locale || isDefaultLocale(locale) ? undefined : locale;
+      routingStrategy === 'prefix-always'
+        ? locale
+        : !locale || isDefaultLocale(locale)
+          ? undefined
+          : locale;
 
     return `/${[
       localeUrlPart, // Locale
@@ -73,10 +81,10 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
     context: AstroContext<'locals' | 'cookies'>,
     url: string,
   ) {
-    const { locales, defaultLocale } = i18n(config);
+    const { locales, defaultLocale, routingStrategy } = i18n(config);
 
     const regexLocaleUnion = locales
-      .filter((l) => !isDefaultLocale(l))
+      .filter((l) => routingStrategy === 'prefix-always' || !isDefaultLocale(l))
       .join('|');
 
     const regexPathPrefixUnion = [
@@ -93,7 +101,10 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
 
     const match = url.match(urlRegex) ?? [];
 
-    const locale = (match[1] || defaultLocale) as T['SiteLocale'];
+    const locale = (
+      routingStrategy === 'prefix-always' ? match[1] : match[1] || defaultLocale
+    ) as T['SiteLocale'];
+
     let pathPrefix = match[2] ?? '';
     let fullSlug = match[3]?.replace(/\/$/, '');
     let slug = fullSlug?.split('/').pop();
