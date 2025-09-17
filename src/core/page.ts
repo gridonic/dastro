@@ -115,7 +115,8 @@ export async function renderPage<T extends DastroTypes>(
     context: AstroContext<'locals' | 'cookies' | 'redirect' | 'request'>,
   ) => Promise<any>,
 ) {
-  const { routingStrategy, locales, defaultLocale } = i18n(dastroConfig);
+  const { routingStrategy, locales, defaultLocale, normalizedIsoLocale } =
+    i18n(dastroConfig);
   const { resolveRecordUrl, pageRecordForUrl } = routing(dastroConfig);
   const { setCachingHeaders } = caching(dastroConfig);
 
@@ -146,12 +147,18 @@ export async function renderPage<T extends DastroTypes>(
       const preferredLanguage = acceptLanguage
         .split(',')
         .map((lang) => lang.split(';')[0].trim().substring(0, 2).toLowerCase())
-        .find((lang) => locales.includes(lang as DastroTypes['SiteLocale']));
+        .find((lang) =>
+          locales
+            .map((l) => normalizedIsoLocale(l))
+            ?.includes(lang as DastroTypes['SiteLocale']),
+        );
 
-      const redirectLocale = preferredLanguage ?? defaultLocale;
+      const redirectLocale = normalizedIsoLocale(
+        preferredLanguage ?? defaultLocale,
+      );
 
       if (process.env.NODE_ENV === 'development') {
-        console.debug(redirectLocale);
+        console.debug('redirectLocale: ', redirectLocale);
       }
 
       return context.redirect(`/${redirectLocale}${url}`);
