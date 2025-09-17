@@ -1,6 +1,10 @@
 import merge from 'deepmerge';
 import type { AstroContext, DastroConfig, DastroTypes } from '../../src';
 import { buildDastroContext } from '../../src';
+import {
+  type ContainerRenderOptions,
+  experimental_AstroContainer as AstroContainer,
+} from 'astro/container';
 
 export const defaultTestLocale = 'de';
 
@@ -76,5 +80,33 @@ export function dastroTest(
     astroContext,
     ...dastroContext,
     defaultTestLocale,
+  };
+}
+
+export async function dastroContainerTest(
+  opts: { config?: Partial<DastroConfig<DastroTypes>>; locale?: string } = {},
+) {
+  const baseTest = dastroTest();
+  const container = await AstroContainer.create();
+
+  async function renderToString(
+    component: Parameters<AstroContainer['renderToString']>[0],
+    options?: ContainerRenderOptions,
+  ) {
+    return container.renderToString(
+      component,
+      merge(
+        {
+          locals: baseTest.astroContext.locals,
+        } as ContainerRenderOptions,
+        options ?? {},
+      ),
+    );
+  }
+
+  return {
+    ...baseTest,
+    container,
+    renderToString,
   };
 }

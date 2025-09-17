@@ -1,20 +1,24 @@
 ---
-import { type DastroTypes } from "../../core/lib-types.ts";
-import type { ClassValue } from "../component.types.ts";
+import { type DastroTypes } from '../../core/lib-types.ts';
+import type { ClassValue } from '../component.types.ts';
 
-interface Props<T extends DastroTypes = DastroTypes> {
+export interface Props<T extends DastroTypes = DastroTypes> {
   // "record" is passed in when using inside StructuredText
-  record: T["RecordLinkFragment"];
+  record: T['RecordLinkFragment'];
+  id?: string;
   target?: string;
   linkTitle?: string;
   class?: ClassValue;
+
+  [key: string]: unknown;
 }
 
 const {
   record,
-  target = "_self",
+  id,
+  target = '_self',
   class: classNames,
-  linkTitle = "",
+  linkTitle = '',
   ...rest
 } = Astro.props;
 
@@ -24,6 +28,7 @@ const { resolveRecordUrl } = Astro.locals.dastro.routing();
 {
   record?.__typename && (
     <a
+      id={id}
       class="link"
       class:list={classNames}
       data-astro-prefetch
@@ -32,7 +37,7 @@ const { resolveRecordUrl } = Astro.locals.dastro.routing();
       title={linkTitle}
       {...rest}
     >
-      <slot>{record.title || "Untitled"}</slot>
+      <slot>{record.title || 'Untitled'}</slot>
     </a>
   )
 }
