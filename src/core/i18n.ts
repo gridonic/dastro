@@ -28,6 +28,15 @@ export function i18n<T extends DastroTypes>(config: DastroConfig<T>) {
     );
   }
 
+  function findLocaleWithVariant(locale: string): string | undefined {
+    const exactMatch = locales.find((l) => l === locale);
+    if (exactMatch) {
+      return exactMatch;
+    }
+
+    return locales.find((l) => l.startsWith(locale));
+  }
+
   function isDefaultLocale(locale: T['SiteLocale']): boolean {
     return areLocalesEqual(locale, defaultLocale);
   }
@@ -37,6 +46,7 @@ export function i18n<T extends DastroTypes>(config: DastroConfig<T>) {
     normalizedSiteLocale,
     areLocalesEqual,
     isDefaultLocale,
+    findLocaleWithVariant,
     defaultLocale,
     locales,
     messages,

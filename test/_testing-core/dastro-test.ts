@@ -34,11 +34,12 @@ export function dastroTest(
       signedCookieJwtSecret: 'jwt-cookie-secret',
     },
     i18n: {
-      locales: ['de', 'en'],
+      locales: ['de', 'fr_CH', 'en'],
       defaultLocale: defaultTestLocale,
       routingStrategy: 'prefix-except-default',
       messages: {
         de: { locales: {} },
+        fr_CH: { locales: {} },
         en: { locales: {} },
       },
     },
@@ -49,7 +50,7 @@ export function dastroTest(
         allRecordsQuery: undefined as any, // TODO
         paths: {
           de: '',
-          fr: '',
+          fr_CH: '',
           en: '',
         },
         component: 'DefaultPage' as any,
@@ -68,7 +69,7 @@ export function dastroTest(
         allRecordsQuery: undefined as any, // TODO
         paths: {
           de: 'themen',
-          fr: 'sujets',
+          fr_CH: 'sujets',
           en: 'topics',
         },
         component: 'ArticlePage' as any,

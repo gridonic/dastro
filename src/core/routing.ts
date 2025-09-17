@@ -22,7 +22,13 @@ export interface RecordWithParent<T extends DastroTypes> {
 }
 
 export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
-  const { isDefaultLocale, areLocalesEqual, routingStrategy } = i18n(config);
+  const {
+    isDefaultLocale,
+    areLocalesEqual,
+    normalizedIsoLocale,
+    findLocaleWithVariant,
+    routingStrategy,
+  } = i18n(config);
 
   function pageDefinitionList(): PageDefinition<T>[] {
     return Object.values(config.pageDefinitions);
@@ -46,14 +52,16 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
       return null;
     }
 
+    const normalizedLocale = normalizedIsoLocale(locale);
+
     // Special case: Home
     if (record.__typename === 'PageRecord' && slug === 'home') {
       if (routingStrategy === 'prefix-always') {
-        return `/${locale}`;
+        return `/${normalizedLocale}`;
       }
 
       if (!isDefaultLocale(locale)) {
-        return `/${locale}`;
+        return `/${normalizedLocale}`;
       }
       return '/';
     }
@@ -62,10 +70,10 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
     const routeDefinition = config.pageDefinitions[record.__typename];
     const localeUrlPart =
       routingStrategy === 'prefix-always'
-        ? locale
+        ? normalizedLocale
         : !locale || isDefaultLocale(locale)
           ? undefined
-          : locale;
+          : normalizedLocale;
 
     return `/${[
       localeUrlPart, // Locale
@@ -85,6 +93,7 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
 
     const regexLocaleUnion = locales
       .filter((l) => routingStrategy === 'prefix-always' || !isDefaultLocale(l))
+      .map((l) => normalizedIsoLocale(l))
       .join('|');
 
     const regexPathPrefixUnion = [
@@ -101,8 +110,10 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
 
     const match = url.match(urlRegex) ?? [];
 
-    const locale = (
-      routingStrategy === 'prefix-always' ? match[1] : match[1] || defaultLocale
+    const locale = findLocaleWithVariant(
+      routingStrategy === 'prefix-always'
+        ? match[1]
+        : match[1] || defaultLocale,
     ) as T['SiteLocale'];
 
     let pathPrefix = match[2] ?? '';

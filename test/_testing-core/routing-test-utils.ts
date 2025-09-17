@@ -11,14 +11,12 @@ export type TestPageRecord = RecordWithParent<DastroTypes> & {
 export function buildTestPageRecord(
   name: string,
   opts: {
-    localeCount?: 1 | 2 | 3;
     locale?: DastroTypes['SiteLocale'];
     type?: string;
     overrides?: Partial<Page<DastroTypes> & TestPageRecord>;
   } = {},
 ): Page<DastroTypes> & TestPageRecord {
   const {
-    localeCount = 2,
     locale = defaultTestLocale,
     overrides = {},
     type = 'PageRecord',
@@ -34,22 +32,14 @@ export function buildTestPageRecord(
         locale: 'de',
         value: `${name}-de`,
       },
-      ...(localeCount === 2
-        ? [
-          {
-            locale: 'en',
-            value: `${name}-en`,
-          },
-        ]
-        : []),
-      ...(localeCount === 3
-        ? [
-          {
-            locale: 'fr',
-            value: `${name}-fr`,
-          },
-        ]
-        : []),
+      {
+        locale: 'en',
+        value: `${name}-en`,
+      },
+      {
+        locale: 'fr_CH',
+        value: `${name}-fr_CH`,
+      },
     ],
     _seoMetaTags: [
       {
@@ -67,19 +57,15 @@ export function buildTestPageRecord(
       },
     ],
     parent: null,
-  }
+  };
 
-  return merge(
-    defaultRecordData,
-    overrides,
-    {
-      customMerge: (key) => {
-        if (key === '_allTranslatedSlugLocales') {
-          return (_, b) => b;
-        }
-      },
+  return merge(defaultRecordData, overrides, {
+    customMerge: (key) => {
+      if (key === '_allTranslatedSlugLocales') {
+        return (_, b) => b;
+      }
     },
-  );
+  });
 }
 
 export function buildHomeRecord() {
@@ -88,6 +74,7 @@ export function buildHomeRecord() {
     _allTranslatedSlugLocales: [
       { locale: 'de', value: 'home' },
       { locale: 'en', value: 'home' },
+      { locale: 'fr_CH', value: 'home' },
     ],
   };
 }

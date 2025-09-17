@@ -35,6 +35,12 @@ describe('resolveRecordUrl', () => {
 
       expect(resolveRecordUrl(homeRecord, 'en')).toBe('/en');
     });
+
+    test('should resolve home page with removed variants', () => {
+      const { resolveRecordUrl, homeRecord } = resolveRecordUrlTest();
+
+      expect(resolveRecordUrl(homeRecord, 'fr_CH')).toBe('/fr');
+    });
   });
 
   describe('Regular page records', () => {
@@ -51,6 +57,14 @@ describe('resolveRecordUrl', () => {
 
       expect(resolveRecordUrl(buildTestPageRecord('about'), 'en')).toBe(
         '/en/about-en',
+      );
+    });
+
+    test('should resolve other language url with prefix and removed variants', () => {
+      const { resolveRecordUrl } = resolveRecordUrlTest();
+
+      expect(resolveRecordUrl(buildTestPageRecord('about'), 'fr_CH')).toBe(
+        '/fr/about-fr_CH',
       );
     });
   });
@@ -86,7 +100,7 @@ describe('resolveRecordUrl', () => {
 
       const record = {
         ...buildTestPageRecord('test'),
-        _allTranslatedSlugLocales: [{ locale: 'fr', value: 'test-fr' }],
+        _allTranslatedSlugLocales: [{ locale: 'es', value: 'test-es' }],
       };
 
       expect(resolveRecordUrl(record, defaultTestLocale)).toBeNull();
@@ -159,6 +173,19 @@ describe('resolveRecordUrl', () => {
 
       expect(resolveRecordUrl(childRecord, 'en')).toBe(
         '/en/parent-en/child-en',
+      );
+    });
+
+    test('should resolve child record with parent for non-default locale and removed variants', () => {
+      const { resolveRecordUrl } = resolveRecordUrlTest();
+
+      const parentRecord = buildTestPageRecord('parent');
+      const childRecord = buildTestPageRecord('child', {
+        overrides: { parent: parentRecord },
+      });
+
+      expect(resolveRecordUrl(childRecord, 'fr_CH')).toBe(
+        '/fr/parent-fr_CH/child-fr_CH',
       );
     });
 
@@ -260,13 +287,13 @@ describe('resolveRecordUrl', () => {
         _allTranslatedSlugLocales: [
           { locale: 'de', value: 'test-de' },
           { locale: 'en', value: 'test-en' },
-          { locale: 'fr', value: null as any }, // French has null value
+          { locale: 'fr_CH', value: null as any }, // French has null value
         ],
       };
 
       expect(resolveRecordUrl(record, 'de')).toBe('/test-de');
       expect(resolveRecordUrl(record, 'en')).toBe('/en/test-en');
-      expect(resolveRecordUrl(record, 'fr')).toBeNull();
+      expect(resolveRecordUrl(record, 'fr_CH')).toBeNull();
     });
   });
 
@@ -287,6 +314,14 @@ describe('resolveRecordUrl', () => {
       expect(resolveRecordUrl(homeRecord, 'en')).toBe('/en');
     });
 
+    test('should resolve home page for non-default locale with removed variants', () => {
+      const { resolveRecordUrl, homeRecord } = resolveRecordUrlTest({
+        config: { i18n: { routingStrategy: 'prefix-always' } },
+      });
+
+      expect(resolveRecordUrl(homeRecord, 'fr_CH')).toBe('/fr');
+    });
+
     test('should resolve page record for default locale with empty path prefix', () => {
       const { resolveRecordUrl } = resolveRecordUrlTest({
         config: { i18n: { routingStrategy: 'prefix-always' } },
@@ -304,6 +339,16 @@ describe('resolveRecordUrl', () => {
 
       expect(resolveRecordUrl(buildTestPageRecord('about'), 'en')).toBe(
         '/en/about-en',
+      );
+    });
+
+    test('should resolve page record for non-default locale with removed variants', () => {
+      const { resolveRecordUrl } = resolveRecordUrlTest({
+        config: { i18n: { routingStrategy: 'prefix-always' } },
+      });
+
+      expect(resolveRecordUrl(buildTestPageRecord('about'), 'fr_CH')).toBe(
+        '/fr/about-fr_CH',
       );
     });
 
@@ -366,6 +411,18 @@ describe('pageRecordForUrl', () => {
       expect(result.pageDefinition?.type).toBe('PageRecord');
     });
 
+    test('should parse root URL for non-default locale with removed variants', async () => {
+      const { pageRecordForUrl, astroContext } = pageRecordForUrlTest();
+
+      const result = await pageRecordForUrl(astroContext, '/fr');
+
+      expect(result.locale).toBe('fr_CH');
+      expect(result.pathPrefix).toBe('');
+      expect(result.fullSlug).toBeUndefined();
+      expect(result.slug).toBeUndefined();
+      expect(result.pageDefinition?.type).toBe('PageRecord');
+    });
+
     test('should parse simple page URL for default locale', async () => {
       const { pageRecordForUrl, astroContext } = pageRecordForUrlTest();
 
@@ -387,6 +444,18 @@ describe('pageRecordForUrl', () => {
       expect(result.pathPrefix).toBe('');
       expect(result.fullSlug).toBe('about-en');
       expect(result.slug).toBe('about-en');
+      expect(result.pageDefinition?.type).toBe('PageRecord');
+    });
+
+    test('should parse simple page URL for non-default locale with removed variants', async () => {
+      const { pageRecordForUrl, astroContext } = pageRecordForUrlTest();
+
+      const result = await pageRecordForUrl(astroContext, '/fr/about-fr');
+
+      expect(result.locale).toBe('fr_CH');
+      expect(result.pathPrefix).toBe('');
+      expect(result.fullSlug).toBe('about-fr');
+      expect(result.slug).toBe('about-fr');
       expect(result.pageDefinition?.type).toBe('PageRecord');
     });
   });
@@ -569,9 +638,9 @@ describe('pageRecordForUrl', () => {
 
       const result = await pageRecordForUrl(astroContext, '/fr/about-fr');
 
-      expect(result.locale).toBe(defaultTestLocale);
+      expect(result.locale).toBe('fr_CH');
       expect(result.pathPrefix).toBe('');
-      expect(result.fullSlug).toBe('fr/about-fr');
+      expect(result.fullSlug).toBe('about-fr');
       expect(result.slug).toBe('about-fr');
     });
   });
@@ -644,6 +713,21 @@ describe('pageRecordForUrl', () => {
       expect(result.pathPrefix).toBe('');
       expect(result.fullSlug).toBe('about-de');
       expect(result.slug).toBe('about-de');
+    });
+
+    test('should parse page URL for non-default locale with removed variants', async () => {
+      const { pageRecordForUrl, astroContext } = pageRecordForUrlTest({
+        config: {
+          i18n: { defaultLocale: 'fr_CH', routingStrategy: 'prefix-always' },
+        },
+      });
+
+      const result = await pageRecordForUrl(astroContext, '/fr/about-fr');
+
+      expect(result.locale).toBe('fr_CH');
+      expect(result.pathPrefix).toBe('');
+      expect(result.fullSlug).toBe('about-fr');
+      expect(result.slug).toBe('about-fr');
     });
 
     test('should parse hierarchical URL with path prefix for default locale', async () => {
