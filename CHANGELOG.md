@@ -1,3 +1,10 @@
+### [1.1.0](https://github.com/gridonic/dastro/compare/v1.0.9...v1.1.0)
+
+- Add lodash and alpine js (alpine must still be activated in projects config)
+- For now, always use locales without their variants in urls (that means, only one language variant is allowed for now)
+- Update dependencies
+- **BREAKING:** You must add the `routingStrategy` variable to your dastro config. set it to 'prefix-except-default' to keep the same strategy as before
+
 ### [1.0.9](https://github.com/gridonic/dastro/compare/v1.0.8...v1.0.9)
 
 - Add utils, for now a slugify helper
