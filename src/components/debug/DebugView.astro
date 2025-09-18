@@ -1,7 +1,7 @@
 ---
 import pkg from '../../../package.json';
 
-const {environmentSwitch, draftMode, config} = Astro.locals.dastro;
+const { environmentSwitch, draftMode, config } = Astro.locals.dastro;
 
 const { isDraftModeEnabled } = draftMode();
 const {
@@ -38,11 +38,7 @@ const dastroVersion = pkg.version;
       data-shortcut="d"
     />
     <label class="label" for="debug-view-show-panel">
-      <svg
-        class="icon"
-        viewBox="0 0 16 16"
-        xmlns="http://www.w3.org/2000/svg"
-      >
+      <svg class="icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
         <g clip-path="url(#clip0_6080_3145)">
           <path
             d="M0.96875 8H15.0312"
@@ -65,22 +61,18 @@ const dastroVersion = pkg.version;
   </div>
   <div class="panel">
     <label class="toggle" for="debug-view-show-panel"
-    ><svg
-      class="icon"
-      viewBox="0 0 16 16"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M3.02815 3.02815L12.9718 12.9718"
-        stroke="white"
-        stroke-linecap="round"
-        stroke-linejoin="round"></path>
-      <path
-        d="M12.9718 3.02815L3.02816 12.9718"
-        stroke="white"
-        stroke-linecap="round"
-        stroke-linejoin="round"></path>
-    </svg>
+      ><svg class="icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M3.02815 3.02815L12.9718 12.9718"
+          stroke="white"
+          stroke-linecap="round"
+          stroke-linejoin="round"></path>
+        <path
+          d="M12.9718 3.02815L3.02816 12.9718"
+          stroke="white"
+          stroke-linecap="round"
+          stroke-linejoin="round"></path>
+      </svg>
     </label>
     <span class="environment">@ {env} environment</span>
     <pre
@@ -146,7 +138,7 @@ const dastroVersion = pkg.version;
           data-shortcut="h"
         />
         <label for="debug-view-show-content-height"
-        >Content Height <span data-contentheight-ratio></span></label
+          >Content Height <span data-contentheight-ratio></span></label
         >
       </div>
     </div>
@@ -159,7 +151,7 @@ const dastroVersion = pkg.version;
       <div class="enabled">ENABLED</div>
       <div class="disabled">disabled</div>
       <button type="button" class="ui-button -small toggle"
-      >Toggle Draft Mode</button
+        >Toggle Draft Mode</button
       >
     </div>
     {
@@ -182,7 +174,7 @@ const dastroVersion = pkg.version;
 </div>
 
 <script>
-  import { log } from "../../client";
+  import { log } from '../../client';
   import { registerComponent, BaseComponent } from '../../client';
 
   registerComponent(
@@ -201,18 +193,18 @@ const dastroVersion = pkg.version;
         this.bindDraftModeEvents();
         this.bindEnvironmentSwitchEvents();
 
-        log.debug('Using dastro version ')
+        log.debug('Using dastro version ');
 
         log.debug(
           'Debug View Keyboard Shortcuts\n' +
-          '-----------------------------\n' +
-          'Ctrl + D: Debug Panel\n' +
-          'Ctrl + V: Variables\n' +
-          'Ctrl + G: Grid\n' +
-          'Ctrl + M: Module Names\n' +
-          'Ctrl + O: Module Outlines\n' +
-          'Ctrl + B: Box Model\n' +
-          'Ctrl + H: Content Height\n',
+            '-----------------------------\n' +
+            'Ctrl + D: Debug Panel\n' +
+            'Ctrl + V: Variables\n' +
+            'Ctrl + G: Grid\n' +
+            'Ctrl + M: Module Names\n' +
+            'Ctrl + O: Module Outlines\n' +
+            'Ctrl + B: Box Model\n' +
+            'Ctrl + H: Content Height\n',
         );
 
         log.debug(`Dastro Version: ${this.$el.dataset.dastroVersion ?? '?'}`);
@@ -222,6 +214,10 @@ const dastroVersion = pkg.version;
 
         this.environment = this.$el.dataset.environment ?? '?';
         log.debug(`Environment: ${this.environment}`);
+
+        log.debug(
+          `Alpine: ${'Alpine' in globalThis ? Alpine.version : 'not activated'}`,
+        );
       }
 
       bindCheckboxEvents() {
@@ -538,17 +534,17 @@ const dastroVersion = pkg.version;
       position: absolute;
       inset: 0;
       background: linear-gradient(
-              to bottom,
-              #f37178 3rem,
-              transparent 3rem,
-              transparent calc(50% - 3rem),
-              #f37178 calc(50% - 3rem),
-              #f37178 50%,
-              #00e599 50%,
-              #00e599 calc(50% + 3rem),
-              transparent calc(50% + 3rem),
-              transparent calc(100% - 3rem),
-              #00e599 calc(100% - 3rem)
+        to bottom,
+        #f37178 3rem,
+        transparent 3rem,
+        transparent calc(50% - 3rem),
+        #f37178 calc(50% - 3rem),
+        #f37178 50%,
+        #00e599 50%,
+        #00e599 calc(50% + 3rem),
+        transparent calc(50% + 3rem),
+        transparent calc(100% - 3rem),
+        #00e599 calc(100% - 3rem)
       );
       background-size: 100% 200vh;
       background-repeat: repeat-y;
