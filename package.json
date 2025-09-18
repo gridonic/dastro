@@ -26,6 +26,7 @@
     "./routes/cms/preview-links.ts": "./src/routes/cms/preview-links.ts",
     "./middleware/html-streaming-prevention.middleware.ts": "./src/middleware/html-streaming-prevention.middleware.ts"
   },
+  "types": "./src/types.d.ts",
   "files": [
     "src",
     "scripts"
