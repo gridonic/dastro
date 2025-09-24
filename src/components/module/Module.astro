@@ -1,5 +1,5 @@
 ---
-import type {AstroComponent, Module} from "../component.types";
+import type { AstroComponent, Module } from '../component.types';
 
 interface Props {
   module: Module;
@@ -7,16 +7,18 @@ interface Props {
 }
 
 const { module, Component } = Astro.props;
+const key = module.__typename
+  .replace(/([a-z])([A-Z])/g, '$1-$2')
+  .slice(0, -7)
+  .toLowerCase();
 ---
 
 <section
   class="content-module"
+  id={module.id ? `module-${key}-${module.id}` : undefined}
   class:list={{
     module: true,
-    [`-${module.__typename
-      .replace(/([a-z])([A-Z])/g, '$1-$2')
-      .slice(0, -7)
-      .toLowerCase()}`]: true,
+    [`-${key}`]: true,
   }}
   data-module={module.__typename
     .replace(/([a-z])([A-Z])/g, '$1.$2')

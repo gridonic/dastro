@@ -1,5 +1,5 @@
 ---
-import type {Module} from "../component.types";
+import type { Module } from '../component.types';
 
 interface Props {
   module: Module;
@@ -9,16 +9,19 @@ const moduleComponents = Astro.locals.dastro.config.moduleComponents;
 const { module } = Astro.props;
 
 const Component = moduleComponents[module.__typename];
+
+const key = module.__typename
+  .replace(/([a-z])([A-Z])/g, '$1-$2')
+  .slice(0, -7)
+  .toLowerCase();
 ---
 
 <header
   class="header-module"
+  id={module.id ? `header-module-${module.id}` : undefined}
   class:list={{
     module: true,
-    [`-${module.__typename
-      .replace(/([a-z])([A-Z])/g, '$1-$2')
-      .slice(0, -7)
-      .toLowerCase()}`]: true,
+    [`-${key}`]: true,
   }}
   data-module={module.__typename
     .replace(/([a-z])([A-Z])/g, '$1.$2')
