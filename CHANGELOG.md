@@ -1,3 +1,9 @@
+### [1.1.1](https://github.com/gridonic/dastro/compare/v1.1.0...v1.1.1)
+
+- Allow to deactivate ssl in dev mode
+- Add .node-version
+- Add some chalk to cli
+
 ### [1.1.0](https://github.com/gridonic/dastro/compare/v1.0.9...v1.1.0)
 
 - Add lodash and alpine js (alpine must still be activated in projects config)
