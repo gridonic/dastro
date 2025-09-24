@@ -4,9 +4,9 @@ import netlify from '@astrojs/netlify';
 import node from '@astrojs/node';
 import { envField } from 'astro/config';
 import { graphqlIntegration } from 'dastro';
-import chalk from "chalk";
+import chalk from 'chalk';
 import type { ViteDevServer, Plugin } from 'vite';
-import {lstatSync} from "fs";
+import { lstatSync } from 'fs';
 
 interface Options {
   htmlStreamingEnabled?: boolean;
@@ -22,27 +22,34 @@ interface Options {
       sitemap?: boolean;
       robots?: boolean;
     };
-  }
+  };
 }
 
 export default function dastroIntegration(options?: Options): AstroIntegration {
   return {
     name: 'dastro',
-    hooks:{
-      'astro:config:setup': ({ injectRoute, updateConfig, addMiddleware, logger }) => {
-        logger.info(chalk.bgGreen(` Using dastro ${chalk.bold(`v${pgk.version}`)} `));
+    hooks: {
+      'astro:config:setup': ({
+        injectRoute,
+        updateConfig,
+        addMiddleware,
+        logger,
+      }) => {
+        logger.info(
+          chalk.bgGreen(` Using dastro ${chalk.bold(`v${pgk.version}`)} `),
+        );
 
-        const stats = lstatSync("node_modules/dastro");
+        const stats = lstatSync('node_modules/dastro');
         if (stats.isSymbolicLink()) {
           logger.info(
             chalk.yellow(
-              "⚠️ Warning: You are using a local development version of dastro (symlinked)"
-            )
+              '⚠️ Warning: You are using a local development version of dastro (symlinked)',
+            ),
           );
           logger.info(
             chalk.yellow(
-              "   Run 'dastro unlink' to switch back to the published version"
-            )
+              "   Run 'dastro unlink' to switch back to the published version",
+            ),
           );
         }
 
@@ -51,9 +58,7 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
 
           site: process.env.APP_BASE_URL,
 
-          integrations: [
-            graphqlIntegration(),
-          ],
+          integrations: [graphqlIntegration()],
 
           prefetch: true,
           experimental: {
@@ -116,20 +121,23 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
                 context: 'server',
                 default: false,
               }),
-            }
+            },
           },
 
           vite: {
             plugins: [watchDastroInNodeModulesVitePlugin()],
             server: {
-              https: {
-                cert:
-                  process.env.SSL_GRIDONIC_TEST_PEM_CERT_PATH ||
-                  process.env.LOCAL_DEVELOPMENT_PATH_CERT,
-                key:
-                  process.env.SSL_GRIDONIC_TEST_PEM_KEY_PATH ||
-                  process.env.LOCAL_DEVELOPMENT_PATH_CERT_KEY,
-              },
+              https:
+                process.env.LOCAL_DEVELOPMENT_SSL_DISABLED !== 'true'
+                  ? {
+                      cert:
+                        process.env.SSL_GRIDONIC_TEST_PEM_CERT_PATH ||
+                        process.env.LOCAL_DEVELOPMENT_PATH_CERT,
+                      key:
+                        process.env.SSL_GRIDONIC_TEST_PEM_KEY_PATH ||
+                        process.env.LOCAL_DEVELOPMENT_PATH_CERT_KEY,
+                    }
+                  : undefined,
               headers: {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Headers': '*',
@@ -151,59 +159,62 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
         if (!overwrite?.debugRoutes) {
           injectRoute({
             pattern: '/api/debug/routes',
-            entrypoint: 'dastro/routes/debug/routes.ts'
+            entrypoint: 'dastro/routes/debug/routes.ts',
           });
         }
 
         if (!overwrite?.draftModeEnable) {
           injectRoute({
             pattern: '/api/cms/draft-mode/enable',
-            entrypoint: 'dastro/routes/cms/draft-mode/enable.ts'
+            entrypoint: 'dastro/routes/cms/draft-mode/enable.ts',
           });
         }
 
         if (!overwrite?.draftModeDisable) {
           injectRoute({
             pattern: '/api/cms/draft-mode/disable',
-            entrypoint: 'dastro/routes/cms/draft-mode/disable.ts'
+            entrypoint: 'dastro/routes/cms/draft-mode/disable.ts',
           });
         }
 
         if (!overwrite?.environmentSwitch) {
           injectRoute({
             pattern: '/api/cms/environment/switch',
-            entrypoint: 'dastro/routes/cms/environment/switch.ts'
+            entrypoint: 'dastro/routes/cms/environment/switch.ts',
           });
         }
 
         if (!overwrite?.previewLinks) {
           injectRoute({
             pattern: '/api/cms/preview-links',
-            entrypoint: 'dastro/routes/cms/preview-links.ts'
+            entrypoint: 'dastro/routes/cms/preview-links.ts',
           });
         }
 
         if (!overwrite?.sitemap) {
           injectRoute({
             pattern: '/sitemap.xml',
-            entrypoint: 'dastro/routes/sitemap.xml.ts'
+            entrypoint: 'dastro/routes/sitemap.xml.ts',
           });
         }
 
         if (!overwrite?.robots) {
           injectRoute({
             pattern: '/robots.txt',
-            entrypoint: 'dastro/routes/robots.txt.ts'
+            entrypoint: 'dastro/routes/robots.txt.ts',
           });
         }
 
         const htmlStreamingEnabled = options?.htmlStreamingEnabled ?? false;
         if (!htmlStreamingEnabled) {
-          logger.info(`Html Streaming is disabled by using a custom middleware. Use ${chalk.italic('htmlStreamingEnabled')} to enable it.`);
+          logger.info(
+            `Html Streaming is disabled by using a custom middleware. Use ${chalk.italic('htmlStreamingEnabled')} to enable it.`,
+          );
 
           addMiddleware({
-            entrypoint: 'dastro/middleware/html-streaming-prevention.middleware.ts',
-            order: 'post'
+            entrypoint:
+              'dastro/middleware/html-streaming-prevention.middleware.ts',
+            order: 'post',
           });
         }
       },
@@ -227,8 +238,8 @@ export function dastroAdapterConfig(): AstroUserConfig['adapter'] {
   return adapterToUse === 'netlify'
     ? netlify()
     : node({
-      mode: 'standalone',
-    });
+        mode: 'standalone',
+      });
 }
 
 function watchDastroInNodeModulesVitePlugin(): Plugin {
@@ -239,8 +250,9 @@ function watchDastroInNodeModulesVitePlugin(): Plugin {
       server.watcher.options = {
         ...server.watcher.options,
         ignored: [
-          ...(server.watcher.options.ignored as string[])
-            .filter(pattern => pattern !== '**/node_modules/**'),
+          ...(server.watcher.options.ignored as string[]).filter(
+            (pattern) => pattern !== '**/node_modules/**',
+          ),
           /node_modules\/(?!dastro).*/,
         ],
       };
