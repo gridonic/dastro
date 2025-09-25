@@ -1,0 +1,227 @@
+---
+description: Creates page types defined in Datocms
+globs:
+alwaysApply: false
+---
+
+# 📄 Rule: Create Page Type from DatoCMS
+
+This rule automates the process of adding new page types to the codebase when they are created in DatoCMS.
+
+Ask the user:
+
+1. What are the names of the page types you want to add?
+2. What are the localized path segments for each page type? (e.g., 'news' for NewsRecord, 'themen/sujets' for ArticleRecord)
+
+Now, for each page type, do the following steps. Perform all steps for one page type before proceeding to the next.
+
+## Preparation
+
+Update the type file by running the command `npm run dato:generate-types`
+
+## Step 1: Create GraphQL Queries
+
+### 1.1 Create Get[PageType]BySlug Query
+
+Create a new file in `src/datocms/data/requests/Get[PageType]BySlug.gql` with this pattern:
+
+```graphql
+query Get[PageType]BySlug($slug: String, $locale: SiteLocale) {
+  [lowercasePageType](locale: $locale, filter: { translatedSlug: { eq: $slug } }) {
+    __typename
+    id
+    title
+    # Add headerModule if this page type supports header modules
+    headerModule {
+      ... on RecordInterface {
+        id
+      }
+      __typename
+      ...HeaderHero
+      ...HeaderText
+      ...HeaderTextMedia
+    }
+    # Add contentModules if this page type supports content modules
+    contentModules {
+      ... on RecordInterface {
+        id
+      }
+      __typename
+      ...ContentAccordion
+      ...ContentFaq
+      ...ContentMediaAsset
+      ...ContentPlaceholder
+      ...ContentText
+      ...ContentInfoBox
+      ...ContentVideoPlayer
+      ...ContentList
+      ...ContentTable
+      ...ContentDownload
+    }
+    # Add any custom fields specific to this page type
+    # (check the generated types for available fields)
+    _seoMetaTags {
+      attributes
+      content
+      tag
+    }
+    ...[PageType]Link
+  }
+}
+```
+
+Replace:
+- `[PageType]` with the actual page type name (e.g., `News`, `EmploymentLifecycle`)
+- `[lowercasePageType]` with the lowercase/camelCase version (e.g., `news`, `employmentLifecycle`)
+
+### 1.2 Update PageRouting.gql
+
+Add the following to `src/datocms/data/requests/PageRouting.gql`:
+
+**In the queries section (after existing GetAll queries):**
+```graphql
+query GetAll[PageType]s($first: IntType, $offset: IntType) {
+  meta: _all[PageType]sMeta {
+    count
+  }
+  records: all[PageType]s(first: $first, skip: $offset) {
+    ...[PageType]Link
+    _updatedAt
+    seo {
+      noIndex
+    }
+  }
+}
+```
+
+**In the page links section (after existing fragments):**
+```graphql
+fragment [PageType]Link on [PageType]Record {
+  __typename
+  id
+  title
+  _allTranslatedSlugLocales {
+    locale
+    value
+  }
+}
+```
+
+**In the RecordLink fragment (add to the existing fragment):**
+```graphql
+...[PageType]Link
+```
+
+Replace `[PageType]` with the actual page type name.
+
+## Step 2: Create a new Page Component
+
+Create a new file in `src/components/page/[PageType]Page.astro`:
+
+```astro
+---
+import LayoutDefault from '@/layouts/LayoutDefault.astro';
+import { Modules, HeaderModule } from 'dastro/components';
+import type { Get[PageType]BySlugQuery, SiteLocale } from '@generated/datocms.types';
+
+interface Props {
+  page: NonNullable<Get[PageType]BySlugQuery['[lowercasePageType]']>;
+  locale: SiteLocale;
+}
+
+const { page, locale } = Astro.props;
+---
+
+<LayoutDefault page={page} locale={locale}>
+  {page.headerModule && <HeaderModule module={page.headerModule} />}
+  <Modules modules={page.contentModules} />
+</LayoutDefault>
+```
+
+Replace:
+- `[PageType]` with the actual page type name
+- `[lowercasePageType]` with the lowercase/camelCase version
+
+**Note:** If this page type has custom fields or special layout requirements, customize the component accordingly. Refer to `ArticlePage.astro` for an example of a more complex page component.
+
+## Step 3: Update Pages Configuration
+
+### 3.1 Add import statements
+
+In `src/config/pages.config.ts`, add the import for the new query documents and page component:
+
+```typescript
+import {
+  Get[PageType]BySlugDocument,
+  GetAll[PageType]sDocument,
+} from '@generated/datocms.types';
+import [PageType]Page from '@/components/page/[PageType]Page.astro';
+```
+
+**Note:** If using an existing component, import that instead.
+
+### 3.2 Add page definition
+
+Add a new entry to the `pageDefinitions` object in `src/config/pages.config.ts`.
+Make sure to use the locales that are supported by the project as defined by the SiteLocale enum in the generated types.
+
+```typescript
+[PageType]Record: {
+  type: '[PageType]Record',
+  apiKey: '[apiKey]',
+  allRecordsQuery: GetAll[PageType]sDocument,
+  paths: {
+    de_CH: '[germanPath]',
+    fr_CH: '[frenchPath]',
+  },
+  component: [PageType]Page, // or existing component if reusing
+  async load(
+    slug: string | undefined,
+    locale: SiteLocale,
+    context: AstroContext<'locals' | 'cookies'>,
+  ) {
+    const { datoFetch } = context.locals.dastro.datocms();
+
+    const data = await datoFetch(context, Get[PageType]BySlugDocument, {
+      slug,
+      locale,
+    });
+
+    return data.[lowercasePageType] ?? null;
+  },
+},
+```
+
+Replace:
+- `[PageType]` with the actual page type name
+- `[apiKey]` with the API key for this page type (usually camelCase version)
+- `[germanPath]` and `[frenchPath]` with the localized path segments
+- `[lowercasePageType]` with the lowercase/camelCase version
+
+## Step 4: Generate Types and Validate
+
+### 4.1 Update type file
+Run the command `npm run dato:generate-types`
+
+### 4.2 Validate implementation
+- Check that all imports are correctly resolved
+- Verify that the GraphQL queries are valid
+- Ensure the page component renders correctly
+- Test that routing works for both locales
+
+## Notes
+
+- **API Key Naming:** The `apiKey` is typically the camelCase version of the page type (e.g., `news`, `employmentLifecycle`)
+- **Query Naming:** DatoCMS auto-generates queries based on the model name. Check the generated types to confirm the exact field names
+- **Custom Fields:** If the page type has custom fields beyond the standard `title`, `headerModule`, and `contentModules`, add them to the GraphQL query and handle them in the component
+- **Path Segments:** Ensure path segments don't conflict with existing routes. Use descriptive, SEO-friendly paths
+
+## Example
+
+For a page type called "EventRecord":
+
+1. Create `GetEventBySlug.gql`
+2. Add `GetAllEvents` query and `EventLink` fragment to `PageRouting.gql`
+3. Create `EventPage.astro` (if needed)
+4. Add EventRecord definition to `pages.config.ts` with paths like `{ de_CH: 'veranstaltungen', fr_CH: 'evenements' }`
+5. Run `npm run dato:generate-types`

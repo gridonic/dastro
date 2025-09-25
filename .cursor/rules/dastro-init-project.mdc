@@ -1,0 +1,116 @@
+---
+description: Starting from a copied boilerplate project, removes unnecessary prototype code
+globs:
+alwaysApply: false
+---
+
+# 📄 Rule: Init project by removing prototype code
+
+This rule automates the process of cleaning up a fresh copy of the boilerpate.
+
+# Step 1: Remove Customer Onboarding
+
+Remove the customer onboarding feature from the boilerplate project. This involves:
+
+## Files to delete:
+
+- `src/layouts/CustomerOnboarding.astro` - The main customer onboarding component
+
+## Environment configuration changes:
+
+- Remove `DEVELOPMENT_CUSTOMER_ONBOARDING_ENABLED` from `.env.example` and from `.env`
+- Remove the environment variable definition from `astro.config.ts` (look for `DEVELOPMENT_CUSTOMER_ONBOARDING_ENABLED` in the env schema)
+
+## Global data store updates:
+
+- Remove `CustomerOnboardingFragment` import from `src/config/globalDataStore.ts`
+- Remove `customerOnboarding` property from `AppGlobalDataStore` type
+- Remove `customerOnboarding` from the destructuring in `initGlobalDataStore` function
+- Remove `customerOnboarding` from the returned object
+- Update the null check to exclude `customerOnboarding`
+
+## GraphQL query updates:
+
+- Remove `customerOnboarding` field from the query in `src/datocms/data/global/GetGlobalSettings.gql`
+- Remove the `CustomerOnboarding` fragment definition
+
+## Layout updates:
+
+- Remove `DEVELOPMENT_CUSTOMER_ONBOARDING_ENABLED` import from `src/layouts/LayoutDefault.astro`
+- Remove `CustomerOnboarding` component import
+- Remove the `customerOnboardingEnabled` variable
+- Remove the conditional rendering of `<CustomerOnboarding />` component
+
+## SCSS cleanup:
+
+- Remove `--z-customer-onboarding` CSS custom property from `src/sass/root/_z.scss`
+
+# Step 2: Remove Examples
+
+Remove boilerplate example content and demo functionality from the project. This involves:
+
+## Files to delete:
+
+- `src/components/examples` - Directory containing example components
+- `src/pages/examples.astro` - Examples page that demonstrates all the example components
+
+# Step 3: Remove all modules except HeaderText, ContentMediaAsset, and ContentText
+
+Remove prototype content modules and header modules, keeping only the essential ones. This involves:
+
+## What to keep:
+
+- `HeaderText` - Basic header with text content
+- `ContentMediaAsset` - Media asset display component
+- `ContentText` - Basic text content component
+
+## Process to follow:
+
+### 1. Remove component files:
+
+- Delete all files in `src/components/content-modules/` except `ContentMediaAsset.astro` and `ContentText.astro`
+- Delete all files in `src/components/header-modules/` except `HeaderText.astro`
+
+### 2. Remove corresponding GraphQL fragments:
+
+- Delete all `.gql` files in `src/datocms/data/modules/` that correspond to the deleted components
+- Keep only the GraphQL fragments for the components you're retaining
+
+### 3. Update module configuration:
+
+- Remove imports and exports for deleted modules from `src/config/modules.config.ts`
+- Keep only the entries for `HeaderText`, `ContentMediaAsset`, and `ContentText`
+
+### 4. Update GraphQL queries:
+
+- Remove fragment references for deleted modules from `src/datocms/data/pages/GetPageBySlug.gql`
+- Remove fragment references for deleted modules from `src/datocms/data/pages/GetArticleBySlug.gql`
+- Keep only the fragment references for the retained components
+
+# Step 4: Remove meta navigation code
+
+Remove the meta navigation feature from the site header. This involves:
+
+## Files to delete:
+
+- `src/components/site/MetaNavigation.astro` - The meta navigation component
+
+## Component updates:
+
+### MainNavigation.astro:
+
+- Remove `isMetaNavigation` from the destructuring of `Astro.locals.globalStore.navigation`
+- Remove the conditional rendering logic for meta navigation (the second nav block)
+- Remove the `isMetaNavigation` condition from the default navigation rendering
+
+### SiteHeader.astro:
+
+- Remove `MetaNavigation` component import
+- Remove `isMetaNavigation` from the destructuring of `Astro.locals.globalStore.navigation`
+- Remove the conditional rendering of `<MetaNavigation />` component
+- Remove the `-has-meta-navigation` class from the header element
+- Remove all CSS styles related to meta navigation (`.metanavigation`, `.-has-meta-navigation` selectors)
+
+## GraphQL updates:
+
+- Remove `isMetaNavigation` field from the `Navigation` fragment in `src/datocms/data/global/Navigation.gql`

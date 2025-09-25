@@ -1,6 +1,13 @@
 #!/usr/bin/env node
 
-import { readFileSync, lstatSync } from 'fs';
+import {
+  readFileSync,
+  lstatSync,
+  existsSync,
+  mkdirSync,
+  copyFileSync,
+  readdirSync,
+} from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { execSync } from 'child_process';
@@ -32,6 +39,9 @@ async function runCommand() {
       console.log(
         `\n✅ Upgraded to latest version: ${getLatestRemoteVersionTag()}`,
       );
+
+      // Copy cursor rules from the installed dastro package
+      copyCursorRules();
       break;
     case 'radar':
       const radarUrl = 'https://boilerplate-radar.gridonic.io';
@@ -110,6 +120,64 @@ runCommand()
   .finally(() => {
     process.exit(0);
   });
+
+function copyCursorRules() {
+  try {
+    console.log('\n📋 Copying cursor rules from dastro package...');
+
+    // Path to the installed dastro package's cursor rules
+    const dastroPackagePath = join(process.cwd(), 'node_modules', 'dastro');
+    const sourceRulesPath = join(dastroPackagePath, '.cursor', 'rules');
+
+    // Path to the current project's cursor rules
+    const targetRulesPath = join(process.cwd(), '.cursor', 'rules');
+
+    // Check if the source rules directory exists
+    if (!existsSync(sourceRulesPath)) {
+      console.log('ℹ️  No cursor rules found in dastro package, skipping...');
+      return;
+    }
+
+    // Create target directory if it doesn't exist
+    if (!existsSync(targetRulesPath)) {
+      mkdirSync(targetRulesPath, { recursive: true });
+      console.log('📁 Created .cursor/rules directory');
+    }
+
+    // Read all files in the source rules directory
+    const ruleFiles = readdirSync(sourceRulesPath);
+
+    // Filter for files that start with 'dastro' and have .mdc extension
+    const dastroRuleFiles = ruleFiles.filter(
+      (file) => file.startsWith('dastro') && file.endsWith('.mdc'),
+    );
+
+    if (dastroRuleFiles.length === 0) {
+      console.log('ℹ️  No dastro cursor rules found, skipping...');
+      return;
+    }
+
+    // Copy each dastro rule file
+    let copiedCount = 0;
+    dastroRuleFiles.forEach((file) => {
+      const sourceFile = join(sourceRulesPath, file);
+      const targetFile = join(targetRulesPath, file);
+
+      copyFileSync(sourceFile, targetFile);
+      console.log(`📄 Copied: ${file}`);
+      copiedCount++;
+    });
+
+    console.log(
+      `\n✅ Successfully copied ${copiedCount} cursor rule(s) from dastro package`,
+    );
+  } catch (error) {
+    console.log(`\n⚠️  Warning: Could not copy cursor rules: ${error.message}`);
+    console.log(
+      '   You can manually copy them from node_modules/dastro/.cursor/rules/',
+    );
+  }
+}
 
 function getPackageVersion() {
   const packageJson = JSON.parse(

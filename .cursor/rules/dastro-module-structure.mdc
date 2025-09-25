@@ -1,0 +1,39 @@
+---
+description: Standards for the Header and Content Modules
+alwaysApply: false
+---
+
+- When a module starts with "Header", it is a header module
+- When a module starts with "Content", "Cta", "Teaser" or something like that, it is a content module
+- Graphql Fragments live inside the `src/datocms/data/modules` folder
+- Graphql Fragments are named like the module (no "Fragment" suffix). E.g., for `ContentText`, the fragments name is `ContentText`.
+- Graphql Types can be retrieved from `.astro/generated/datocms.types.ts`
+- Module components are registerted in `src/config/modules.config.ts`
+- Modules generally are added inside pages querys in `src/datocms/data/pagesGetPageBySlug.gql`. They may also be in other pages.
+
+# Core Graphql Fragments and their types
+
+- When a module fragment uses a LinkRecord, it should use the `src/datocms/data/core/Link.gql` fragment for it
+- Other links that are **not** using the LinkRecord often use the `RecordLink` fragment
+
+# Example for Header Module: Header Text
+
+- Name: HeaderText
+- Datocms Type, that is defined in @datocms.types.ts as HeaderTextRecord. It uses other types HeaderTextModelLeadField and LinkRecord
+- Graphql Fragment
+  - `src/datocms/data/modules/HeaderText.gql`
+  - Used in `src/datocms/data/pagesGetPageBySlug.gql` in headerModule
+- Component
+  - `src/components/header-modules/HeaderText.astro`
+  - Registered in `src/config/modules.config.ts`
+
+# Example for Content Module: Content Text
+
+- Name: ContentText
+- Datocms Type, that is defined in @datocms.types.ts as ContentTextRecord. It uses another type ContentTextModelContentField
+- Graphql Fragment
+  - @ContentText.gql
+  - Used in `src/datocms/data/pagesGetPageBySlug.gql` in contentModules
+- Component
+  - `src/components/content-modules/ContentText.astro`
+  - Registered in `src/config/modules.config.ts`

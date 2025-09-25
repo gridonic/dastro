@@ -1,0 +1,115 @@
+---
+description: Creates modules defined in Datocms
+globs : modules defined in Datocms
+alwaysApply: false
+---
+
+# 🧩 Rule: Create Module from DatoCMS
+
+Uses rule: @dastro-module-structure.mdc
+
+Ask the user:
+
+1. What are the names of the modules you want to add?
+
+Now, for each component, do the following steps. Peform all steps for one component before proceeding to the next.
+
+## Preparation
+
+Update the type file by running the command `npm run dato:generate-types`
+
+## Step 1: Create GraphQL Fragment
+
+### Create fragment
+
+Search for the main record type and associated grapqhl types in `.astro/generated/datocms.types.ts`.
+Create a fragment using the properties of the determined record type in here.
+
+Note: Often, when there are graphql errors with a "conflict" in them, you need to make an alias for the attribute the conflict applies to.
+Often, this happens with the attributes title or text.
+
+**Special Case for media assets**
+Ist the type of an attribute in a fragment of something like `FileField` and does it contain `image`, `asset` or `media` in its name?
+Then do the following:
+
+Ask the user to provide the dimensions of the asset.
+
+Then add the following in the fragment for that attribute
+
+```
+<assetName> {
+    responsiveImage(imgixParams: { w: <width>, h: <height>, fit: crop }) {
+      ...ResponsiveImage
+    }
+}
+```
+
+where <assetName> is the attribute name and <width> and <height> are taken from the image in figma.
+
+If the attribute name does not contain image, then it probably allows vidos too. in that case, add
+`...MediaAsset` before the `responsiveImage` part.
+
+### Register fragment
+
+Register the fragment in: `/src/datocms/data/pages/GetPageBySlug.gql` under the appropriate section.
+
+Update the type file by running the command `npm run dato:generate-types`
+
+Then proceed to Step 3.
+
+---
+
+## Step 3: Create Astro Component
+
+- Check if the component file exists.
+  - If **yes**, stop and inform the user.
+  - If **no**, create the component with this boilerplate:
+
+```
+---
+import type { ContentTextFragment } from '@generated/datocms.types';
+
+interface Props {
+  data: ContentTextFragment;
+}
+
+const { data } = Astro.props;
+---
+
+<div class="ui-grid content-text">
+  <pre style="max-width: 100vw; overflow: hidden">
+    {JSON.stringify(data, null, 2)}
+  </pre>
+</div>
+
+<style lang="scss">
+  .content-text {
+  }
+</style>
+```
+
+> 🔁 Replace all content-text instances with the actual component name.
+
+---
+
+## Step 4: 📦 Implement component
+
+- Do **not** implement any styles
+- Do not add any classes or data attributes
+- Markup should be simple and only on one level (except for collection items that must be iterated)
+- Generally, each value of the data record should be printed in a div
+- For attributes named title or headline, use a h2, h3 or h4
+
+The following types should be handled specially:
+
+- If there is an attribute of the record that contains a value of type like JsonField,
+  it is almost certainly a structured text, and therefore it should use a `<DefaultStructuredText data={data.textProperty} />`, where textProperty is the attribute. DefaultStructuredText should be imported from `dastro/components`
+- Links of type `LinkFragment` use the `<Link link={data.linkProperty} />`, where linkProperty is the attribute. Link should be imported from `@/components/link/Link.astro`
+- Links o type `RecordLinkFragment` use `<RecordLink record={data.linkProperty} />` , where linkProperty is the attribute. Link should be imported from `dastro/components`
+- Attributes that have responsiveImage and or the `MediaAsset` fragment on them use the `<MediaAsset data={data.assetProperty} aspectRatio={<w> / <h>}/>` component, where assetProperty is the attribute and <w> and <h> are the specified dimensions in the fragment. If we are in a Header module, `priority={true}` should also be specifed. MediaAsset should be imported from `dastro/components`
+
+---
+
+## Step 5: 📦 Register the Component
+
+Register the component in the module config file: `src/config/module.config.ts`
