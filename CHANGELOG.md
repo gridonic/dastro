@@ -1,3 +1,10 @@
+### [1.1.2](https://github.com/gridonic/dastro/compare/v1.1.1...v1.1.2)
+
+- dato fetch: allow to override excludeInvalid
+- update dependencies
+- now copies cursor rules defined in dastro to local project after upgrade
+- **CHORE** update fetching global navigation to not exclude invalid values
+
 ### [1.1.1](https://github.com/gridonic/dastro/compare/v1.1.0...v1.1.1)
 
 - Allow to deactivate ssl in dev mode
