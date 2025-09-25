@@ -1,16 +1,20 @@
 import type { TypedDocumentNode } from '@graphql-typed-document-node/core';
 import { executeQuery } from '@datocms/cda-client';
-import type {DastroConfig, DastroTypes} from "../core/lib-types.ts";
-import type {AstroContext} from "../astro.context.ts";
-import {draftMode} from "./draft-mode.ts";
-import {environmentSwitch} from "./environment-switch.ts";
+import type { DastroConfig, DastroTypes } from '../core/lib-types.ts';
+import type { AstroContext } from '../astro.context.ts';
+import { draftMode } from './draft-mode.ts';
+import { environmentSwitch } from './environment-switch.ts';
 
 export function datocms<T extends DastroTypes>(config: DastroConfig<T>) {
   async function datoFetch<TResult, TVariables>(
     context: AstroContext<'locals' | 'cookies'>,
     query: TypedDocumentNode<TResult, TVariables>,
     variables?: TVariables,
+    options: {
+      excludeInvalid?: boolean;
+    } = {},
   ) {
+    const { excludeInvalid = true } = options;
     // // TODO: temporary to watch /  debug query execution
     // console.debug('Query: ', {
     //   name: (
@@ -23,7 +27,7 @@ export function datocms<T extends DastroTypes>(config: DastroConfig<T>) {
 
     return executeQuery(query, {
       variables: variables,
-      excludeInvalid: true,
+      excludeInvalid,
       includeDrafts: isDraftModeEnabled(context),
       token: config.datocms.token as any,
       environment: getDatoEnvironment(context),
@@ -31,6 +35,6 @@ export function datocms<T extends DastroTypes>(config: DastroConfig<T>) {
   }
 
   return {
-    datoFetch
-  }
+    datoFetch,
+  };
 }
