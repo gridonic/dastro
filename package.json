@@ -36,13 +36,13 @@
   "license": "ISC",
   "description": "",
   "peerDependencies": {
-    "astro": "^5.13.8"
+    "astro": "^5.13.11"
   },
   "dependencies": {
     "@astrojs/alpinejs": "^0.4.9",
     "@astrojs/check": "^0.9.4",
-    "@astrojs/netlify": "^6.5.10",
-    "@astrojs/node": "^9.4.3",
+    "@astrojs/netlify": "^6.5.11",
+    "@astrojs/node": "^9.4.4",
     "@datocms/astro": "^0.6.2",
     "@datocms/cda-client": "^0.2.7",
     "@datocms/cma-client": "^5.0.1",
@@ -63,7 +63,7 @@
     "@types/lodash": "^4.17.20",
     "prettier": "^3.6.2",
     "prettier-plugin-astro": "^0.14.1",
-    "sass-embedded": "^1.92.1",
+    "sass-embedded": "^1.93.2",
     "vitest": "^3.2.4"
   }
 }
