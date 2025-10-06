@@ -201,7 +201,7 @@ async function createProject() {
 
     console.log('\n🚀 Next steps:');
     console.log(
-      '   🤖 Run the init-project.mdc rule to remove unnecessary prototype code',
+      '   🤖 Run the dastro-init-project.mdc rule to remove unnecessary prototype code',
     );
   } catch (error) {
     console.error('❌ Error creating project:', error.message);
