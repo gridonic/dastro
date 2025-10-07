@@ -28,7 +28,6 @@ export interface DastroConfig<T extends DastroTypes> {
   };
   datocms: {
     token: string;
-    cmaToken: string;
     environment: string;
     allowEnvironmentSwitch: boolean;
   };
