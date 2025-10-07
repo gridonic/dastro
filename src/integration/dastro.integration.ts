@@ -75,10 +75,9 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
                 context: 'server',
                 url: true,
               }),
-              ENVIRONMENT: envField.enum({
+              ENVIRONMENT: envField.string({
                 access: 'public',
                 context: 'client',
-                values: ['local', 'preview', 'production'],
               }),
               NODE_VERSION: envField.string({
                 access: 'public',
