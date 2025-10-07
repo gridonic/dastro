@@ -5,7 +5,10 @@ import {
   json,
 } from '../utils.ts';
 import { buildClient } from '@datocms/cma-client-node';
-import type { Environment } from '@datocms/cma-client/dist/types/generated/ApiTypes';
+import type {
+  Environment,
+  Site,
+} from '@datocms/cma-client/dist/types/generated/ApiTypes';
 
 export const GET: APIRoute = async (context) => {
   if (
@@ -20,11 +23,13 @@ export const GET: APIRoute = async (context) => {
   const { config } = context.locals.dastro;
 
   let datoCmsEnvironments: Environment[] = [];
+  let site: Site | null = null;
 
   try {
     const datocmsClient = buildClient({
       apiToken: config.datocms.token,
     });
+    site = await datocmsClient.site.find();
 
     datoCmsEnvironments = await datocmsClient.environments.list();
   } catch (error) {
@@ -52,6 +57,7 @@ export const GET: APIRoute = async (context) => {
       components: Object.keys(config.moduleComponents),
     },
     datocms: {
+      siteUrl: site?.domain,
       environments: datoCmsEnvironments.map((e) => ({
         id: e.id,
         primary: e.meta.primary,
