@@ -1,3 +1,7 @@
+### [1.1.5](https://github.com/gridonic/dastro/compare/v1.1.4...v1.1.5)
+
+- add datocms site url to system info
+
 ### [1.1.4](https://github.com/gridonic/dastro/compare/v1.1.3...v1.1.4)
 
 - add netlify backup function handler

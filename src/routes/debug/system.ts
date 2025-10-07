@@ -57,7 +57,7 @@ export const GET: APIRoute = async (context) => {
       components: Object.keys(config.moduleComponents),
     },
     datocms: {
-      siteUrl: site?.domain,
+      siteUrl: site?.domain ?? site?.internal_domain ?? null,
       environments: datoCmsEnvironments.map((e) => ({
         id: e.id,
         primary: e.meta.primary,
