@@ -15,6 +15,7 @@ interface Options {
     // Marked routes will not be injected, so we can define it in our project.
     overwrite?: {
       debugRoutes?: boolean;
+      debugSystem?: boolean;
       draftModeEnable?: boolean;
       draftModeDisable?: boolean;
       environmentSwitch?: boolean;
@@ -159,6 +160,13 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
           injectRoute({
             pattern: '/api/debug/routes',
             entrypoint: 'dastro/routes/debug/routes.ts',
+          });
+        }
+
+        if (!overwrite?.debugSystem) {
+          injectRoute({
+            pattern: '/api/debug/system',
+            entrypoint: 'dastro/routes/debug/system.ts',
           });
         }
 

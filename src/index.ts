@@ -14,6 +14,7 @@ import { datocms } from './datocms/datocms.ts';
 import { buildDastroContext } from './core/context.ts';
 import { renderPage } from './core/page.ts';
 import { i18n } from './core/i18n.ts';
+import { dailyBackupHandler } from './backup/daily-backup-handler.netlify.ts';
 export type { Route } from './core/routing.ts';
 export type {
   DastroTypes,
@@ -37,4 +38,5 @@ export {
   datocms,
   buildDastroContext,
   renderPage,
+  dailyBackupHandler,
 };
