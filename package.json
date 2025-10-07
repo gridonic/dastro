@@ -16,6 +16,7 @@
     ".": "./src/index.ts",
     "./client": "./src/client/index.ts",
     "./components": "./src/components/index.ts",
+    "./netlify": "./src/netlify/index.ts",
     "./util/route": "./src/util/route.util.ts",
     "./routes/sitemap.xml.ts": "./src/routes/sitemap.xml.ts",
     "./routes/robots.txt.ts": "./src/routes/robots.txt.ts",
