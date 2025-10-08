@@ -66,6 +66,11 @@ export interface TranslatedSlugLocale<T extends DastroTypes> {
   value: string;
 }
 
+export type InitGlobalDataStore<T extends DastroTypes, R = any> = (
+  locale: T['SiteLocale'],
+  context: AstroContext<'locals' | 'cookies' | 'redirect' | 'request'>,
+) => Promise<R>;
+
 export async function getPageRecordsFor<T extends DastroTypes>(
   config: DastroConfig<T>,
   query: AllRecordsQueryType<T>,
@@ -110,10 +115,7 @@ export async function getPageRecordsFor<T extends DastroTypes>(
 export async function renderPage<T extends DastroTypes>(
   context: AstroGlobal,
   dastroConfig: DastroConfig<T>,
-  initGlobalDataStore: (
-    locale: T['SiteLocale'],
-    context: AstroContext<'locals' | 'cookies' | 'redirect' | 'request'>,
-  ) => Promise<any>,
+  initGlobalDataStore: InitGlobalDataStore<T>,
 ) {
   const { routingStrategy, locales, defaultLocale, normalizedIsoLocale } =
     i18n(dastroConfig);
@@ -200,6 +202,45 @@ export async function renderPage<T extends DastroTypes>(
   return {
     Component: pageDefinition.component,
     page,
+    locale,
+  };
+}
+
+export async function render404Page<T extends DastroTypes, R>(
+  getRecordLink: (
+    globalStore: Awaited<ReturnType<InitGlobalDataStore<T, R>>>,
+  ) => {
+    __typename: T['RecordLinkFragment']['__typename'];
+    translatedSlug: string;
+  },
+  context: AstroGlobal,
+  dastroConfig: DastroConfig<T>,
+  initGlobalDataStore: InitGlobalDataStore<T, R>,
+) {
+  const { i18n } = dastroConfig;
+
+  // Note: Locale and globalStore should already be set, as usually we rewrite to 404.
+  //  -> if not, use defaultLocale and initialize globalStore
+  const locale = context.locals.locale ?? i18n.defaultLocale;
+  const globalStore =
+    context.locals.globalStore ?? (await initGlobalDataStore(locale, context));
+
+  const recordLink404 = getRecordLink(globalStore);
+
+  const pageDefinition = dastroConfig.pageDefinitions[recordLink404.__typename];
+  const page404 = await pageDefinition.load(
+    recordLink404.translatedSlug,
+    locale,
+    context,
+  );
+
+  context.locals.locale = locale;
+  context.locals.globalStore = globalStore;
+  context.locals.page = page404;
+
+  return {
+    Component: pageDefinition.component,
+    page: page404,
     locale,
   };
 }
