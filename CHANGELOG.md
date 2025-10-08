@@ -1,3 +1,7 @@
+### [1.1.6](https://github.com/gridonic/dastro/compare/v1.1.5...v1.1.6)
+
+- add 404 render function
+
 ### [1.1.5](https://github.com/gridonic/dastro/compare/v1.1.4...v1.1.5)
 
 - add datocms site url to system info
