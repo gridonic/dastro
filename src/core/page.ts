@@ -206,7 +206,7 @@ export async function renderPage<T extends DastroTypes>(
   };
 }
 
-export async function render404Page<T extends DastroTypes, R>(
+export async function renderErrorPage<T extends DastroTypes, R>(
   getRecordLink: (
     globalStore: Awaited<ReturnType<InitGlobalDataStore<T, R>>>,
   ) => {
@@ -219,28 +219,28 @@ export async function render404Page<T extends DastroTypes, R>(
 ) {
   const { i18n } = dastroConfig;
 
-  // Note: Locale and globalStore should already be set, as usually we rewrite to 404.
+  // Note: Locale and globalStore should already be set, as usually we rewrite to error pages.
   //  -> if not, use defaultLocale and initialize globalStore
   const locale = context.locals.locale ?? i18n.defaultLocale;
   const globalStore =
     context.locals.globalStore ?? (await initGlobalDataStore(locale, context));
 
-  const recordLink404 = getRecordLink(globalStore);
+  const recordLink = getRecordLink(globalStore);
 
-  const pageDefinition = dastroConfig.pageDefinitions[recordLink404.__typename];
-  const page404 = await pageDefinition.load(
-    recordLink404.translatedSlug,
+  const pageDefinition = dastroConfig.pageDefinitions[recordLink.__typename];
+  const page = await pageDefinition.load(
+    recordLink.translatedSlug,
     locale,
     context,
   );
 
   context.locals.locale = locale;
   context.locals.globalStore = globalStore;
-  context.locals.page = page404;
+  context.locals.page = page;
 
   return {
     Component: pageDefinition.component,
-    page: page404,
+    page,
     locale,
   };
 }

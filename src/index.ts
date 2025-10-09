@@ -12,7 +12,7 @@ import { draftMode } from './datocms/draft-mode.ts';
 import { environmentSwitch } from './datocms/environment-switch.ts';
 import { datocms } from './datocms/datocms.ts';
 import { buildDastroContext } from './core/context.ts';
-import { renderPage, render404Page } from './core/page.ts';
+import { renderPage, renderErrorPage } from './core/page.ts';
 import { i18n } from './core/i18n.ts';
 export type { Route } from './core/routing.ts';
 export type {
@@ -37,5 +37,5 @@ export {
   datocms,
   buildDastroContext,
   renderPage,
-  render404Page,
+  renderErrorPage,
 };
