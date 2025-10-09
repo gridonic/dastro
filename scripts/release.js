@@ -268,6 +268,17 @@ const runRelease = async () => {
       console.log('\n📋 Next steps to release:');
       console.log('   git push');
       console.log('   git push origin v' + newVersion);
+
+      // Copy git push commands to clipboard
+      const pushCommands = `git push && git push origin v${newVersion}`;
+      try {
+        execSync(`echo "${pushCommands}" | pbcopy`, { stdio: 'pipe' });
+        console.log(`\n📋 Copied to clipboard: ${pushCommands}`);
+      } catch (clipboardError) {
+        console.log(
+          `\n⚠️  Could not copy to clipboard. Manual command: ${pushCommands}`,
+        );
+      }
     }
   } catch (error) {
     console.error('❌ Error during release process:', error.message);
