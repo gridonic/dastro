@@ -1,3 +1,7 @@
+### [1.1.7](https://github.com/gridonic/dastro/compare/v1.1.6...v1.1.7)
+
+- rename render404Page to renderErrorPage
+
 ### [1.1.6](https://github.com/gridonic/dastro/compare/v1.1.5...v1.1.6)
 
 - add 404 render function
