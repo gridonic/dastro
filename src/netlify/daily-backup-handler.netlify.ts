@@ -29,6 +29,19 @@ export const dailyBackupHandler: Handler = async () => {
     apiToken: process.env.DATO_CMS_CMA_TOKEN as string,
   });
 
+  try {
+    const site = await client.site.find();
+    if (site) {
+      console.log(`Handling daily backup for site ${site.name}`, {
+        name: site.name,
+        domain: site.domain ?? site.internal_domain ?? 'unknown',
+        NETLIFY_BACKUP_KEEP_AT_LEAST_DAYS: keepAtLeastDays,
+      });
+    }
+  } catch (error) {
+    console.warn('Error loading site info', error);
+  }
+
   const environments = await client.environments.list();
 
   const mainEnvironment = environments.find(
@@ -73,16 +86,25 @@ export const dailyBackupHandler: Handler = async () => {
 
   console.log(`Creating backup for environment ${mainEnvironment!.id}`);
 
-  await client.environments.fork(
-    mainEnvironment!.id,
-    {
-      id: dailyBackupId,
-    },
-    {
-      fast: true,
-      force: true,
-    },
-  );
+  try {
+    await client.environments.fork(
+      mainEnvironment!.id,
+      {
+        id: dailyBackupId,
+      },
+      {
+        fast: true,
+        force: true,
+      },
+    );
+  } catch (error) {
+    console.warn('Error creating backup', error);
+
+    return {
+      statusCode: 500,
+      body: `Error creating backup`,
+    };
+  }
 
   console.log(`Backup created for environment ${mainEnvironment!.id}`);
 
