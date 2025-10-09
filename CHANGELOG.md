@@ -1,3 +1,7 @@
+### [1.1.8](https://github.com/gridonic/dastro/compare/v1.1.7...v1.1.8)
+
+- add more logging on backup
+
 ### [1.1.7](https://github.com/gridonic/dastro/compare/v1.1.6...v1.1.7)
 
 - rename render404Page to renderErrorPage
