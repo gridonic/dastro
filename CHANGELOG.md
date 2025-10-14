@@ -1,3 +1,7 @@
+### [1.1.9](https://github.com/gridonic/dastro/compare/v1.1.8...v1.1.9)
+
+- fix deleting old backups
+
 ### [1.1.8](https://github.com/gridonic/dastro/compare/v1.1.7...v1.1.8)
 
 - add more logging on backup
