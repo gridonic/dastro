@@ -62,7 +62,7 @@ export const dailyBackupHandler: Handler = async () => {
       return true;
     }
 
-    const backupDate = new Date(backup.id.split('-').slice(2).join('-'));
+    const backupDate = new Date(backup.id.split('-').slice(1).join('-'));
     return (
       backupDate < new Date(Date.now() - keepAtLeastDays * 24 * 60 * 60 * 1000)
     );
