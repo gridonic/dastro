@@ -1,3 +1,7 @@
+### [1.1.10](https://github.com/gridonic/dastro/compare/v1.1.9...v1.1.10)
+
+- Allow to customize caching options
+
 ### [1.1.9](https://github.com/gridonic/dastro/compare/v1.1.8...v1.1.9)
 
 - fix deleting old backups
