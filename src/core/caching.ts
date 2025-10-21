@@ -84,8 +84,6 @@ export function caching<T extends DastroTypes>(config: DastroConfig<T>) {
         vary,
       );
 
-      console.log(vary);
-
       context.response.headers.set(
         'Netlify-Vary',
         Object.keys(varyHeader)
