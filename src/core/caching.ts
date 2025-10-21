@@ -1,24 +1,33 @@
+import merge from 'deepmerge';
 import { type AstroContext, draftMode, environmentSwitch } from 'dastro';
-import type {DastroConfig, DastroTypes} from "./lib-types.ts";
+import type { DastroConfig, DastroTypes } from './lib-types.ts';
 
-// TODO: configurable options for swr, netlify vary, ...
-// TODO: add stale if error?
-const FRESH_IN_CDN = 5 * 60; // 5 minutes;
-const STALE_IN_CDN = 365 * 24 * 60 * 60; // 365 days;
-// const STALE_IF_ERROR = 7 * 24 * 60 * 60; // 7 days;
+export interface CachingOptions {
+  provider?: { type: 'nocache' } | ({ type: 'netlify' } & NetlifyCacheOptions);
+}
+
+export interface NetlifyCacheOptions {
+  vary?: Record<string, string[] | null>;
+  freshInCdn?: number;
+  staleInCdn?: number;
+}
 
 export function caching<T extends DastroTypes>(config: DastroConfig<T>) {
   function setCachingHeaders(
     context: AstroContext<'cookies' | 'response'>,
+    options: CachingOptions = {},
   ) {
-    const {isDraftModeEnabled, DRAFT_MODE_COOKIE_NAME} =
-      draftMode(config);
+    const { provider = { type: 'netlify' } } = options;
+
+    const { isDraftModeEnabled, DRAFT_MODE_COOKIE_NAME } = draftMode(config);
 
     const {
       usesDefaultDatoEnvironment,
       getDatoEnvironment,
       CUSTOM_DATO_ENVIRONMENT_COOKIE_NAME,
     } = environmentSwitch(config);
+
+    context.response.headers.set('X-Gridonic-Cache-Provider', provider.type);
 
     const draftModeEnabled = isDraftModeEnabled(context);
     context.response.headers.set(
@@ -33,10 +42,17 @@ export function caching<T extends DastroTypes>(config: DastroConfig<T>) {
     );
 
     // When using draft mode, or when targeting a custom environment, disable caching
-    if (draftModeEnabled || usesCustomDatoEnvironment) {
+    if (
+      provider.type === 'nocache' ||
+      draftModeEnabled ||
+      usesCustomDatoEnvironment
+    ) {
       noCache();
     } else {
-      netlifySwrCache();
+      if (provider.type === 'netlify') {
+        netlifySwrCache(provider);
+      }
+
       // netlifyTagsCache();
     }
 
@@ -54,11 +70,36 @@ export function caching<T extends DastroTypes>(config: DastroConfig<T>) {
       );
     }
 
-    function netlifySwrCache() {
+    function netlifySwrCache(providerOptions: NetlifyCacheOptions) {
+      const {
+        vary = { query: [] },
+        freshInCdn = 5 * 60, // 5 minutes;
+        staleInCdn = 365 * 24 * 60 * 60, // 1 year
+      } = providerOptions;
       // @see https://developers.netlify.com/guides/how-to-do-advanced-caching-and-isr-with-astro/
+      const varyHeader = merge(
+        {
+          cookie: [DRAFT_MODE_COOKIE_NAME, CUSTOM_DATO_ENVIRONMENT_COOKIE_NAME],
+        },
+        vary,
+      );
+
+      console.log(vary);
+
       context.response.headers.set(
         'Netlify-Vary',
-        `query,cookie=${DRAFT_MODE_COOKIE_NAME}|${CUSTOM_DATO_ENVIRONMENT_COOKIE_NAME}`,
+        Object.keys(varyHeader)
+          .map((key) => {
+            if (varyHeader[key] === null) {
+              return null;
+            }
+
+            return varyHeader[key].length > 0
+              ? `${key}=${[...new Set(varyHeader[key])].join('|')}`
+              : key;
+          })
+          .filter((v) => !!v)
+          .join(','),
       );
 
       // Tell the browser to always check the freshness of the cache
@@ -73,13 +114,13 @@ export function caching<T extends DastroTypes>(config: DastroConfig<T>) {
       // while it revalidates. Use Durable Cache to minimize the need for serverless function calls.
       context.response.headers.set(
         'Netlify-CDN-Cache-Control',
-        `public, durable, s-maxage=${FRESH_IN_CDN}, stale-while-revalidate=${STALE_IN_CDN}`, // TODO: stale-if-error?
+        `public, durable, s-maxage=${freshInCdn}, stale-while-revalidate=${staleInCdn}`, // TODO: stale-if-error?
       );
 
       // For debugging purposes, set the X-Cache-Config header to show our cache settings in the browser
       context.response.headers.set(
         'X-Gridonic-Cache-Config',
-        `max age: ${FRESH_IN_CDN}, swr: ${STALE_IN_CDN}`,
+        `max age: ${freshInCdn}, swr: ${staleInCdn}`,
       );
     }
 
@@ -110,22 +151,22 @@ export function caching<T extends DastroTypes>(config: DastroConfig<T>) {
   }
 
   return {
-    setCachingHeaders
-  }
+    setCachingHeaders,
+  };
 
-// export function augmentResponseHeadersWithCacheTags(
-//   newCacheTags: string[],
-//   context: AstroContext<'response'>,
-// ) {
-//   const NETLIFY_CACHE_TAG_NAME = 'Netlify-Cache-Tag';
-//
-//   const existingCacheTags =
-//     context.response.headers.get(NETLIFY_CACHE_TAG_NAME)?.split(' ') ?? [];
-//   const finalCacheTags = [
-//     ...new Set([...existingCacheTags, ...newCacheTags]),
-//   ].join(' ');
-//
-//   context.response.headers.set(NETLIFY_CACHE_TAG_NAME, finalCacheTags);
-//   context.response.headers.set('X-Gridonic-Cache-Tags', finalCacheTags);
-// }
+  // export function augmentResponseHeadersWithCacheTags(
+  //   newCacheTags: string[],
+  //   context: AstroContext<'response'>,
+  // ) {
+  //   const NETLIFY_CACHE_TAG_NAME = 'Netlify-Cache-Tag';
+  //
+  //   const existingCacheTags =
+  //     context.response.headers.get(NETLIFY_CACHE_TAG_NAME)?.split(' ') ?? [];
+  //   const finalCacheTags = [
+  //     ...new Set([...existingCacheTags, ...newCacheTags]),
+  //   ].join(' ');
+  //
+  //   context.response.headers.set(NETLIFY_CACHE_TAG_NAME, finalCacheTags);
+  //   context.response.headers.set('X-Gridonic-Cache-Tags', finalCacheTags);
+  // }
 }

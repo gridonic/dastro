@@ -4,7 +4,7 @@ import type { AstroContext } from '../astro.context.ts';
 import { datocms } from '../datocms/datocms.ts';
 import type { AstroGlobal } from 'astro';
 import { routing } from './routing.ts';
-import { caching } from './caching.ts';
+import { caching, type CachingOptions } from './caching.ts';
 import { i18n } from './i18n.ts';
 
 export type PageRecordType<T extends DastroTypes> =
@@ -116,13 +116,16 @@ export async function renderPage<T extends DastroTypes>(
   context: AstroGlobal,
   dastroConfig: DastroConfig<T>,
   initGlobalDataStore: InitGlobalDataStore<T>,
+  options: {
+    caching?: CachingOptions;
+  } = {},
 ) {
   const { routingStrategy, locales, defaultLocale, normalizedIsoLocale } =
     i18n(dastroConfig);
   const { resolveRecordUrl, pageRecordForUrl } = routing(dastroConfig);
   const { setCachingHeaders } = caching(dastroConfig);
 
-  setCachingHeaders(context);
+  setCachingHeaders(context, options.caching);
 
   const url = context.url.pathname;
   const { page, pageDefinition, locale, slug } = await pageRecordForUrl(
