@@ -1,3 +1,8 @@
+### [1.1.11](https://github.com/gridonic/dastro/compare/v1.1.10...v1.1.11)
+
+- temporary client prerendering fix for chrome bug
+- video player fixes and improvements
+
 ### [1.1.10](https://github.com/gridonic/dastro/compare/v1.1.9...v1.1.10)
 
 - Allow to customize caching options
