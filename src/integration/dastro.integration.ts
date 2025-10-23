@@ -63,7 +63,8 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
 
           prefetch: true,
           experimental: {
-            clientPrerender: true,
+            // TODO: temporarily disable client prerendering for local development due to chrome dev tools issues on navigation
+            clientPrerender: process.env.ENVIRONMENT !== 'local',
           },
 
           // Note: Changing the scoped style strategy to "attribute" will break dastro components where classes can be passed! Use 'class' or 'when'
