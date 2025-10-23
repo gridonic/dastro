@@ -1,0 +1,5 @@
+pre-commit:
+  parallel: true
+  jobs:
+    - name: astro check
+      run: npx astro check --minimumFailingSeverity hint
