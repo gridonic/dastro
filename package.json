@@ -29,6 +29,7 @@
     "./middleware/html-streaming-prevention.middleware.ts": "./src/middleware/html-streaming-prevention.middleware.ts"
   },
   "files": [
+    "config",
     "src",
     "scripts",
     ".cursor"

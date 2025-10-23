@@ -1,17 +1,19 @@
 import type { AstroIntegration } from 'astro';
 import type { Types } from '@graphql-codegen/plugin-helpers';
 import 'dotenv/config'; // Need to import env variables for graphql cli
-import {
-  generate,
-  loadCodegenConfig,
-} from '@graphql-codegen/cli';
-import chalk from "chalk";
+import { generate, loadCodegenConfig } from '@graphql-codegen/cli';
+import chalk from 'chalk';
 
 export default function graphqlIntegration(): AstroIntegration {
   return {
     name: 'graphql',
     hooks: {
-      'astro:config:setup': async ({ config, addWatchFile, logger }) => {
+      'astro:config:setup': async ({
+        config,
+        addWatchFile,
+        logger,
+        command,
+      }) => {
         // When this integration changes, the server must be reloaded
         addWatchFile(
           new URL('./integration/graphql.integration.ts', config.root),
@@ -23,23 +25,30 @@ export default function graphqlIntegration(): AstroIntegration {
         const generatorConfigs = await loadGraphqlSchemaConfigs();
 
         for (const [name, config] of Object.entries(generatorConfigs)) {
-          logger.info(`Generate Typescript types from graphql for ${chalk.bold.green(name)}`);
+          logger.info(
+            `Generate Typescript types from graphql for ${chalk.bold.green(name)}`,
+          );
 
           try {
             await generateAndWriteTypesFile(config);
-          } catch {
-            logger.error(
-              'Generating graphql types failed! Error is not printed here as he should be logged by generator. If not, find this error in the code and print the error manually.',
-            );
-            // ignore error, gql errors will be logged by Generator anyway
+          } catch (e: any) {
+            if (command === 'sync') {
+              throw e;
+            } else {
+              logger.error(e);
+            }
           }
 
           logger.info(`${chalk.bold.green(name)} type generation complete`);
         }
 
-        async function loadGraphqlSchemaConfigs(): Promise<Record<string, Types.Config>> {
+        async function loadGraphqlSchemaConfigs(): Promise<
+          Record<string, Types.Config>
+        > {
           // hacky, need to extend the type of the config, as it does not contain projects
-          const { config } = await loadCodegenConfig({ configFilePath: 'graphql.config.yml' });
+          const { config } = await loadCodegenConfig({
+            configFilePath: 'graphql.config.yml',
+          });
           if ('projects' in config) {
             return config.projects as Record<string, Types.Config>;
           }
@@ -50,7 +59,7 @@ export default function graphqlIntegration(): AstroIntegration {
         async function generateAndWriteTypesFile(
           generatorConfig: Types.Config,
         ) {
-          return generate(generatorConfig, true);
+          return generate({ ...generatorConfig, silent: true }, true);
         }
       },
       'astro:server:setup': async ({ server }) => {
