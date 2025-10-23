@@ -1,3 +1,9 @@
+### [1.1.12](https://github.com/gridonic/dastro/compare/v1.1.11...v1.1.12)
+
+- Add Lefthook base configuration
+- Update error handling in graphql integration
+- Video player adds fallback to mux thumbnail
+
 ### [1.1.11](https://github.com/gridonic/dastro/compare/v1.1.10...v1.1.11)
 
 - temporary client prerendering fix for chrome bug
