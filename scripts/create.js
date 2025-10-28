@@ -89,7 +89,7 @@ async function createProject() {
     // Get DatoCMS token from user
     console.log('\n🔑 DatoCMS Configuration');
     const datocmsToken = await askQuestionWithDefault(
-      'Enter your DatoCMS Content Delivery API token (leave blank to use boilerplate token)',
+      'Enter your DatoCMS Content Delivery API token ("Read-only API token"). Leave blank to use boilerplate token',
       '',
     );
 
