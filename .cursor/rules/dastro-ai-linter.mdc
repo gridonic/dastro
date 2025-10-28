@@ -1,6 +1,4 @@
 ---
-description: AI Linter
-globs: 
 alwaysApply: false
 ---
 
@@ -10,11 +8,13 @@ Do not make any changes but make a report with the problems and suggest solution
 # Rule: Use isEmptyDocument to check if the content of a structured text isempty
 
 ## When
+
 - We are in an Astro component
 - A structured text component is used.
 - The data that is passed to the structured text component can be null or undefined
 
 ## Then
+
 Whe should not make a simple truth check.
 Instead, use the `isEmptyDocument` function from `datocms-structured-text-utils` to check if the content of a structured text field is empty.
 The truth check can be omitted, as `isEmptyDocument` does it anyway.

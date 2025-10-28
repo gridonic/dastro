@@ -1,6 +1,4 @@
 ---
-description: Creates modules defined in Datocms
-globs : modules defined in Datocms
 alwaysApply: false
 ---
 
@@ -8,21 +6,29 @@ alwaysApply: false
 
 Uses rule: @dastro-module-structure.mdc
 
-Ask the user:
-
-1. What are the names of the modules you want to add?
-
-Now, for each component, do the following steps. Peform all steps for one component before proceeding to the next.
-
 ## Preparation
 
 Update the type file by running the command `npm run dato:generate-types`
+
+## Get User Input
+
+Provide a list of modules that exist in the cms, but we have not yet added to the project and then ask the user:
+
+"What are the names of the modules you want to add?"
+
+Very important not concerning naming: Sometimes, the user provides a module name in plural. In those cases, the naming of everything should be as the user provided it, using the plural. Only the main record type is named differently, as the cms does not allow block names with plurals. So make sure to search for the correct type but keep the naming as the user provides it. See the following examples:
+
+- Example 1: User provides `ContentDownloads`, so the type name to search for is `ContentDownloadRecord`.
+- Example 2: User provides `HeaderTextMedia`, so the type name to search for is `HeaderTextMediumRecord`.
+
+Now, for each component, do the following steps. Peform all steps for one component before proceeding to the next.
 
 ## Step 1: Create GraphQL Fragment
 
 ### Create fragment
 
 Search for the main record type and associated grapqhl types in `.astro/generated/datocms.types.ts`.
+
 Create a fragment using the properties of the determined record type in here.
 
 Note: Often, when there are graphql errors with a "conflict" in them, you need to make an alias for the attribute the conflict applies to.

@@ -1,6 +1,4 @@
 ---
-description: Starting from a copied boilerplate project, removes unnecessary prototype code
-globs:
 alwaysApply: false
 ---
 
