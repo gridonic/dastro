@@ -3,3 +3,39 @@ pre-commit:
   jobs:
     - name: astro check
       run: npx astro check --minimumFailingSeverity hint
+
+post-merge:
+  jobs:
+    - name: npm install if needed
+      run: |
+        HASHFILE=".git/.last_package_lock_hash"
+        CURRENT_HASH="$(cat $HASHFILE 2>/dev/null)"
+        NEW_HASH=$(sha256sum package-lock.json 2>/dev/null)
+        if [ "$NEW_HASH" != "$CURRENT_HASH" ]; then
+          echo "🔧 package-lock.json changed, running npm ci..."
+          npm ci && echo "$NEW_HASH" > "$HASHFILE"
+        fi
+
+post-checkout:
+  jobs:
+    - name: npm install if needed
+      run: |
+        HASHFILE=".git/.last_package_lock_hash"
+        CURRENT_HASH="$(cat $HASHFILE 2>/dev/null)"
+        NEW_HASH=$(sha256sum package-lock.json 2>/dev/null)
+        if [ "$NEW_HASH" != "$CURRENT_HASH" ]; then
+          echo "🔧 package-lock.json changed, running npm ci..."
+          npm ci && echo "$NEW_HASH" > "$HASHFILE"
+        fi
+
+post-rewrite:
+  jobs:
+    - name: npm install if needed
+      run: |
+        HASHFILE=".git/.last_package_lock_hash"
+        CURRENT_HASH="$(cat $HASHFILE 2>/dev/null)"
+        NEW_HASH=$(sha256sum package-lock.json 2>/dev/null)
+        if [ "$NEW_HASH" != "$CURRENT_HASH" ]; then
+          echo "🔧 package-lock.json changed, running npm ci..."
+          npm ci && echo "$NEW_HASH" > "$HASHFILE"
+        fi
