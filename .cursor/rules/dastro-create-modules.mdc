@@ -105,13 +105,14 @@ const { data } = Astro.props;
 - Markup should be simple and only on one level (except for collection items that must be iterated)
 - Generally, each value of the data record should be printed in a div
 - For attributes named title or headline, use a h2, h3 or h4
+- Make sure that the rules in @dastro-ai-linter.mdc are followed
 
 The following types should be handled specially:
 
 - If there is an attribute of the record that contains a value of type like JsonField,
   it is almost certainly a structured text, and therefore it should use a `<DefaultStructuredText data={data.textProperty} />`, where textProperty is the attribute. DefaultStructuredText should be imported from `dastro/components`
 - Links of type `LinkFragment` use the `<Link link={data.linkProperty} />`, where linkProperty is the attribute. Link should be imported from `@/components/link/Link.astro`
-- Links o type `RecordLinkFragment` use `<RecordLink record={data.linkProperty} />` , where linkProperty is the attribute. Link should be imported from `dastro/components`
+- Links of type `RecordLinkFragment` use `<RecordLink record={data.linkProperty} />` , where linkProperty is the attribute. Link should be imported from `dastro/components`
 - Attributes that have responsiveImage and or the `MediaAsset` fragment on them use the `<MediaAsset data={data.assetProperty} aspectRatio={<w> / <h>}/>` component, where assetProperty is the attribute and <w> and <h> are the specified dimensions in the fragment. If we are in a Header module, `priority={true}` should also be specifed. MediaAsset should be imported from `dastro/components`
 
 ---
