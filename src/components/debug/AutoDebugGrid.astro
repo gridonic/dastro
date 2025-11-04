@@ -1,4 +1,5 @@
 ---
+
 ---
 
 <debug-grid class="debug-grid-complete ui-grid">
@@ -14,16 +15,16 @@
   import { BaseCustomElement } from 'dastro/client';
 
   const colors = [
-    '#FF6B6B',
-    '#4ECDC4',
-    '#45B7D1',
-    '#96CEB4',
-    '#FFEEAD',
-    '#D4A5A5',
-    '#9B59B6',
-    '#3498DB',
-    '#E67E22',
-    '#1ABC9C',
+    '#E8A87C',
+    '#C5D8D1',
+    '#A7C7E7',
+    '#B8CBB9',
+    '#F6E2B3',
+    '#DAB6B6',
+    '#BFA5CF',
+    '#A3BFD9',
+    '#D6A77A',
+    '#9FC9C2',
   ];
 
   customElements.define(
@@ -35,7 +36,7 @@
         window.addEventListener('resize', () => this.requestGridRefresh());
 
         const observer = new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
+          entries.forEach((entry) => {
             if (entry.isIntersecting) {
               this.requestGridRefresh();
             }
@@ -131,13 +132,17 @@
       position: relative;
       background-color: rgba(251, 192, 147, var(--debug-grid-column-opacity));
 
+      &:not(:first-child) {
+        border-left: 1px solid rgba(0, 0, 0, 0.075);
+      }
+
       &:first-child,
       &:last-child {
         background-color: rgba(
-                161,
-                192,
-                255,
-                calc(var(--debug-grid-column-opacity) / 2)
+          161,
+          192,
+          255,
+          calc(var(--debug-grid-column-opacity) / 2)
         );
       }
 
@@ -209,6 +214,16 @@
         border-color: var(--color);
         border-top-width: 0.3em;
 
+        &.-topline {
+          &::before {
+            border-bottom-right-radius: 0.4em;
+          }
+
+          &::after {
+            border-bottom-left-radius: 0.4em;
+          }
+        }
+
         &.-bottomline {
           border-top-width: 0;
           border-bottom-width: 0.3em;
@@ -216,6 +231,8 @@
           &::before,
           &::after {
             padding: 0.3em 0.5em 0;
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
           }
 
           &::before {
@@ -224,16 +241,6 @@
 
           &::after {
             border-top-left-radius: 0.4em;
-          }
-        }
-
-        &.-topline {
-          &::before {
-            border-bottom-right-radius: 0.4em;
-          }
-
-          &::after {
-            border-bottom-left-radius: 0.4em;
           }
         }
       }
