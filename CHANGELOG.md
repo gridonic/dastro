@@ -1,3 +1,7 @@
+### [1.1.14](https://github.com/gridonic/dastro/compare/v1.1.13...v1.1.14)
+
+- Improve Auto Debug Grid
+
 ### [1.1.13](https://github.com/gridonic/dastro/compare/v1.1.12...v1.1.13)
 
 - Lefthook: use npm ci when package lock changed after updating repo locally
