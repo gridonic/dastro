@@ -56,6 +56,9 @@ export const GET: APIRoute = async (context) => {
       })),
       components: Object.keys(config.moduleComponents),
     },
+    sentry: {
+      dsn: process.env.SENTRY_DSN,
+    },
     datocms: {
       siteUrl: site?.domain ?? site?.internal_domain ?? null,
       environments: datoCmsEnvironments.map((e) => ({
