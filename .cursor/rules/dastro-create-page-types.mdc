@@ -112,6 +112,23 @@ fragment [PageType]Link on [PageType]Record {
 
 Replace `[PageType]` with the actual page type name.
 
+NOTE: If there was only one page type now, the `RecordLink` fragment would look like this:
+
+```graphql
+fragment RecordLink on PageRecord {
+  ...PageLink
+}
+```
+
+Now that we have multiple page types, the `RecordLink` fragment should be updated to handle all of them, as now the
+`NavigationLinkModelLinkField` should exist:
+
+```graphql
+fragment RecordLink on NavigationLinkModelLinkField {
+    # Links
+}
+```
+
 ## Step 2: Create a new Page Component
 
 Create a new file in `src/components/page/[PageType]Page.astro`:
@@ -209,7 +226,7 @@ Run the command `npm run dato:generate-types`
 
 ## Notes
 
-- **API Key Naming:** The `apiKey` is typically the camelCase version of the page type (e.g., `news`, `employmentLifecycle`)
+- **API Key Naming:** The `apiKey` is typically the snake case version of the page type (e.g., `news`, `employment_lifecycle`)
 - **Query Naming:** DatoCMS auto-generates queries based on the model name. Check the generated types to confirm the exact field names
 - **Custom Fields:** If the page type has custom fields beyond the standard `title`, `headerModule`, and `contentModules`, add them to the GraphQL query and handle them in the component
 - **Path Segments:** Ensure path segments don't conflict with existing routes. Use descriptive, SEO-friendly paths
