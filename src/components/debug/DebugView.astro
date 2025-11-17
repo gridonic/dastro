@@ -101,17 +101,6 @@ const dastroVersion = pkg.version;
 
     <div class="variables">
       <div class="title">Variables</div>
-      <pre
-        class="list"
-        data-debug-variables>
-        <span class="variable" data-variable="--fluid-rem" data-type="font-size" />
-        <span class="variable" data-variable="--fluid-outer-margin" data-type="height" />
-        <span class="variable" data-variable="--scrollbar-width" data-type="width" />
-      </pre>
-    </div>
-
-    <div class="checkboxes">
-      <div class="title">Info Overlays</div>
       <div class="checkbox">
         <input
           type="checkbox"
@@ -124,6 +113,17 @@ const dastroVersion = pkg.version;
           <span class="shortcut">Ctrl + V</span>
         </label>
       </div>
+      <pre
+        class="list"
+        data-debug-variables>
+        <span class="variable" data-variable="--fluid-rem" data-type="font-size" />
+        <span class="variable" data-variable="--fluid-outer-margin" data-type="height" />
+        <span class="variable" data-variable="--scrollbar-width" data-type="width" />
+      </pre>
+    </div>
+
+    <div class="checkboxes">
+      <div class="title">Info Overlays</div>
       <div class="checkbox">
         <input
           type="checkbox"
@@ -669,25 +669,14 @@ const dastroVersion = pkg.version;
       // Variables
       > .variables {
         margin: 0;
-        padding: 0.75rem 1rem;
-        font-size: var(--debug-view-font-size);
-        border-top: 1px solid var(--debug-view-color-lines);
+        /*padding: 0.75rem 1rem;*/
 
-        body:has(input#debug-view-show-variables:not(:checked)) & {
+        body:has(input#debug-view-show-variables:not(:checked)) & > .list {
           display: none;
         }
 
-        > .title {
-          font-weight: bold;
-          margin-bottom: 0.45rem;
-          text-transform: uppercase;
-          letter-spacing: 0.04em;
-          font-size: 0.65rem;
-          color: rgba(0, 0, 0, 0.6);
-        }
-
         > .list {
-          margin: 0;
+          margin: 0.5rem 0 0;
           line-height: 160%;
           color: var(--debug-view-foreground-color);
           white-space: normal;
@@ -698,6 +687,7 @@ const dastroVersion = pkg.version;
         }
       }
 
+      > .variables,
       > .checkboxes {
         display: flex;
         flex-direction: column;
