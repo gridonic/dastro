@@ -559,12 +559,12 @@ const dastroVersion = pkg.version;
   :root {
     --debug-grid-name-line-opacity: 0.95;
     --debug-grid-column-opacity: 0.25;
-    --debug-view-font-size: clamp(6px, 0.75rem, 10px);
+    --debug-view-font-size: clamp(6px, 12px, 10px);
   }
 
   .debug-view {
     font-family: system-ui;
-    z-index: var(--z-debug);
+    z-index: var(--z-debug, 999999);
     --debug-view-offset-x: 0px;
     --debug-view-offset-y: 0px;
     --debug-view-accent-color: rgba(40, 30, 213, 1);
@@ -578,8 +578,8 @@ const dastroVersion = pkg.version;
     > .toggle,
     > .panel {
       position: fixed;
-      bottom: 1rem;
-      left: 1rem;
+      bottom: 16px;
+      left: 16px;
       z-index: calc(var(--z-debug) + 100);
       transform: translate(
         var(--debug-view-offset-x),
@@ -589,7 +589,7 @@ const dastroVersion = pkg.version;
 
     > .toggle {
       background: var(--debug-view-accent-color);
-      border-radius: 0.2rem;
+      border-radius: 3px;
 
       > .checkbox {
         display: none;
@@ -597,12 +597,12 @@ const dastroVersion = pkg.version;
 
       > .label {
         display: block;
-        padding: 0.5rem;
+        padding: 8px;
         cursor: grab;
 
         > .icon {
-          width: 1rem;
-          height: 1rem;
+          width: 16px;
+          height: 16px;
         }
       }
     }
@@ -611,13 +611,13 @@ const dastroVersion = pkg.version;
       width: max-content;
       font-size: var(--debug-view-font-size);
       line-height: 125%;
-      border-radius: 0.2rem;
+      border-radius: 3px;
       overflow: hidden;
       background-color: var(--debug-view-background-color);
       box-shadow:
-        rgba(17, 17, 26, 0.1) 0 0.062rem 0,
-        rgba(17, 17, 26, 0.1) 0 0.5rem 1.5rem,
-        rgba(17, 17, 26, 0.1) 0 1rem 3rem;
+        rgba(17, 17, 26, 0.1) 0 1px 0,
+        rgba(17, 17, 26, 0.1) 0 8px 24px,
+        rgba(17, 17, 26, 0.1) 0 16px 48px;
 
       body:has(input#debug-view-show-panel:not(:checked)) & {
         display: none;
@@ -627,8 +627,8 @@ const dastroVersion = pkg.version;
         display: flex;
         align-items: center;
         font-weight: bold;
-        font-size: 0.75rem;
-        padding: 0.75rem 1rem;
+        font-size: 12px;
+        padding: 12px 16px;
         position: relative;
         background: var(--debug-view-accent-color);
         color: var(--debug-view-inverted-foreground-color);
@@ -639,8 +639,8 @@ const dastroVersion = pkg.version;
           cursor: pointer;
 
           > .icon {
-            width: 1rem;
-            height: 1rem;
+            width: 16px;
+            height: 16px;
           }
         }
       }
@@ -648,21 +648,21 @@ const dastroVersion = pkg.version;
       &::before,
       > .environment {
         display: inline-block;
-        padding-bottom: 0.5rem;
+        padding-bottom: 8px;
         font-weight: bold;
       }
 
       > .details {
-        padding: 0.75rem 1rem;
+        padding: 12px 16px;
         display: flex;
-        gap: 0.25rem;
+        gap: 4px;
         background: var(--debug-view-background-color);
 
         > .detail {
-          padding: 0.25rem 0.5rem;
+          padding: 4px 8px;
           background: gray;
           color: var(--debug-view-inverted-foreground-color);
-          border-radius: 0.25rem;
+          border-radius: 4px;
           text-transform: capitalize;
           cursor: default;
         }
@@ -671,14 +671,14 @@ const dastroVersion = pkg.version;
       // Variables
       > .variables {
         margin: 0;
-        /*padding: 0.75rem 1rem;*/
+        /*padding: 12px 16px;*/
 
         body:has(input#debug-view-show-variables:not(:checked)) & > .list {
           display: none;
         }
 
         > .list {
-          margin: 0.5rem 0 0;
+          margin: 8px 0 0;
           line-height: 160%;
           color: var(--debug-view-foreground-color);
           white-space: normal;
@@ -693,21 +693,21 @@ const dastroVersion = pkg.version;
       > .checkboxes {
         display: flex;
         flex-direction: column;
-        gap: 0.35rem;
-        padding: 0.8rem 1rem 1rem;
+        gap: 6px;
+        padding: 13px 16px 16px;
         border-top: 1px solid var(--debug-view-color-lines);
 
         > .title {
           font-weight: bold;
-          margin-bottom: 0.125rem;
+          margin-bottom: 2px;
           text-transform: uppercase;
-          letter-spacing: 0.04em;
-          font-size: 0.65rem;
+          letter-spacing: 0.64px;
+          font-size: 10px;
           color: rgba(0, 0, 0, 0.6);
         }
 
         * + .title {
-          margin-top: 0.45rem;
+          margin-top: 7px;
         }
 
         > .checkbox {
@@ -729,10 +729,10 @@ const dastroVersion = pkg.version;
           display: inline-flex;
           align-items: center;
           justify-content: space-between;
-          gap: 0.5rem;
+          gap: 8px;
           width: 100%;
-          padding: 0.45rem 0.75rem 0.45rem 0.6rem;
-          border-radius: 0.4rem;
+          padding: 7px 12px 7px 10px;
+          border-radius: 6px;
           border: 1px solid var(--debug-view-color-lines);
           background: white;
           cursor: pointer;
@@ -745,9 +745,9 @@ const dastroVersion = pkg.version;
 
         > .checkbox > label::before {
           content: '';
-          width: 0.9rem;
-          height: 0.9rem;
-          border-radius: 0.2rem;
+          width: 14px;
+          height: 14px;
+          border-radius: 3px;
           border: 1px solid var(--debug-view-color-lines);
           transition:
             border-color 0.15s ease,
@@ -757,7 +757,7 @@ const dastroVersion = pkg.version;
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          font-size: 0.6rem;
+          font-size: 10px;
           font-weight: 700;
           color: transparent;
         }
@@ -792,17 +792,17 @@ const dastroVersion = pkg.version;
 
         > .checkbox > label > .shortcut {
           align-self: center;
-          font-size: 0.6rem;
-          letter-spacing: 0.08em;
+          font-size: 9.6px;
+          letter-spacing: 1.28px;
           text-transform: uppercase;
-          padding: 0.15rem 0.45rem;
-          border-radius: 0.4rem;
+          padding: 3px 7px;
+          border-radius: 6px;
           background: rgba(40, 30, 213, 0.1);
           color: var(--debug-view-accent-color);
           font-weight: 700;
           white-space: nowrap;
           opacity: 0;
-          transform: translateY(-0.2rem);
+          transform: translateX(5px);
           transition:
             opacity 0.15s ease,
             transform 0.15s ease;
@@ -811,15 +811,15 @@ const dastroVersion = pkg.version;
         > .checkbox > label:hover > .shortcut,
         > .checkbox > label:focus-visible > .shortcut {
           opacity: 1;
-          transform: translateY(0);
+          transform: translateX(0);
         }
       }
 
       > .datoenvironment {
         display: flex;
         align-items: center;
-        gap: 1rem;
-        padding: 0.75rem 1rem;
+        gap: 16px;
+        padding: 12px 16px;
         border-top: 1px solid var(--debug-view-color-lines);
 
         &.-custom {
@@ -837,10 +837,10 @@ const dastroVersion = pkg.version;
         > .status {
           > .title {
             font-weight: bold;
-            margin-bottom: 0.125rem;
+            margin-bottom: 2px;
             text-transform: uppercase;
-            letter-spacing: 0.04em;
-            font-size: 0.65rem;
+            letter-spacing: 0.64px;
+            font-size: 10px;
             color: rgba(0, 0, 0, 0.6);
           }
         }
@@ -853,8 +853,8 @@ const dastroVersion = pkg.version;
       > .draftmode {
         display: flex;
         align-items: center;
-        gap: 1rem;
-        padding: 0.75rem 1rem;
+        gap: 16px;
+        padding: 12px 16px;
 
         &.-enabled {
           background: var(--debug-view-color-negative);
@@ -875,10 +875,10 @@ const dastroVersion = pkg.version;
         > .status {
           > .title {
             font-weight: bold;
-            margin-bottom: 0.125rem;
+            margin-bottom: 2px;
             text-transform: uppercase;
-            letter-spacing: 0.04em;
-            font-size: 0.65rem;
+            letter-spacing: 0.64px;
+            font-size: 10px;
             color: rgba(0, 0, 0, 0.6);
           }
         }
@@ -900,16 +900,16 @@ const dastroVersion = pkg.version;
       inset: 0;
       background: linear-gradient(
         to bottom,
-        #f37178 3rem,
-        transparent 3rem,
-        transparent calc(50% - 3rem),
-        #f37178 calc(50% - 3rem),
+        #f37178 48px,
+        transparent 48px,
+        transparent calc(50% - 48px),
+        #f37178 calc(50% - 48px),
         #f37178 50%,
         #00e599 50%,
-        #00e599 calc(50% + 3rem),
-        transparent calc(50% + 3rem),
-        transparent calc(100% - 3rem),
-        #00e599 calc(100% - 3rem)
+        #00e599 calc(50% + 48px),
+        transparent calc(50% + 48px),
+        transparent calc(100% - 48px),
+        #00e599 calc(100% - 48px)
       );
       background-size: 100% 200vh;
       background-repeat: repeat-y;
@@ -922,7 +922,7 @@ const dastroVersion = pkg.version;
         height: 100vh;
         align-items: center;
         justify-content: center;
-        font-size: 26rem;
+        font-size: 416px;
         color: #00e599;
 
         &:nth-child(odd) {
@@ -948,7 +948,7 @@ const dastroVersion = pkg.version;
       white-space: nowrap;
       background: CanvasText;
       color: Canvas;
-      padding: 1em;
+      padding: 16px;
       font-size: var(--debug-view-font-size);
       line-height: 1.25;
       font-family: system-ui;
@@ -980,8 +980,8 @@ const dastroVersion = pkg.version;
   :global(
     body:has(input#debug-view-show-module-outlines:checked) [data-module]
   ) {
-    outline: 0.25rem solid rgba(186, 225, 255, 0.9);
-    outline-offset: -0.25rem;
+    outline: 4px solid rgba(186, 225, 255, 0.9);
+    outline-offset: -4px;
   }
 
   .debug-view [data-debug-drag-handle] {
@@ -993,10 +993,10 @@ const dastroVersion = pkg.version;
   }
 
   .debug-view-button {
-    padding: 0.5rem 0.75rem;
+    padding: 8px 12px;
     background: var(--debug-view-accent-color);
     color: var(--debug-view-inverted-foreground-color);
-    border-radius: 0.25rem;
+    border-radius: 4px;
     border: none;
   }
 </style>
