@@ -37,7 +37,12 @@ const dastroVersion = pkg.version;
       name="debug-view-show-panel"
       data-shortcut="d"
     />
-    <label class="label" for="debug-view-show-panel">
+    <label
+      class="label"
+      for="debug-view-show-panel"
+      data-debug-drag-handle
+      aria-label="Toggle Debug View"
+    >
       <svg class="icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
         <g clip-path="url(#clip0_6080_3145)">
           <path
@@ -60,31 +65,50 @@ const dastroVersion = pkg.version;
     </label>
   </div>
   <div class="panel">
-    <label class="toggle" for="debug-view-show-panel"
-      ><svg class="icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d="M3.02815 3.02815L12.9718 12.9718"
-          stroke="white"
-          stroke-linecap="round"
-          stroke-linejoin="round"></path>
-        <path
-          d="M12.9718 3.02815L3.02816 12.9718"
-          stroke="white"
-          stroke-linecap="round"
-          stroke-linejoin="round"></path>
-      </svg>
-    </label>
-    <span class="environment">@ {env} environment</span>
+    <div class="titlebar" data-debug-drag-handle>
+      <div class="title">Gridonic Info Panel</div>
+      <label
+        class="toggle"
+        for="debug-view-show-panel"
+        data-debug-ignore-drag
+        aria-label="Close Debug View"
+      >
+        <svg
+          class="icon"
+          viewBox="0 0 16 16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M3.02815 3.02815L12.9718 12.9718"
+            stroke="white"
+            stroke-linecap="round"
+            stroke-linejoin="round"></path>
+          <path
+            d="M12.9718 3.02815L3.02816 12.9718"
+            stroke="white"
+            stroke-linecap="round"
+            stroke-linejoin="round"></path>
+        </svg>
+      </label>
+    </div>
+
+    <div class="details">
+      <div class="detail">Dastro v{dastroVersion}</div>
+      <div class="detail">{env} Environment</div>
+      <div class="detail _hidden-vs">Large Viewport</div>
+      <div class="detail _hidden-vl">Small Viewport</div>
+    </div>
+
     <pre
       class="variables"
       data-debug-variables>
       <span class="variable" data-variable="--fluid-rem" data-type="font-size" />
       <span class="variable" data-variable="--fluid-outer-margin" data-type="height" />
-      <span class="variable" data-variable="--base-component-padding" data-type="padding" />
       <span class="variable" data-variable="--scrollbar-width" data-type="width" />
     </pre>
 
     <div class="checkboxes">
+      <div class="title">Info Overlays</div>
       <div class="checkbox">
         <input
           type="checkbox"
@@ -97,20 +121,32 @@ const dastroVersion = pkg.version;
       <div class="checkbox">
         <input
           type="checkbox"
-          id="debug-view-show-grid"
-          name="debug-view-show-grid"
-          data-shortcut="g"
-        />
-        <label for="debug-view-show-grid">Grid</label>
-      </div>
-      <div class="checkbox">
-        <input
-          type="checkbox"
           id="debug-view-show-module-names"
           name="debug-view-show-module-names"
           data-shortcut="m"
         />
         <label for="debug-view-show-module-names">Module Names</label>
+      </div>
+      <div class="checkbox">
+        <input
+          type="checkbox"
+          id="debug-view-show-content-height"
+          name="debug-view-show-content-height"
+          data-shortcut="h"
+        />
+        <label for="debug-view-show-content-height"
+          >Content Height <span data-contentheight-ratio></span></label
+        >
+      </div>
+      <div class="title">Layout Tools</div>
+      <div class="checkbox">
+        <input
+          type="checkbox"
+          id="debug-view-show-grid"
+          name="debug-view-show-grid"
+          data-shortcut="g"
+        />
+        <label for="debug-view-show-grid">Grid</label>
       </div>
       <div class="checkbox">
         <input
@@ -130,44 +166,38 @@ const dastroVersion = pkg.version;
         />
         <label for="debug-view-show-box-model">Box Model</label>
       </div>
-      <div class="checkbox">
-        <input
-          type="checkbox"
-          id="debug-view-show-content-height"
-          name="debug-view-show-content-height"
-          data-shortcut="h"
-        />
-        <label for="debug-view-show-content-height"
-          >Content Height <span data-contentheight-ratio></span></label
-        >
-      </div>
     </div>
 
-    <div
-      class="draft-mode"
-      class:list={`-${draftModeEnabled ? 'enabled' : 'disabled'}`}
-    >
-      <div>Draft Mode</div>
-      <div class="enabled">ENABLED</div>
-      <div class="disabled">disabled</div>
-      <button type="button" class="ui-button -small toggle"
-        >Toggle Draft Mode</button
-      >
-    </div>
     {
       datoEnvironment.switchAllowed && (
         <div
-          class="dato-environment"
+          class="datoenvironment"
           class:list={{ '-custom': !datoEnvironment.isDefault }}
         >
-          <div>DatoCMS Environment</div>
-          <div class="value">{datoEnvironment.environment}</div>
-          <button type="button" class="ui-button -small switch">
+          <div class="status">
+            <div class="title">DatoCMS Environment</div>
+            <div class="value">{datoEnvironment.environment}</div>
+          </div>
+          <button type="button" class="button debug-view-button">
             Switch Environment
           </button>
         </div>
       )
     }
+
+    <div
+      class="draftmode"
+      class:list={`-${draftModeEnabled ? 'enabled' : 'disabled'}`}
+    >
+      <div class="status">
+        <div class="title">Draft Mode</div>
+        <div class="value -enabled">enabled</div>
+        <div class="value -disabled">disabled</div>
+      </div>
+      <button type="button" class="button debug-view-button"
+        >Toggle Draft Mode</button
+      >
+    </div>
   </div>
 
   <div class="contentheight" data-contentheight></div>
@@ -182,6 +212,13 @@ const dastroVersion = pkg.version;
     class DebugView extends BaseComponent {
       private draftModeEnabled = false;
       private environment: string = '';
+      private readonly dragStorageKey = 'debug-view-position';
+      private dragPointerId: number | null = null;
+      private dragPosition = { x: 0, y: 0 };
+      private dragStart = { x: 0, y: 0 };
+      private dragOrigin = { x: 0, y: 0 };
+      private isDragging = false;
+      private activeDragHandle: HTMLElement | null = null;
 
       init() {
         window.addEventListener('DOMContentLoaded', () => this.recalculate());
@@ -192,6 +229,8 @@ const dastroVersion = pkg.version;
         this.bindKeyboardShortcuts();
         this.bindDraftModeEvents();
         this.bindEnvironmentSwitchEvents();
+        this.restorePanelPosition();
+        this.bindDragHandles();
 
         log.debug('Using dastro version ');
 
@@ -269,7 +308,7 @@ const dastroVersion = pkg.version;
       }
 
       private bindDraftModeEvents() {
-        const toggle = this.$el.querySelector('.draft-mode > .toggle');
+        const toggle = this.$el.querySelector('.draftmode .button');
         toggle?.addEventListener('click', () => {
           if (this.draftModeEnabled) {
             window.location.href = '/api/cms/draft-mode/disable';
@@ -284,7 +323,7 @@ const dastroVersion = pkg.version;
       }
 
       private bindEnvironmentSwitchEvents() {
-        const switcher = this.$el.querySelector('.dato-environment > .switch');
+        const switcher = this.$el.querySelector('.datoenvironment .button');
         switcher?.addEventListener('click', () => {
           const targetEnvironment = prompt('Enter target environment');
 
@@ -355,6 +394,140 @@ const dastroVersion = pkg.version;
           ratioElement.innerText = `(${ratio} viewports)`;
         }
       }
+
+      private bindDragHandles() {
+        const handles = this.$el.querySelectorAll<HTMLElement>(
+          '[data-debug-drag-handle]',
+        );
+        handles.forEach((handle) => {
+          handle.addEventListener('pointerdown', this.handleDragStart);
+        });
+      }
+
+      private handleDragStart = (event: PointerEvent) => {
+        if (event.button !== 0) {
+          return;
+        }
+
+        const target = event.target as HTMLElement | null;
+        if (target?.closest('[data-debug-ignore-drag]')) {
+          return;
+        }
+
+        const handle = event.currentTarget as HTMLElement;
+        this.activeDragHandle = handle;
+
+        this.dragPointerId = event.pointerId;
+        this.dragStart = { x: event.clientX, y: event.clientY };
+        this.dragOrigin = { ...this.dragPosition };
+        this.isDragging = false;
+
+        window.addEventListener('pointermove', this.handleDragMove);
+        window.addEventListener('pointerup', this.handleDragEnd);
+      };
+
+      private handleDragMove = (event: PointerEvent) => {
+        if (this.dragPointerId !== event.pointerId) {
+          return;
+        }
+
+        const deltaX = event.clientX - this.dragStart.x;
+        const deltaY = event.clientY - this.dragStart.y;
+
+        if (!this.isDragging) {
+          if (Math.abs(deltaX) < 2 && Math.abs(deltaY) < 2) {
+            return;
+          }
+          this.isDragging = true;
+          this.activeDragHandle?.setPointerCapture?.(event.pointerId);
+          this.toggleHandleDraggingState(true);
+        }
+
+        this.applyDragPosition({
+          x: this.dragOrigin.x + deltaX,
+          y: this.dragOrigin.y + deltaY,
+        });
+      };
+
+      private handleDragEnd = (event: PointerEvent) => {
+        if (this.dragPointerId !== event.pointerId) {
+          return;
+        }
+
+        window.removeEventListener('pointermove', this.handleDragMove);
+        window.removeEventListener('pointerup', this.handleDragEnd);
+
+        this.dragPointerId = null;
+
+        if (this.isDragging) {
+          this.persistDragPosition();
+          this.cancelNextClick();
+          this.activeDragHandle?.releasePointerCapture?.(event.pointerId);
+        }
+
+        this.toggleHandleDraggingState(false);
+        this.isDragging = false;
+        this.activeDragHandle = null;
+      };
+
+      private applyDragPosition(position: { x: number; y: number }) {
+        this.dragPosition = position;
+        this.$el.style.setProperty('--debug-view-offset-x', `${position.x}px`);
+        this.$el.style.setProperty('--debug-view-offset-y', `${position.y}px`);
+      }
+
+      private restorePanelPosition() {
+        try {
+          const stored = sessionStorage.getItem(this.dragStorageKey);
+          if (!stored) {
+            return;
+          }
+
+          const parsed = JSON.parse(stored);
+          if (typeof parsed?.x === 'number' && typeof parsed?.y === 'number') {
+            this.applyDragPosition(parsed);
+          }
+        } catch (error) {
+          console.warn('Unable to restore Debug View position', error);
+        }
+      }
+
+      private persistDragPosition() {
+        try {
+          sessionStorage.setItem(
+            this.dragStorageKey,
+            JSON.stringify(this.dragPosition),
+          );
+        } catch (error) {
+          console.warn('Unable to persist Debug View position', error);
+        }
+      }
+
+      private toggleHandleDraggingState(isDragging: boolean) {
+        const handles = this.$el.querySelectorAll<HTMLElement>(
+          '[data-debug-drag-handle]',
+        );
+        handles.forEach((handle) => {
+          handle.classList.toggle('is-dragging', isDragging);
+        });
+      }
+
+      private cancelNextClick() {
+        if (!this.activeDragHandle) {
+          return;
+        }
+
+        const handle = this.activeDragHandle;
+        const suppressOnce = (event: MouseEvent) => {
+          event.stopPropagation();
+          event.preventDefault();
+        };
+
+        handle.addEventListener('click', suppressOnce, {
+          capture: true,
+          once: true,
+        });
+      }
     },
   );
 </script>
@@ -369,19 +542,32 @@ const dastroVersion = pkg.version;
   .debug-view {
     font-family: system-ui;
     z-index: var(--z-debug);
+    --debug-view-offset-x: 0px;
+    --debug-view-offset-y: 0px;
+    --debug-view-accent-color: rgba(40, 30, 213, 1);
+    --debug-view-background-color: #fbfbfb;
+    --debug-view-foreground-color: black;
+    --debug-view-inverted-foreground-color: white;
+    --debug-view-color-lines: #e3e1e1;
+    --debug-view-color-positive: hsl(166, 95%, 30%);
+    --debug-view-color-negative: hsl(2, 85%, 69%);
 
     > .toggle,
     > .panel {
       position: fixed;
       bottom: 1rem;
       left: 1rem;
-      border-radius: 0.2rem;
-      background: rgba(40, 30, 213, 1);
-      color: white;
       z-index: calc(var(--z-debug) + 100);
+      transform: translate(
+        var(--debug-view-offset-x),
+        var(--debug-view-offset-y)
+      );
     }
 
     > .toggle {
+      background: var(--debug-view-accent-color);
+      border-radius: 0.2rem;
+
       > .checkbox {
         display: none;
       }
@@ -389,7 +575,7 @@ const dastroVersion = pkg.version;
       > .label {
         display: block;
         padding: 0.5rem;
-        cursor: pointer;
+        cursor: grab;
 
         > .icon {
           width: 1rem;
@@ -400,12 +586,40 @@ const dastroVersion = pkg.version;
 
     > .panel {
       width: max-content;
-      padding: 0.75rem 3rem 0.75rem 1rem;
       font-size: var(--debug-view-font-size);
       line-height: 125%;
+      border-radius: 0.2rem;
+      overflow: hidden;
+      background-color: var(--debug-view-background-color);
+      box-shadow:
+        rgba(17, 17, 26, 0.1) 0 0.062rem 0,
+        rgba(17, 17, 26, 0.1) 0 0.5rem 1.5rem,
+        rgba(17, 17, 26, 0.1) 0 1rem 3rem;
 
       body:has(input#debug-view-show-panel:not(:checked)) & {
         display: none;
+      }
+
+      > .titlebar {
+        display: flex;
+        align-items: center;
+        font-weight: bold;
+        font-size: 0.75rem;
+        padding: 0.75rem 1rem;
+        position: relative;
+        background: var(--debug-view-accent-color);
+        color: var(--debug-view-inverted-foreground-color);
+        user-select: none;
+
+        > .toggle {
+          margin-left: auto;
+          cursor: pointer;
+
+          > .icon {
+            width: 1rem;
+            height: 1rem;
+          }
+        }
       }
 
       &::before,
@@ -415,40 +629,31 @@ const dastroVersion = pkg.version;
         font-weight: bold;
       }
 
-      @media (--vs) {
-        &::before {
-          content: 'Small Viewport (--vs)';
-        }
-      }
+      > .details {
+        padding: 0.75rem 1rem;
+        display: flex;
+        gap: 0.25rem;
+        background: var(--debug-view-background-color);
 
-      @media (--vl) {
-        &::before {
-          content: 'Large Viewport (--vl)';
-        }
-      }
-
-      > .toggle {
-        position: absolute;
-        top: 0.75rem;
-        right: 1rem;
-        cursor: pointer;
-
-        > .icon {
-          width: 1rem;
-          height: 1rem;
+        > .detail {
+          padding: 0.25rem 0.5rem;
+          background: gray;
+          color: var(--debug-view-inverted-foreground-color);
+          border-radius: 0.25rem;
+          text-transform: capitalize;
+          cursor: default;
         }
       }
 
       // Variables
       > .variables {
-        margin-top: 0;
-        padding: 0.4rem 0.5rem;
-        background: Canvas;
-        border-radius: 0.125rem;
+        margin: 0;
+        padding: 0.75rem 1rem;
         color: CanvasText;
         white-space: normal;
         line-height: 140%;
         font-size: var(--debug-view-font-size);
+        border-top: 1px solid var(--debug-view-color-lines);
 
         body:has(input#debug-view-show-variables:not(:checked)) & {
           display: none;
@@ -460,66 +665,89 @@ const dastroVersion = pkg.version;
       }
 
       > .checkboxes {
-        margin: 0 -0.35rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        padding: 0.75rem 1rem;
+        border-top: 1px solid var(--debug-view-color-lines);
+
+        > .title {
+          font-weight: bold;
+          margin-bottom: 0.125rem;
+        }
+
+        * + .title {
+          margin-top: 0.45rem;
+        }
 
         > .checkbox {
-          margin: 0.35rem;
           display: flex;
           gap: 0.25rem;
         }
       }
 
-      > .draft-mode {
-        margin-top: 1rem;
+      > .datoenvironment {
         display: flex;
+        align-items: center;
         gap: 1rem;
-        padding: 0.5rem;
-
-        > .enabled,
-        > .disabled {
-          font-weight: bold;
-        }
-
-        &.-enabled {
-          background: var(--base-color-negative);
-
-          > .disabled {
-            display: none;
-          }
-        }
-
-        &.-disabled {
-          background: var(--base-color-positive);
-
-          > .enabled {
-            display: none;
-          }
-        }
-      }
-
-      > .dato-environment {
-        display: flex;
-        gap: 1rem;
-        padding: 0.5rem;
-
-        > .value {
-          font-weight: bold;
-        }
+        padding: 0.75rem 1rem;
+        border-top: 1px solid var(--debug-view-color-lines);
 
         &.-custom {
-          background: var(--base-color-negative);
-
           > .disabled {
             display: none;
           }
         }
 
         &:not(.-custom) {
-          background: var(--base-color-positive);
-
           > .enabled {
             display: none;
           }
+        }
+
+        > .status {
+          > .title {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+          }
+        }
+
+        > .button {
+          margin-left: auto;
+        }
+      }
+
+      > .draftmode {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem 1rem;
+
+        &.-enabled {
+          background: var(--debug-view-color-negative);
+
+          > .status > .value.-disabled {
+            display: none;
+          }
+        }
+
+        &.-disabled {
+          background: var(--debug-view-color-positive);
+
+          > .status > .value.-enabled {
+            display: none;
+          }
+        }
+
+        > .status {
+          > .title {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+          }
+        }
+
+        > .button {
+          margin-left: auto;
         }
       }
     }
@@ -617,5 +845,21 @@ const dastroVersion = pkg.version;
   ) {
     outline: 0.25rem solid rgba(186, 225, 255, 0.9);
     outline-offset: -0.25rem;
+  }
+
+  .debug-view [data-debug-drag-handle] {
+    cursor: grab;
+  }
+
+  .debug-view [data-debug-drag-handle].is-dragging {
+    cursor: grabbing;
+  }
+
+  .debug-view-button {
+    padding: 0.5rem 0.75rem;
+    background: var(--debug-view-accent-color);
+    color: var(--debug-view-inverted-foreground-color);
+    border-radius: 0.25rem;
+    border: none;
   }
 </style>
