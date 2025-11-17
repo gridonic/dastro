@@ -1,3 +1,8 @@
+### [1.1.15](https://github.com/gridonic/dastro/compare/v1.1.14...v1.1.15)
+
+- Add sentry dsn to system info endpoint
+- Refactor debug panel and make it freely movable
+
 ### [1.1.14](https://github.com/gridonic/dastro/compare/v1.1.13...v1.1.14)
 
 - Improve Auto Debug Grid
