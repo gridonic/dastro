@@ -66,7 +66,7 @@ const dastroVersion = pkg.version;
   </div>
   <div class="panel">
     <div class="titlebar" data-debug-drag-handle>
-      <div class="title">Gridonic Info Panel</div>
+      <div class="title">Gridonic Debug Panel</div>
       <label
         class="toggle"
         for="debug-view-show-panel"
@@ -99,13 +99,16 @@ const dastroVersion = pkg.version;
       <div class="detail _hidden-vl">Small Viewport</div>
     </div>
 
-    <pre
-      class="variables"
-      data-debug-variables>
-      <span class="variable" data-variable="--fluid-rem" data-type="font-size" />
-      <span class="variable" data-variable="--fluid-outer-margin" data-type="height" />
-      <span class="variable" data-variable="--scrollbar-width" data-type="width" />
-    </pre>
+    <div class="variables">
+      <div class="title">Variables</div>
+      <pre
+        class="list"
+        data-debug-variables>
+        <span class="variable" data-variable="--fluid-rem" data-type="font-size" />
+        <span class="variable" data-variable="--fluid-outer-margin" data-type="height" />
+        <span class="variable" data-variable="--scrollbar-width" data-type="width" />
+      </pre>
+    </div>
 
     <div class="checkboxes">
       <div class="title">Info Overlays</div>
@@ -116,7 +119,10 @@ const dastroVersion = pkg.version;
           name="debug-view-show-variables"
           data-shortcut="v"
         />
-        <label for="debug-view-show-variables">Variables</label>
+        <label for="debug-view-show-variables">
+          <span class="label-text">Variables</span>
+          <span class="shortcut">Ctrl + V</span>
+        </label>
       </div>
       <div class="checkbox">
         <input
@@ -125,7 +131,10 @@ const dastroVersion = pkg.version;
           name="debug-view-show-module-names"
           data-shortcut="m"
         />
-        <label for="debug-view-show-module-names">Module Names</label>
+        <label for="debug-view-show-module-names">
+          <span class="label-text">Module Names</span>
+          <span class="shortcut">Ctrl + M</span>
+        </label>
       </div>
       <div class="checkbox">
         <input
@@ -134,9 +143,12 @@ const dastroVersion = pkg.version;
           name="debug-view-show-content-height"
           data-shortcut="h"
         />
-        <label for="debug-view-show-content-height"
-          >Content Height <span data-contentheight-ratio></span></label
-        >
+        <label for="debug-view-show-content-height">
+          <span class="label-text"
+            >Content Height <span data-contentheight-ratio></span></span
+          >
+          <span class="shortcut">Ctrl + H</span>
+        </label>
       </div>
       <div class="title">Layout Tools</div>
       <div class="checkbox">
@@ -146,7 +158,10 @@ const dastroVersion = pkg.version;
           name="debug-view-show-grid"
           data-shortcut="g"
         />
-        <label for="debug-view-show-grid">Grid</label>
+        <label for="debug-view-show-grid">
+          <span class="label-text">Grid</span>
+          <span class="shortcut">Ctrl + G</span>
+        </label>
       </div>
       <div class="checkbox">
         <input
@@ -155,7 +170,10 @@ const dastroVersion = pkg.version;
           name="debug-view-show-module-outlines"
           data-shortcut="o"
         />
-        <label for="debug-view-show-module-outlines">Module Outlines</label>
+        <label for="debug-view-show-module-outlines">
+          <span class="label-text">Module Outlines</span>
+          <span class="shortcut">Ctrl + O</span>
+        </label>
       </div>
       <div class="checkbox">
         <input
@@ -164,7 +182,10 @@ const dastroVersion = pkg.version;
           name="debug-view-show-box-model"
           data-shortcut="b"
         />
-        <label for="debug-view-show-box-model">Box Model</label>
+        <label for="debug-view-show-box-model">
+          <span class="label-text">Box Model</span>
+          <span class="shortcut">Ctrl + B</span>
+        </label>
       </div>
     </div>
 
@@ -649,9 +670,6 @@ const dastroVersion = pkg.version;
       > .variables {
         margin: 0;
         padding: 0.75rem 1rem;
-        color: CanvasText;
-        white-space: normal;
-        line-height: 140%;
         font-size: var(--debug-view-font-size);
         border-top: 1px solid var(--debug-view-color-lines);
 
@@ -659,8 +677,24 @@ const dastroVersion = pkg.version;
           display: none;
         }
 
-        > .variable {
-          display: block;
+        > .title {
+          font-weight: bold;
+          margin-bottom: 0.45rem;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          font-size: 0.65rem;
+          color: rgba(0, 0, 0, 0.6);
+        }
+
+        > .list {
+          margin: 0;
+          line-height: 160%;
+          color: var(--debug-view-foreground-color);
+          white-space: normal;
+
+          > .variable {
+            display: block;
+          }
         }
       }
 
@@ -668,12 +702,16 @@ const dastroVersion = pkg.version;
         display: flex;
         flex-direction: column;
         gap: 0.35rem;
-        padding: 0.75rem 1rem;
+        padding: 0.8rem 1rem 1rem;
         border-top: 1px solid var(--debug-view-color-lines);
 
         > .title {
           font-weight: bold;
           margin-bottom: 0.125rem;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          font-size: 0.65rem;
+          color: rgba(0, 0, 0, 0.6);
         }
 
         * + .title {
@@ -681,8 +719,107 @@ const dastroVersion = pkg.version;
         }
 
         > .checkbox {
+          position: relative;
           display: flex;
-          gap: 0.25rem;
+          align-items: center;
+          width: 100%;
+        }
+
+        > .checkbox > input {
+          position: absolute;
+          inset: 0;
+          opacity: 0;
+          pointer-events: none;
+        }
+
+        > .checkbox > label {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.5rem;
+          width: 100%;
+          padding: 0.45rem 0.75rem 0.45rem 0.6rem;
+          border-radius: 0.4rem;
+          border: 1px solid var(--debug-view-color-lines);
+          background: white;
+          cursor: pointer;
+          transition:
+            border-color 0.15s ease,
+            box-shadow 0.15s ease,
+            transform 0.15s ease;
+          font-weight: 600;
+        }
+
+        > .checkbox > label::before {
+          content: '';
+          width: 0.9rem;
+          height: 0.9rem;
+          border-radius: 0.2rem;
+          border: 1px solid var(--debug-view-color-lines);
+          transition:
+            border-color 0.15s ease,
+            background 0.15s ease,
+            box-shadow 0.15s ease,
+            color 0.15s ease;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.6rem;
+          font-weight: 700;
+          color: transparent;
+        }
+
+        > .checkbox > label:hover,
+        > .checkbox > label:focus-visible {
+          border-color: var(--debug-view-accent-color);
+          box-shadow: 0 0 0 1px var(--debug-view-accent-color);
+        }
+
+        > .checkbox > input:checked + label {
+          border-color: var(--debug-view-accent-color);
+          box-shadow: 0 0 0 1px rgba(40, 30, 213, 0.35);
+        }
+
+        > .checkbox > input:checked + label::before {
+          background: var(--debug-view-accent-color);
+          border-color: var(--debug-view-accent-color);
+          color: var(--debug-view-inverted-foreground-color);
+          content: '✓';
+        }
+
+        > .checkbox > input:focus-visible + label {
+          outline: 2px solid var(--debug-view-accent-color);
+          outline-offset: 2px;
+        }
+
+        > .checkbox > label > .label-text {
+          flex: 1;
+          line-height: 1.2;
+        }
+
+        > .checkbox > label > .shortcut {
+          align-self: center;
+          font-size: 0.6rem;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          padding: 0.15rem 0.45rem;
+          border-radius: 0.4rem;
+          background: rgba(40, 30, 213, 0.1);
+          color: var(--debug-view-accent-color);
+          font-weight: 700;
+          white-space: nowrap;
+          opacity: 0;
+          transform: translateY(-0.2rem);
+          transition:
+            opacity 0.15s ease,
+            transform 0.15s ease;
+        }
+
+        > .checkbox > label:hover > .shortcut,
+        > .checkbox > label:focus-visible > .shortcut {
+          opacity: 1;
+          transform: translateY(0);
         }
       }
 
@@ -708,7 +845,11 @@ const dastroVersion = pkg.version;
         > .status {
           > .title {
             font-weight: bold;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.125rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-size: 0.65rem;
+            color: rgba(0, 0, 0, 0.6);
           }
         }
 
@@ -742,7 +883,11 @@ const dastroVersion = pkg.version;
         > .status {
           > .title {
             font-weight: bold;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.125rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-size: 0.65rem;
+            color: rgba(0, 0, 0, 0.6);
           }
         }
 
