@@ -179,9 +179,9 @@ export async function renderPage<T extends DastroTypes>(
   context.locals.page = page;
 
   if (!pageDefinition || !page) {
-    console.warn(
-      `page (${pageDefinition?.type}, ${locale}, ${slug}): loaded page is empty`,
-    );
+    // console.warn(
+    //   `page (${pageDefinition?.type}, ${locale}, ${slug}): loaded page is empty`,
+    // );
     return context.rewrite('/404');
   }
 

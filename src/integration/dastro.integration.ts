@@ -10,6 +10,9 @@ import { lstatSync } from 'fs';
 
 interface Options {
   htmlStreamingEnabled?: boolean;
+  requestLogging?: {
+    disabled?: boolean;
+  };
   injectedRoutes?: {
     // If we want to define the endpoint in our project, we must mark that we want to overwrite it.
     // Marked routes will not be injected, so we can define it in our project.
@@ -210,6 +213,15 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
           injectRoute({
             pattern: '/robots.txt',
             entrypoint: 'dastro/routes/robots.txt.ts',
+          });
+        }
+
+        const requestLoggingEnabled =
+          options?.requestLogging?.disabled !== true;
+        if (requestLoggingEnabled) {
+          addMiddleware({
+            entrypoint: 'dastro/middleware/request-logger.middleware.ts',
+            order: 'pre',
           });
         }
 
