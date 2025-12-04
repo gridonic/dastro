@@ -1,3 +1,7 @@
+### [1.1.16](https://github.com/gridonic/dastro/compare/v1.1.15...v1.1.16)
+
+- dependency updates
+
 ### [1.1.15](https://github.com/gridonic/dastro/compare/v1.1.14...v1.1.15)
 
 - Add sentry dsn to system info endpoint
