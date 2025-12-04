@@ -1,4 +1,4 @@
-import type {buildDastroContext, DastroTypes } from "./src";
+import type { buildDastroContext, DastroTypes } from './src';
 
 declare global {
   namespace App {
@@ -7,6 +7,7 @@ declare global {
       page: Page;
       locale: DastroTypes['SiteLocale'];
       dastro: ReturnType<typeof buildDastroContext<DastroTypes>>;
+      netlify: Context | null | undefined;
     }
   }
 }
