@@ -7,7 +7,7 @@ declare global {
   const Alpine: Alpine;
   namespace App {
     interface Locals {
-      netlify: Context | null | undefined;
+      netlify: { context: Context | null | undefined } | null | undefined;
     }
   }
 }

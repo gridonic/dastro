@@ -18,11 +18,11 @@ export const onRequest = defineMiddleware(async (context, next) => {
       throw e;
     } finally {
       const duration = Math.round(performance.now() - startTime);
-      const netlify = context.locals.netlify;
+      const netlifyContext = context.locals.netlify?.context;
 
-      const clientIP = netlify?.ip || context.clientAddress;
-      const geo = netlify?.geo
-        ? `${netlify.geo.city}, ${netlify.geo.postalCode} ${netlify.geo.country?.name}`
+      const clientIP = netlifyContext?.ip || context.clientAddress;
+      const geo = netlifyContext?.geo
+        ? `${netlifyContext?.geo.city}, ${netlifyContext?.geo.postalCode} ${netlifyContext?.geo.country?.name}`
         : 'unknown';
 
       const parts = [
