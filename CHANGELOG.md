@@ -1,3 +1,7 @@
+### [1.1.18](https://github.com/gridonic/dastro/compare/v1.1.17...v1.1.18)
+
+- fix access and types of netlify in astro locals
+
 ### [1.1.17](https://github.com/gridonic/dastro/compare/v1.1.16...v1.1.17)
 
 - add request logger
