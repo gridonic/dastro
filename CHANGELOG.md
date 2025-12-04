@@ -1,3 +1,9 @@
+### [1.1.17](https://github.com/gridonic/dastro/compare/v1.1.16...v1.1.17)
+
+- add request logger
+- update node version
+- show astro version in debug
+
 ### [1.1.16](https://github.com/gridonic/dastro/compare/v1.1.15...v1.1.16)
 
 - dependency updates
