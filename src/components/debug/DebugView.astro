@@ -20,6 +20,7 @@ const datoEnvironment = {
 };
 
 const dastroVersion = pkg.version;
+const astroVersion = Astro.generator.match(/v(.*)/)?.[1] || 'unknown';
 ---
 
 <div
@@ -28,6 +29,7 @@ const dastroVersion = pkg.version;
   data-environment={env}
   data-draft-mode-enabled={draftModeEnabled}
   data-dastro-version={dastroVersion}
+  data-astro-version={astroVersion}
 >
   <div class="toggle">
     <input
@@ -269,17 +271,17 @@ const dastroVersion = pkg.version;
             'Ctrl + H: Content Height\n',
         );
 
-        log.debug(`Dastro Version: ${this.$el.dataset.dastroVersion ?? '?'}`);
+        log.debug(`Dastro: ${this.$el.dataset.dastroVersion ?? '?'}`);
+        log.debug(`Astro: ${this.$el.dataset.astroVersion ?? '?'}`);
+        log.debug(
+          `Alpine: ${'Alpine' in globalThis ? Alpine.version : 'not activated'}`,
+        );
 
         this.draftModeEnabled = this.$el.dataset.draftModeEnabled === 'true';
         log.debug(`Draft Mode enabled: ${this.draftModeEnabled.toString()}`);
 
         this.environment = this.$el.dataset.environment ?? '?';
         log.debug(`Environment: ${this.environment}`);
-
-        log.debug(
-          `Alpine: ${'Alpine' in globalThis ? Alpine.version : 'not activated'}`,
-        );
       }
 
       bindCheckboxEvents() {
@@ -437,8 +439,7 @@ const dastroVersion = pkg.version;
           return;
         }
 
-        const handle = event.currentTarget as HTMLElement;
-        this.activeDragHandle = handle;
+        this.activeDragHandle = event.currentTarget as HTMLElement;
 
         this.dragPointerId = event.pointerId;
         this.dragStart = { x: event.clientX, y: event.clientY };
