@@ -1,15 +1,15 @@
 ---
 import '@/sass/styles.scss';
 
-import { Seo } from '@datocms/astro';
+import { QueryListener, Seo } from '@datocms/astro';
 
-import type {Page, MetaTag} from "../../core/page";
-import type {DastroTypes} from "../../core/lib-types";
-import {isSearchIndexingPrevented} from "../../core/page-indexing";
+import type { Page, MetaTag } from '../../core/page';
+import type { DastroTypes } from '../../core/lib-types';
+import { isSearchIndexingPrevented } from '../../core/page-indexing';
+import type { ClassValue } from '../component.types.ts';
+import DebugGridContainer from '../debug/DebugGridContainer.astro';
+import AutoDebugGrid from '../debug/AutoDebugGrid.astro';
 import DebugView from '../debug/DebugView.astro';
-import type {ClassValue} from "../component.types.ts";
-import DebugGridContainer from "../debug/DebugGridContainer.astro";
-import AutoDebugGrid from "../debug/AutoDebugGrid.astro";
 
 interface Props<T extends DastroTypes = DastroTypes> {
   page: Page<T>;
@@ -20,9 +20,10 @@ interface Props<T extends DastroTypes = DastroTypes> {
 
 const { page, locale, bodyClass, faviconMetaTags } = Astro.props;
 
-const { routing, config, i18n } = Astro.locals.dastro;
+const { routing, config, i18n, draftMode } = Astro.locals.dastro;
 const { resolveRecordUrl } = routing();
 const { normalizedIsoLocale, locales } = i18n();
+const { getExecutedDraftQueries } = draftMode();
 
 const debugViewEnabled = config.dev.debugViewEnabled;
 
@@ -43,7 +44,10 @@ function i18nLinkTags(): MetaTag[] {
   return [
     {
       tag: 'meta',
-      attributes: { property: 'og:url', content: `${baseUrl}${urlInCurrentLocale}` },
+      attributes: {
+        property: 'og:url',
+        content: `${baseUrl}${urlInCurrentLocale}`,
+      },
     },
     {
       tag: 'link',
@@ -59,6 +63,8 @@ function i18nLinkTags(): MetaTag[] {
     })),
   ];
 }
+
+const executedDraftQueries = getExecutedDraftQueries(Astro);
 ---
 
 <!doctype html>
@@ -71,8 +77,8 @@ function i18nLinkTags(): MetaTag[] {
   <head>
     <meta charset="UTF-8" />
     <slot name="head:before" />
-    <slot name="head:viewport" >
-      <meta name="viewport" content="width=device-width, initial-scale=1">
+    <slot name="head:viewport">
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
     </slot>
     <slot name="head:generator">
       <meta name="generator" content={Astro.generator} />
@@ -83,7 +89,7 @@ function i18nLinkTags(): MetaTag[] {
     <slot name="head:seo">
       <Seo
         data={[
-          ...faviconMetaTags ?? [],
+          ...(faviconMetaTags ?? []),
           ...page._seoMetaTags,
           ...i18nLinkTags(),
         ]}
@@ -116,6 +122,9 @@ function i18nLinkTags(): MetaTag[] {
         </slot>
       )
     }
+    <slot name="body:query-listeners">
+      {executedDraftQueries.map((q) => <QueryListener {...q} />)}
+    </slot>
     <slot name="body:after" />
   </body>
 </html>

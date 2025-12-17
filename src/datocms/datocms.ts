@@ -1,5 +1,5 @@
 import type { TypedDocumentNode } from '@graphql-typed-document-node/core';
-import { executeQuery } from '@datocms/cda-client';
+import { executeQuery, type ExecuteQueryOptions } from '@datocms/cda-client';
 import type { DastroConfig, DastroTypes } from '../core/lib-types.ts';
 import type { AstroContext } from '../astro.context.ts';
 import { draftMode } from './draft-mode.ts';
@@ -22,16 +22,27 @@ export function datocms<T extends DastroTypes>(config: DastroConfig<T>) {
     //   ).name?.value,
     //   variables: JSON.stringify(variables),
     // });
-    const { isDraftModeEnabled } = draftMode<T>(config);
+    const { isDraftModeEnabled, addExecutedQueryInDraftMode } =
+      draftMode<T>(config);
     const { getDatoEnvironment } = environmentSwitch<T>(config);
 
-    return executeQuery(query, {
-      variables: variables,
+    const queryOptions = {
+      variables,
       excludeInvalid,
       includeDrafts: isDraftModeEnabled(context),
-      token: config.datocms.token as any,
+      token: config.datocms.token,
       environment: getDatoEnvironment(context),
-    });
+    } satisfies ExecuteQueryOptions<TVariables>;
+
+    addExecutedQueryInDraftMode(
+      {
+        query,
+        ...queryOptions,
+      },
+      context,
+    );
+
+    return executeQuery(query, queryOptions);
   }
 
   return {

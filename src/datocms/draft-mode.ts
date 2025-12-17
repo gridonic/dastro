@@ -1,7 +1,15 @@
 import jwt, { type JwtPayload } from 'jsonwebtoken';
 import type { AstroCookieSetOptions } from 'astro';
-import type {AstroContext} from "../astro.context.ts";
-import type {DastroConfig, DastroTypes} from "../core/lib-types.ts";
+import type { AstroContext } from '../astro.context.ts';
+import type { DastroConfig, DastroTypes } from '../core/lib-types.ts';
+import type { QueryListenerOptions } from '@datocms/astro';
+
+export interface ExecutedQuery<
+  QueryResult,
+  QueryVariables,
+> extends QueryListenerOptions<QueryResult, QueryVariables> {
+  // TODO: can add stuff like resulting cache tags
+}
 
 export function draftMode<T extends DastroTypes>(config: DastroConfig<T>) {
   const DRAFT_MODE_COOKIE_NAME = 'draft_mode';
@@ -34,7 +42,7 @@ export function draftMode<T extends DastroTypes>(config: DastroConfig<T>) {
   }
 
   function jwtToken() {
-    return jwt.sign({enabled: true}, config.api.signedCookieJwtSecret);
+    return jwt.sign({ enabled: true }, config.api.signedCookieJwtSecret);
   }
 
   function cookieOptions(): AstroCookieSetOptions {
@@ -46,10 +54,40 @@ export function draftMode<T extends DastroTypes>(config: DastroConfig<T>) {
     };
   }
 
+  function addExecutedQueryInDraftMode<QueryResult, QueryVariables>(
+    executedQuery: ExecutedQuery<QueryResult, QueryVariables>,
+    context: AstroContext<'cookies' | 'locals'>,
+  ) {
+    if (!isDraftModeEnabled(context)) {
+      return;
+    }
+
+    const { locals } = context;
+
+    if (!locals.draftMode) {
+      locals.draftMode = {
+        executedQueries: [],
+      };
+    }
+
+    if (!locals.draftMode.executedQueries) {
+      locals.draftMode.executedQueries = [];
+    }
+
+    locals.draftMode.executedQueries.push(executedQuery);
+  }
+
+  function getExecutedDraftQueries(context: AstroContext<'locals'>) {
+    const { locals } = context;
+    return locals.draftMode?.executedQueries ?? [];
+  }
+
   return {
     isDraftModeEnabled,
     enableDraftMode,
     disableDraftMode,
-    DRAFT_MODE_COOKIE_NAME
-  }
+    addExecutedQueryInDraftMode,
+    getExecutedDraftQueries,
+    DRAFT_MODE_COOKIE_NAME,
+  };
 }
