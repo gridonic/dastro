@@ -10,6 +10,7 @@ import type { ClassValue } from '../component.types.ts';
 import DebugGridContainer from '../debug/DebugGridContainer.astro';
 import AutoDebugGrid from '../debug/AutoDebugGrid.astro';
 import DebugView from '../debug/DebugView.astro';
+import DebugInfo from '../debug/DebugInfo.astro';
 
 interface Props<T extends DastroTypes = DastroTypes> {
   page: Page<T>;
@@ -122,6 +123,9 @@ const executedDraftQueries = getExecutedDraftQueries(Astro);
         </slot>
       )
     }
+    <slot name="body:debug-info">
+      <DebugInfo />
+    </slot>
     <slot name="body:query-listeners">
       {executedDraftQueries.map((q) => <QueryListener {...q} />)}
     </slot>

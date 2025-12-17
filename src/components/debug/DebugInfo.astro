@@ -1,0 +1,82 @@
+---
+import pkg from '../../../package.json';
+
+const { environmentSwitch, draftMode, config } = Astro.locals.dastro;
+
+const { isDraftModeEnabled } = draftMode();
+const { getDatoEnvironment } = environmentSwitch();
+
+const env = config.environment || 'no env';
+const draftModeEnabled = isDraftModeEnabled(Astro);
+
+const dastroVersion = pkg.version;
+const astroVersion = Astro.generator.match(/v(.*)/)?.[1] || 'unknown';
+
+const datoEnvironment = getDatoEnvironment(Astro);
+---
+
+<div
+  class="debug-info"
+  data-debug-info
+  data-environment={env}
+  data-draft-mode-enabled={draftModeEnabled}
+  data-dastro-version={dastroVersion}
+  data-astro-version={astroVersion}
+  data-dato-environment={datoEnvironment}
+>
+  {draftModeEnabled && <div class="draft-mode-enabled">Draft</div>}
+</div>
+
+<script>
+  import { log } from '../../client';
+  import { registerComponent, BaseComponent } from '../../client';
+
+  registerComponent(
+    '[data-debug-info]',
+    class DebugView extends BaseComponent {
+      init() {
+        log.debug(`Dastro: ${this.$el.dataset.dastroVersion ?? '?'}`);
+        log.debug(`Astro: ${this.$el.dataset.astroVersion ?? '?'}`);
+        log.debug(
+          `Alpine: ${'Alpine' in globalThis ? Alpine.version : 'not activated'}`,
+        );
+        log.debug(`Environment: ${this.$el.dataset.environment ?? '?'}`);
+        log.debug(
+          `Dato Environment: ${this.$el.dataset.datoEnvironment ?? '?'}`,
+        );
+        log.debug(
+          `Draft Mode enabled: ${(this.$el.dataset.draftModeEnabled === 'true').toString()}`,
+        );
+      }
+    },
+  );
+</script>
+
+<style lang="scss">
+  .debug-info {
+    > .draft-mode-enabled {
+      position: fixed;
+      right: 0;
+      top: 0;
+      padding: 4px;
+      z-index: calc(var(--z-debug) + 1);
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      font-size: 10px;
+      line-height: 1;
+
+      /*border: 1px solid #632804;*/
+      border-bottom-left-radius: 4px;
+      color: white;
+      background: hsl(2, 85%, 69%);
+      opacity: 0.5;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+</style>

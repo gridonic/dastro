@@ -257,8 +257,6 @@ const astroVersion = Astro.generator.match(/v(.*)/)?.[1] || 'unknown';
         this.restorePanelPosition();
         this.bindDragHandles();
 
-        log.debug('Using dastro version ');
-
         log.debug(
           'Debug View Keyboard Shortcuts\n' +
             '-----------------------------\n' +
@@ -271,17 +269,8 @@ const astroVersion = Astro.generator.match(/v(.*)/)?.[1] || 'unknown';
             'Ctrl + H: Content Height\n',
         );
 
-        log.debug(`Dastro: ${this.$el.dataset.dastroVersion ?? '?'}`);
-        log.debug(`Astro: ${this.$el.dataset.astroVersion ?? '?'}`);
-        log.debug(
-          `Alpine: ${'Alpine' in globalThis ? Alpine.version : 'not activated'}`,
-        );
-
         this.draftModeEnabled = this.$el.dataset.draftModeEnabled === 'true';
-        log.debug(`Draft Mode enabled: ${this.draftModeEnabled.toString()}`);
-
         this.environment = this.$el.dataset.environment ?? '?';
-        log.debug(`Environment: ${this.environment}`);
       }
 
       bindCheckboxEvents() {
@@ -605,6 +594,19 @@ const astroVersion = Astro.generator.match(/v(.*)/)?.[1] || 'unknown';
           width: 16px;
           height: 16px;
         }
+      }
+    }
+
+    &:has(.draftmode.-enabled) > .toggle {
+      &::before {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        content: '';
+        border: 4px solid var(--debug-view-color-negative);
+        pointer-events: none;
       }
     }
 
