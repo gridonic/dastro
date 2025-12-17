@@ -9,6 +9,7 @@ import type {
   Environment,
   Site,
 } from '@datocms/cma-client/dist/types/generated/ApiTypes';
+import pkg from '../../../package.json';
 
 export const GET: APIRoute = async (context) => {
   if (
@@ -37,6 +38,10 @@ export const GET: APIRoute = async (context) => {
   }
 
   return json({
+    dastro: {
+      version: pkg.version,
+      astroVersion: context.generator.match(/v(.*)/)?.[1] || 'unknown',
+    },
     config: {
       environment: config.environment,
       appBaseUrl: config.appBaseUrl,
