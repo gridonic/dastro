@@ -1,12 +1,17 @@
 import type { APIRoute } from 'astro';
-import {checkSecretApiTokenCorrectness, handleUnexpectedError, invalidRequestResponse} from "../../utils.ts";
+import {
+  checkSecretApiTokenCorrectness,
+  handleUnexpectedError,
+  invalidRequestResponse,
+} from '../../utils.ts';
 
 /**
  * This route handler enables Draft Mode and redirects to the given URL.
  */
 export const GET: APIRoute = async (event) => {
   const { enableDraftMode } = event.locals.dastro.draftMode();
-  const { isDatoEnvironmentSwitchAllowed, switchDatoEnvironment } = event.locals.dastro.environmentSwitch();
+  const { isDatoEnvironmentSwitchAllowed, switchDatoEnvironment } =
+    event.locals.dastro.environmentSwitch();
 
   const { url } = event;
 
@@ -37,5 +42,13 @@ export const GET: APIRoute = async (event) => {
     return handleUnexpectedError(error);
   }
 
-  return event.redirect(redirectUrl, 307);
+  const redirectUrlWithDraftMode = new URL(redirectUrl, url.origin);
+  redirectUrlWithDraftMode.searchParams.set(
+    'draftModeEnabledAt',
+    Date.now().toString(),
+  );
+  const finalRedirectUrl =
+    redirectUrlWithDraftMode.pathname + redirectUrlWithDraftMode.search;
+
+  return event.redirect(finalRedirectUrl, 303);
 };

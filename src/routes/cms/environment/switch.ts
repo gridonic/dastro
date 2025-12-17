@@ -1,12 +1,16 @@
 import type { APIRoute } from 'astro';
-import {checkSecretApiTokenCorrectness, handleUnexpectedError, invalidRequestResponse} from "../../utils.ts";
-
+import {
+  checkSecretApiTokenCorrectness,
+  handleUnexpectedError,
+  invalidRequestResponse,
+} from '../../utils.ts';
 
 /**
  * This route handler enables Draft Mode and redirects to the given URL.
  */
 export const GET: APIRoute = async (event) => {
-  const { isDatoEnvironmentSwitchAllowed, switchDatoEnvironment } = event.locals.dastro.environmentSwitch();
+  const { isDatoEnvironmentSwitchAllowed, switchDatoEnvironment } =
+    event.locals.dastro.environmentSwitch();
 
   if (!isDatoEnvironmentSwitchAllowed()) {
     return invalidRequestResponse('Switching environment is not allowed.', 501);
@@ -41,5 +45,5 @@ export const GET: APIRoute = async (event) => {
     return handleUnexpectedError(error);
   }
 
-  return event.redirect(redirectUrl, 307);
+  return event.redirect(redirectUrl, 303);
 };
