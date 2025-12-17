@@ -1,3 +1,7 @@
+### [1.1.19](https://github.com/gridonic/dastro/compare/v1.1.18...v1.1.19)
+
+- add query listeners for datocms in draft mode, allows live refresh of page when content changes
+
 ### [1.1.18](https://github.com/gridonic/dastro/compare/v1.1.17...v1.1.18)
 
 - fix access and types of netlify in astro locals
