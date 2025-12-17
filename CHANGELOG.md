@@ -1,3 +1,7 @@
+### [1.1.21](https://github.com/gridonic/dastro/compare/v1.1.20...v1.1.21)
+
+- make sure that browser never uses locally cached pages when switching to draft mode
+
 ### [1.1.20](https://github.com/gridonic/dastro/compare/v1.1.19...v1.1.20)
 
 - log version infos and show draft mode hint also when debug view not enabled
