@@ -798,6 +798,7 @@
         const unitlessVariables = [
           '--fluid-aspect-ratio-max',
           '--fluid-aspect-ratio-min',
+          '--fluid-rate-of-reduction',
         ];
         return unitlessVariables.includes(variableName);
       }
@@ -872,8 +873,35 @@
             control.valueDisplay.textContent = formatValue(currentValue);
           } else {
             // Show saved value or original value for inactive viewport
-            const original = this.originalValues.get(controlKey);
-            control.valueDisplay.textContent = formatValue(original || '0');
+            // Check for saved override first
+            let displayValue: string | null = null;
+            try {
+              const saved = JSON.parse(
+                sessionStorage.getItem(this.storageKey) || '{}'
+              );
+              const savedValue = saved[controlKey];
+              if (typeof savedValue === 'number') {
+                // Get unit from original value
+                const original = this.originalValues.get(controlKey) || '0';
+                if (isUnitless) {
+                  displayValue = savedValue.toString();
+                } else {
+                  const unitMatch = original.match(/[\d.]+(.*)/);
+                  const unit = unitMatch && unitMatch[1] ? unitMatch[1] : 'px';
+                  displayValue = `${savedValue}${unit}`;
+                }
+              }
+            } catch (error) {
+              // Ignore
+            }
+            
+            // Fallback to original value if no saved value
+            if (!displayValue) {
+              const original = this.originalValues.get(controlKey);
+              displayValue = original || '0';
+            }
+            
+            control.valueDisplay.textContent = formatValue(displayValue);
           }
         } else {
           const currentValue = this.getCurrentValue(variableName);
@@ -1101,6 +1129,9 @@
                 control.mediaQuery, 
                 false
               );
+              
+              // Ensure display is updated after loading saved value
+              this.updateDisplayValue(controlKey);
             } else {
               this.updateModifiedState(controlKey);
             }
