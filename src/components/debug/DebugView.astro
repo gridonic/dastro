@@ -1,4 +1,5 @@
 ---
+import DebugCssVariables from '../debug/DebugCssVariables.astro';
 import pkg from '../../../package.json';
 
 const { environmentSwitch, draftMode, config } = Astro.locals.dastro;
@@ -100,6 +101,8 @@ const astroVersion = Astro.generator.match(/v(.*)/)?.[1] || 'unknown';
       <div class="detail _hidden-vs">Large Viewport</div>
       <div class="detail _hidden-vl">Small Viewport</div>
     </div>
+
+    <DebugCssVariables />
 
     <div class="variables">
       <div class="title">Variables</div>
@@ -636,6 +639,7 @@ const astroVersion = Astro.generator.match(/v(.*)/)?.[1] || 'unknown';
         background: var(--debug-view-accent-color);
         color: var(--debug-view-inverted-foreground-color);
         user-select: none;
+        cursor: grab;
 
         > .toggle {
           margin-left: auto;
