@@ -235,6 +235,47 @@
       />
     </div>
   </div>
+  <div class="variable-control" data-css-var-container="--fluid-aspect-ratio-max">
+    <label class="label" for="css-var-fluid-aspect-ratio-max">
+      <span class="label-text">--fluid-aspect-ratio-max</span>
+      <span class="value-wrapper">
+        <button
+          type="button"
+          class="reset-icon"
+          data-css-var="--fluid-aspect-ratio-max"
+          aria-label="Reset to original value"
+          title="Reset to original value"
+        >
+          <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M13.65 2.35C12.2 0.9 10.2 0 8 0C3.58 0 0 3.58 0 8C0 12.42 3.58 16 8 16C11.73 16 14.84 13.45 15.73 10H13.65C12.83 12.33 10.61 14 8 14C4.69 14 2 11.31 2 8C2 4.69 4.69 2 8 2C9.66 2 11.14 2.69 12.22 3.78L9 7H16V0L13.65 2.35Z"
+              fill="currentColor"
+            />
+          </svg>
+        </button>
+        <span class="value" data-css-var-value="--fluid-aspect-ratio-max"></span>
+      </span>
+    </label>
+    <div class="input-group">
+      <input
+        type="range"
+        id="css-var-fluid-aspect-ratio-max"
+        class="slider"
+        data-css-var="--fluid-aspect-ratio-max"
+        min="0.5"
+        max="3"
+        step="0.1"
+      />
+      <input
+        type="number"
+        class="number-input"
+        data-css-var="--fluid-aspect-ratio-max"
+        min="0.5"
+        max="3"
+        step="0.1"
+      />
+    </div>
+  </div>
   <div class="variable-control" data-css-var-container="--fluid-rate-of-reduction">
     <label class="label" for="css-var-fluid-rate-of-reduction">
       <span class="label-text">--fluid-rate-of-reduction</span>
@@ -493,6 +534,9 @@
           );
           const savedValue = saved[variableName];
           if (typeof savedValue === 'number') {
+            if (this.isUnitlessVariable(variableName)) {
+              return savedValue.toString();
+            }
             const currentValue = this.getCurrentValue(variableName);
             const unitMatch = currentValue.match(/[\d.]+(.*)/);
             const unit = unitMatch && unitMatch[1] ? unitMatch[1] : 'px';
@@ -593,51 +637,55 @@
       }
 
       private setupVariableControls() {
-        // Handle all variables (including viewport-specific ones)
-        const allControls = this.$el.querySelectorAll('[data-css-var]');
-        allControls.forEach((control) => {
-          const variableName = control.getAttribute('data-css-var');
-          const viewport = control.getAttribute('data-viewport') as 'small' | 'large' | null;
+        // Iterate over containers directly for more reliable setup
+        const containers = this.$el.querySelectorAll('[data-css-var-container]');
+        containers.forEach((container) => {
+          const variableName = container.getAttribute('data-css-var-container');
+          const viewport = container.getAttribute('data-viewport') as 'small' | 'large' | null;
           if (!variableName) return;
 
           // Create unique key for viewport-specific variables
           const controlKey = viewport ? `${variableName}-${viewport}` : variableName;
           
           if (!this.variableControls.has(controlKey)) {
-            const container = control.closest('[data-css-var-container]') as HTMLElement;
-            const mediaQuery = container?.getAttribute('data-media-query') || undefined;
+            const mediaQuery = container.getAttribute('data-media-query') || undefined;
             
-            const slider = viewport
-              ? this.$el.querySelector(
-                  `input[type="range"][data-css-var="${variableName}"][data-viewport="${viewport}"]`
-                ) as HTMLInputElement
-              : this.$el.querySelector(
-                  `input[type="range"][data-css-var="${variableName}"]:not([data-viewport])`
-                ) as HTMLInputElement;
+            // Find all elements within this container
+            const slider = container.querySelector(
+              viewport
+                ? `input[type="range"][data-css-var="${variableName}"][data-viewport="${viewport}"]`
+                : `input[type="range"][data-css-var="${variableName}"]:not([data-viewport])`
+            ) as HTMLInputElement;
                 
-            const numberInput = viewport
-              ? this.$el.querySelector(
-                  `input[type="number"][data-css-var="${variableName}"][data-viewport="${viewport}"]`
-                ) as HTMLInputElement
-              : this.$el.querySelector(
-                  `input[type="number"][data-css-var="${variableName}"]:not([data-viewport])`
-                ) as HTMLInputElement;
+            const numberInput = container.querySelector(
+              viewport
+                ? `input[type="number"][data-css-var="${variableName}"][data-viewport="${viewport}"]`
+                : `input[type="number"][data-css-var="${variableName}"]:not([data-viewport])`
+            ) as HTMLInputElement;
                 
-            const valueDisplay = viewport
-              ? this.$el.querySelector(
-                  `[data-css-var-value="${variableName}"][data-viewport="${viewport}"]`
-                ) as HTMLElement
-              : this.$el.querySelector(
-                  `[data-css-var-value="${variableName}"]:not([data-viewport])`
-                ) as HTMLElement;
+            const valueDisplay = container.querySelector(
+              viewport
+                ? `[data-css-var-value="${variableName}"][data-viewport="${viewport}"]`
+                : `[data-css-var-value="${variableName}"]:not([data-viewport])`
+            ) as HTMLElement;
                 
-            const resetIcon = viewport
-              ? this.$el.querySelector(
-                  `button.reset-icon[data-css-var="${variableName}"][data-viewport="${viewport}"]`
-                ) as HTMLButtonElement
-              : this.$el.querySelector(
-                  `button.reset-icon[data-css-var="${variableName}"]:not([data-viewport])`
-                ) as HTMLButtonElement;
+            // Find reset icon - check all reset buttons in container and find the one without data-viewport if non-viewport
+            let resetIcon: HTMLButtonElement | null = null;
+            if (viewport) {
+              resetIcon = container.querySelector(
+                `button.reset-icon[data-css-var="${variableName}"][data-viewport="${viewport}"]`
+              ) as HTMLButtonElement;
+            } else {
+              // For non-viewport, find button without data-viewport attribute
+              const allResetButtons = container.querySelectorAll(`button.reset-icon[data-css-var="${variableName}"]`);
+              for (let i = 0; i < allResetButtons.length; i++) {
+                const btn = allResetButtons[i] as HTMLButtonElement;
+                if (!btn.hasAttribute('data-viewport')) {
+                  resetIcon = btn;
+                  break;
+                }
+              }
+            }
 
             if (slider && numberInput && valueDisplay && resetIcon) {
               this.setupVariable(variableName, slider, numberInput, valueDisplay, resetIcon, viewport || undefined, mediaQuery);
@@ -745,6 +793,15 @@
         return match ? parseFloat(match[1]) : null;
       }
 
+      private isUnitlessVariable(variableName: string): boolean {
+        // List of variables that don't have units (e.g., aspect ratios, ratios, etc.)
+        const unitlessVariables = [
+          '--fluid-aspect-ratio-max',
+          '--fluid-aspect-ratio-min',
+        ];
+        return unitlessVariables.includes(variableName);
+      }
+
       private updateVariable(variableName: string, value: string, viewport?: 'small' | 'large', mediaQuery?: string, save: boolean = true) {
         const numValue = parseFloat(value);
         if (isNaN(numValue)) return;
@@ -753,12 +810,16 @@
         const control = this.variableControls.get(controlKey);
         if (!control) return;
 
-        // Determine unit from original value, default to px
-        const originalValue = this.originalValues.get(controlKey) || this.getCurrentValue(variableName);
-        const unitMatch = originalValue.match(/[\d.]+(.*)/);
-        const unit = unitMatch && unitMatch[1] ? unitMatch[1] : 'px';
-
-        const newValue = `${numValue}${unit}`;
+        // Determine unit from original value, default to px (unless unitless)
+        let newValue: string;
+        if (this.isUnitlessVariable(variableName)) {
+          newValue = numValue.toString();
+        } else {
+          const originalValue = this.originalValues.get(controlKey) || this.getCurrentValue(variableName);
+          const unitMatch = originalValue.match(/[\d.]+(.*)/);
+          const unit = unitMatch && unitMatch[1] ? unitMatch[1] : 'px';
+          newValue = `${numValue}${unit}`;
+        }
         
         // Only apply if this is for the current viewport or if no viewport specified
         if (viewport) {
@@ -788,22 +849,35 @@
         const control = this.variableControls.get(controlKey);
         if (!control) return;
 
+        const variableName = control.viewport 
+          ? controlKey.replace(`-${control.viewport}`, '')
+          : controlKey;
+        const isUnitless = this.isUnitlessVariable(variableName);
+
+        // Helper to strip units for unitless variables
+        const formatValue = (value: string): string => {
+          if (isUnitless) {
+            // Strip any units for unitless variables
+            const match = value.match(/^([\d.]+)/);
+            return match ? match[1] : value;
+          }
+          return value;
+        };
+
         // For viewport-specific variables, show the value only when that viewport is active
         if (control.viewport) {
           const currentViewport = this.getCurrentViewport();
           if (control.viewport === currentViewport) {
-            const currentValue = this.getCurrentValue(controlKey.split('-').slice(0, -1).join('-') || controlKey);
-            control.valueDisplay.textContent = currentValue;
+            const currentValue = this.getCurrentValue(variableName);
+            control.valueDisplay.textContent = formatValue(currentValue);
           } else {
             // Show saved value or original value for inactive viewport
-            const variableName = controlKey.replace(`-${control.viewport}`, '');
             const original = this.originalValues.get(controlKey);
-            control.valueDisplay.textContent = original || '0';
+            control.valueDisplay.textContent = formatValue(original || '0');
           }
         } else {
-          const variableName = controlKey;
           const currentValue = this.getCurrentValue(variableName);
-          control.valueDisplay.textContent = currentValue;
+          control.valueDisplay.textContent = formatValue(currentValue);
         }
       }
 
@@ -851,12 +925,19 @@
                     
                     if (typeof saved[controlKey] === 'number') {
                       // Apply saved override
-                      const unitMatch = currentValue.match(/[\d.]+(.*)/);
-                      const unit = unitMatch && unitMatch[1] ? unitMatch[1] : 'px';
-                      document.documentElement.style.setProperty(
-                        variableName,
-                        `${saved[controlKey]}${unit}`
-                      );
+                      if (this.isUnitlessVariable(variableName)) {
+                        document.documentElement.style.setProperty(
+                          variableName,
+                          saved[controlKey].toString()
+                        );
+                      } else {
+                        const unitMatch = currentValue.match(/[\d.]+(.*)/);
+                        const unit = unitMatch && unitMatch[1] ? unitMatch[1] : 'px';
+                        document.documentElement.style.setProperty(
+                          variableName,
+                          `${saved[controlKey]}${unit}`
+                        );
+                      }
                     } else {
                       // Remove inline style to use CSS value
                       document.documentElement.style.removeProperty(variableName);
@@ -896,9 +977,25 @@
         const variableName = control.viewport 
           ? controlKey.replace(`-${control.viewport}`, '')
           : controlKey;
-        const container = this.$el.querySelector(
-          `[data-css-var-container="${variableName}"][data-viewport="${control.viewport || ''}"]`
-        ) as HTMLElement;
+        
+        // Build selector based on whether it's viewport-specific or not
+        let container: HTMLElement | null = null;
+        if (control.viewport) {
+          container = this.$el.querySelector(
+            `[data-css-var-container="${variableName}"][data-viewport="${control.viewport}"]`
+          ) as HTMLElement;
+        } else {
+          // For non-viewport variables, find container without data-viewport attribute
+          const containers = this.$el.querySelectorAll(`[data-css-var-container="${variableName}"]`);
+          for (let i = 0; i < containers.length; i++) {
+            const cont = containers[i] as HTMLElement;
+            if (!cont.hasAttribute('data-viewport')) {
+              container = cont;
+              break;
+            }
+          }
+        }
+        
         if (!container) return;
 
         let isModified = false;
@@ -923,15 +1020,33 @@
             }
           }
         } else {
-          // For non-viewport-specific, compare with original
-          const originalValue = this.originalValues.get(controlKey) || '0';
-          const currentValue = this.getCurrentValue(variableName);
-          const normalizedOriginal = originalValue.trim() || '0';
-          const normalizedCurrent = currentValue.trim() || '0';
-          isModified = normalizedOriginal !== normalizedCurrent || isModified;
+          // For non-viewport-specific, check inline style first
+          const inlineStyle = document.documentElement.style.getPropertyValue(variableName);
+          if (inlineStyle && inlineStyle.trim() !== '') {
+            isModified = true;
+          } else {
+            // If no inline style, compare computed value with original
+            const originalValue = this.originalValues.get(controlKey) || '0';
+            const currentValue = this.getCurrentValue(variableName);
+            
+            // Normalize values for comparison (strip units for unitless variables)
+            const isUnitless = this.isUnitlessVariable(variableName);
+            let normalizedOriginal = originalValue.trim() || '0';
+            let normalizedCurrent = currentValue.trim() || '0';
+            
+            if (isUnitless) {
+              // Strip units from both values for comparison
+              const originalMatch = normalizedOriginal.match(/^([\d.]+)/);
+              const currentMatch = normalizedCurrent.match(/^([\d.]+)/);
+              normalizedOriginal = originalMatch ? originalMatch[1] : normalizedOriginal;
+              normalizedCurrent = currentMatch ? currentMatch[1] : normalizedCurrent;
+            }
+            
+            isModified = normalizedOriginal !== normalizedCurrent || isModified;
+          }
         }
         
-        // Also check if there's a saved value
+        // Also check if there's a saved value (this check is redundant but kept for safety)
         if (!isModified) {
           try {
             const saved = JSON.parse(
