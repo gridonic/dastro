@@ -2,15 +2,15 @@
 ---
 
 <div class="debug-css-variables">
-  <div class="title">CSS Variables</div>
-  <div class="variable-control" data-css-var-container="--fluid-size-max" data-responsive="true">
-    <label class="label" for="css-var-fluid-size-max">
-      <span class="label-text">--fluid-size-max <span class="responsive-badge" title="This value changes based on viewport size">responsive</span></span>
+  <div class="variable-control" data-css-var-container="--fluid-size-max" data-viewport="small" data-media-query="--vs">
+    <label class="label" for="css-var-fluid-size-max-small">
+      <span class="label-text">--fluid-size-max <span class="viewport-badge">small</span></span>
       <span class="value-wrapper">
         <button
           type="button"
           class="reset-icon"
           data-css-var="--fluid-size-max"
+          data-viewport="small"
           aria-label="Reset to original value"
           title="Reset to original value"
         >
@@ -21,15 +21,16 @@
             />
           </svg>
         </button>
-        <span class="value" data-css-var-value="--fluid-size-max"></span>
+        <span class="value" data-css-var-value="--fluid-size-max" data-viewport="small"></span>
       </span>
     </label>
     <div class="input-group">
       <input
         type="range"
-        id="css-var-fluid-size-max"
+        id="css-var-fluid-size-max-small"
         class="slider"
         data-css-var="--fluid-size-max"
+        data-viewport="small"
         min="0"
         max="200"
         step="1"
@@ -38,20 +39,22 @@
         type="number"
         class="number-input"
         data-css-var="--fluid-size-max"
+        data-viewport="small"
         min="0"
         max="200"
         step="1"
       />
     </div>
   </div>
-  <div class="variable-control" data-css-var-container="--fluid-size-min" data-responsive="true">
-    <label class="label" for="css-var-fluid-size-min">
-      <span class="label-text">--fluid-size-min <span class="responsive-badge" title="This value changes based on viewport size">responsive</span></span>
+  <div class="variable-control" data-css-var-container="--fluid-size-max" data-viewport="large" data-media-query="--vl">
+    <label class="label" for="css-var-fluid-size-max-large">
+      <span class="label-text">--fluid-size-max <span class="viewport-badge">large</span></span>
       <span class="value-wrapper">
         <button
           type="button"
           class="reset-icon"
-          data-css-var="--fluid-size-min"
+          data-css-var="--fluid-size-max"
+          data-viewport="large"
           aria-label="Reset to original value"
           title="Reset to original value"
         >
@@ -62,15 +65,60 @@
             />
           </svg>
         </button>
-        <span class="value" data-css-var-value="--fluid-size-min"></span>
+        <span class="value" data-css-var-value="--fluid-size-max" data-viewport="large"></span>
       </span>
     </label>
     <div class="input-group">
       <input
         type="range"
-        id="css-var-fluid-size-min"
+        id="css-var-fluid-size-max-large"
+        class="slider"
+        data-css-var="--fluid-size-max"
+        data-viewport="large"
+        min="0"
+        max="200"
+        step="1"
+      />
+      <input
+        type="number"
+        class="number-input"
+        data-css-var="--fluid-size-max"
+        data-viewport="large"
+        min="0"
+        max="200"
+        step="1"
+      />
+    </div>
+  </div>
+  <div class="variable-control" data-css-var-container="--fluid-size-min" data-viewport="small" data-media-query="--vs">
+    <label class="label" for="css-var-fluid-size-min-small">
+      <span class="label-text">--fluid-size-min <span class="viewport-badge">small</span></span>
+      <span class="value-wrapper">
+        <button
+          type="button"
+          class="reset-icon"
+          data-css-var="--fluid-size-min"
+          data-viewport="small"
+          aria-label="Reset to original value"
+          title="Reset to original value"
+        >
+          <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M13.65 2.35C12.2 0.9 10.2 0 8 0C3.58 0 0 3.58 0 8C0 12.42 3.58 16 8 16C11.73 16 14.84 13.45 15.73 10H13.65C12.83 12.33 10.61 14 8 14C4.69 14 2 11.31 2 8C2 4.69 4.69 2 8 2C9.66 2 11.14 2.69 12.22 3.78L9 7H16V0L13.65 2.35Z"
+              fill="currentColor"
+            />
+          </svg>
+        </button>
+        <span class="value" data-css-var-value="--fluid-size-min" data-viewport="small"></span>
+      </span>
+    </label>
+    <div class="input-group">
+      <input
+        type="range"
+        id="css-var-fluid-size-min-small"
         class="slider"
         data-css-var="--fluid-size-min"
+        data-viewport="small"
         min="0"
         max="200"
         step="1"
@@ -79,6 +127,51 @@
         type="number"
         class="number-input"
         data-css-var="--fluid-size-min"
+        data-viewport="small"
+        min="0"
+        max="200"
+        step="1"
+      />
+    </div>
+  </div>
+  <div class="variable-control" data-css-var-container="--fluid-size-min" data-viewport="large" data-media-query="--vl">
+    <label class="label" for="css-var-fluid-size-min-large">
+      <span class="label-text">--fluid-size-min <span class="viewport-badge">large</span></span>
+      <span class="value-wrapper">
+        <button
+          type="button"
+          class="reset-icon"
+          data-css-var="--fluid-size-min"
+          data-viewport="large"
+          aria-label="Reset to original value"
+          title="Reset to original value"
+        >
+          <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M13.65 2.35C12.2 0.9 10.2 0 8 0C3.58 0 0 3.58 0 8C0 12.42 3.58 16 8 16C11.73 16 14.84 13.45 15.73 10H13.65C12.83 12.33 10.61 14 8 14C4.69 14 2 11.31 2 8C2 4.69 4.69 2 8 2C9.66 2 11.14 2.69 12.22 3.78L9 7H16V0L13.65 2.35Z"
+              fill="currentColor"
+            />
+          </svg>
+        </button>
+        <span class="value" data-css-var-value="--fluid-size-min" data-viewport="large"></span>
+      </span>
+    </label>
+    <div class="input-group">
+      <input
+        type="range"
+        id="css-var-fluid-size-min-large"
+        class="slider"
+        data-css-var="--fluid-size-min"
+        data-viewport="large"
+        min="0"
+        max="200"
+        step="1"
+      />
+      <input
+        type="number"
+        class="number-input"
+        data-css-var="--fluid-size-min"
+        data-viewport="large"
         min="0"
         max="200"
         step="1"
@@ -176,14 +269,228 @@
     '.debug-css-variables',
     class DebugCssVariables extends BaseComponent {
       private readonly storageKey = 'debug-css-variables';
-      private variableControls: Map<string, { slider: HTMLInputElement; numberInput: HTMLInputElement; valueDisplay: HTMLElement; resetIcon: HTMLButtonElement }> = new Map();
+      private variableControls: Map<string, { slider: HTMLInputElement; numberInput: HTMLInputElement; valueDisplay: HTMLElement; resetIcon: HTMLButtonElement; viewport?: 'small' | 'large'; mediaQuery?: string }> = new Map();
       private originalValues: Map<string, string> = new Map();
-      private readonly responsiveVariables = ['--fluid-size-min', '--fluid-size-max'];
       private resizeTimeout: number | null = null;
+      
+      private getCurrentViewport(): 'small' | 'large' {
+        // Use width-based detection (typically 768px breakpoint)
+        // --vs is typically max-width, --vl is min-width
+        return window.innerWidth < 768 ? 'small' : 'large';
+      }
 
-      init() {
+      private readValueFromStylesheet(variableName: string, viewport: 'small' | 'large'): string | null {
+        // Try to read the value from CSS rules directly
+        // Look for @media (--vs) or @media (--vl) rules that set this variable
+        const mediaQuery = viewport === 'small' ? '--vs' : '--vl';
+        
+        try {
+          const stylesheets = Array.from(document.styleSheets);
+          for (const stylesheet of stylesheets) {
+            try {
+              const rules = Array.from(stylesheet.cssRules || []);
+              for (const rule of rules) {
+                if (rule instanceof CSSMediaRule) {
+                  // Check if this media rule matches our target
+                  const mediaText = rule.media.mediaText;
+                  if (mediaText.includes(mediaQuery)) {
+                    // Look for the variable in this media rule
+                    const styleRules = Array.from(rule.cssRules || []);
+                    for (const styleRule of styleRules) {
+                      if (styleRule instanceof CSSStyleRule) {
+                        // Check if this rule sets our variable on :root or html
+                        if (styleRule.selectorText === ':root' || styleRule.selectorText === 'html') {
+                          const value = styleRule.style.getPropertyValue(variableName).trim();
+                          if (value) {
+                            return value;
+                          }
+                        }
+                      }
+                    }
+                  }
+                } else if (rule instanceof CSSStyleRule) {
+                  // Check for :root rules that might have the variable
+                  if (rule.selectorText === ':root' || rule.selectorText === 'html') {
+                    const value = rule.style.getPropertyValue(variableName).trim();
+                    if (value) {
+                      // This is a base value, might be overridden by media query
+                      // But we'll use it as fallback
+                    }
+                  }
+                }
+              }
+            } catch (e) {
+              // Cross-origin or other issues - skip this stylesheet
+              continue;
+            }
+          }
+        } catch (e) {
+          // Error reading stylesheets
+        }
+        
+        return null;
+      }
+
+      private async readValueForViewport(variableName: string, targetViewport: 'small' | 'large'): Promise<string> {
+        // Use the current page URL so the iframe has all the same styles
+        return new Promise<string>((resolve) => {
+          const iframe = document.createElement('iframe');
+          const targetWidth = targetViewport === 'small' ? 767 : 1920;
+          
+          iframe.style.position = 'fixed';
+          iframe.style.width = `${targetWidth}px`;
+          iframe.style.height = '100vh';
+          iframe.style.left = '-9999px';
+          iframe.style.top = '0';
+          iframe.style.border = 'none';
+          iframe.style.visibility = 'hidden';
+          iframe.style.pointerEvents = 'none';
+          iframe.style.zIndex = '-9999';
+          
+          let resolved = false;
+          
+          const cleanup = () => {
+            if (iframe.parentNode) {
+              try {
+                document.body.removeChild(iframe);
+              } catch (e) {
+                // Already removed
+              }
+            }
+          };
+          
+          const readValue = () => {
+            try {
+              const iframeWindow = iframe.contentWindow;
+              const iframeDoc = iframe.contentDocument || iframeWindow?.document;
+              
+              if (!iframeDoc || !iframeDoc.documentElement) {
+                return null;
+              }
+              
+              // Read the value from the iframe's computed styles
+              const value = getComputedStyle(iframeDoc.documentElement)
+                .getPropertyValue(variableName)
+                .trim();
+              
+              return value || null;
+            } catch (error) {
+              return null;
+            }
+          };
+          
+          iframe.onload = () => {
+            // Wait for stylesheets to load and media queries to evaluate
+            // Try multiple times with increasing delays
+            const attempts = [
+              () => setTimeout(() => {
+                const value = readValue();
+                if (value && value !== '0') {
+                  resolved = true;
+                  cleanup();
+                  resolve(value);
+                }
+              }, 100),
+              () => setTimeout(() => {
+                if (!resolved) {
+                  const value = readValue();
+                  if (value && value !== '0') {
+                    resolved = true;
+                    cleanup();
+                    resolve(value);
+                  }
+                }
+              }, 500),
+              () => setTimeout(() => {
+                if (!resolved) {
+                  const value = readValue();
+                  resolved = true;
+                  cleanup();
+                  resolve(value || '0');
+                }
+              }, 1000)
+            ];
+            
+            attempts.forEach(attempt => attempt());
+          };
+          
+          iframe.onerror = () => {
+            resolved = true;
+            cleanup();
+            resolve('0');
+          };
+          
+          document.body.appendChild(iframe);
+          iframe.src = window.location.href;
+          
+          // Timeout fallback
+          setTimeout(() => {
+            if (!resolved) {
+              resolved = true;
+              const value = readValue();
+              cleanup();
+              resolve(value || '0');
+            }
+          }, 3000);
+        });
+      }
+
+      private getValueForViewport(variableName: string, viewport: 'small' | 'large'): string {
+        // Check if there's a saved override first
+        const saved = this.getSavedValueRaw(variableName, viewport);
+        if (saved !== null) {
+          return saved;
+        }
+
+        // To read the value from the correct media query, we need to simulate
+        // the viewport size. Since we can't directly query custom media queries,
+        // we'll use the current value if it matches the current viewport,
+        // otherwise we'll need to store the original values per viewport.
+        
+        // For now, if we're reading for the current viewport, use current value
+        const currentViewport = this.getCurrentViewport();
+        if (viewport === currentViewport) {
+          return this.getCurrentValue(variableName);
+        }
+
+        // For the other viewport, we need to read it differently
+        // Since CSS variables are evaluated at render time based on media queries,
+        // we can't easily read the "other" viewport's value without changing the viewport.
+        // Instead, we'll store the original values when first loaded for each viewport.
+        
+        // Try to get from original values stored per viewport
+        const originalKey = `${variableName}-${viewport}`;
+        const storedOriginal = this.originalValues.get(originalKey);
+        if (storedOriginal) {
+          return storedOriginal;
+        }
+
+        // Fallback: return current value (will be updated when viewport changes)
+        return this.getCurrentValue(variableName);
+      }
+
+      private getSavedValueRaw(variableName: string, viewport: 'small' | 'large'): string | null {
+        try {
+          const storageKey = `${this.storageKey}-${viewport}`;
+          const saved = JSON.parse(
+            sessionStorage.getItem(storageKey) || '{}'
+          );
+          const savedValue = saved[variableName];
+          if (typeof savedValue === 'number') {
+            const currentValue = this.getCurrentValue(variableName);
+            const unitMatch = currentValue.match(/[\d.]+(.*)/);
+            const unit = unitMatch && unitMatch[1] ? unitMatch[1] : 'px';
+            return `${savedValue}${unit}`;
+          }
+        } catch (error) {
+          // Ignore
+        }
+        return null;
+      }
+
+      async init() {
         // Store original values first, before any modifications
-        this.storeOriginalValues();
+        await this.storeOriginalValues();
         // Set up controls
         this.setupVariableControls();
         // Load saved values after controls are set up
@@ -191,102 +498,227 @@
         this.loadSavedValues();
         // Update display to show current values
         this.updateDisplayValues();
-        // Set up resize listener for responsive variables
+        // Set up resize listener for viewport-specific variables
         this.setupResizeListener();
       }
 
-      private storeOriginalValues() {
-        const controls = this.$el.querySelectorAll('[data-css-var]');
-        controls.forEach((control) => {
-          const variableName = control.getAttribute('data-css-var');
+      private async storeOriginalValues() {
+        // Store original values for each control (including viewport-specific ones)
+        const containers = this.$el.querySelectorAll('[data-css-var-container]');
+        const currentViewport = this.getCurrentViewport();
+        const promises: Promise<void>[] = [];
+        
+        containers.forEach((container) => {
+          const variableName = container.getAttribute('data-css-var-container');
+          const viewport = container.getAttribute('data-viewport') as 'small' | 'large' | null;
           if (!variableName) return;
           
-          // Get the original value from CSS before any modifications
-          const originalValue = getComputedStyle(document.documentElement)
-            .getPropertyValue(variableName)
-            .trim();
-          this.originalValues.set(variableName, originalValue || '0');
+          const controlKey = viewport ? `${variableName}-${viewport}` : variableName;
+          
+          if (viewport) {
+            // For viewport-specific variables
+            if (viewport === currentViewport) {
+              // Current viewport - read directly
+              const originalValue = getComputedStyle(document.documentElement)
+                .getPropertyValue(variableName)
+                .trim();
+              this.originalValues.set(controlKey, originalValue || '0');
+            } else {
+              // Other viewport - try to read from stylesheet first, then fallback to iframe
+              let foundValue = false;
+              
+              // Try to read from stylesheet rules directly
+              try {
+                const value = this.readValueFromStylesheet(variableName, viewport);
+                if (value) {
+                  this.originalValues.set(controlKey, value);
+                  foundValue = true;
+                }
+              } catch (e) {
+                // Stylesheet reading failed, will use iframe
+              }
+              
+              if (!foundValue) {
+                // Set a temporary placeholder first
+                this.originalValues.set(controlKey, '0');
+                
+                // Read using iframe simulation (async)
+                const promise = this.readValueForViewport(variableName, viewport).then((value: string) => {
+                  if (value && value !== '0') {
+                    this.originalValues.set(controlKey, value);
+                    // Update controls if they exist
+                    const control = this.variableControls.get(controlKey);
+                    if (control) {
+                      const numericValue = this.parseValue(value);
+                      if (numericValue !== null) {
+                        control.slider.value = numericValue.toString();
+                        control.numberInput.value = numericValue.toString();
+                        this.updateDisplayValue(controlKey);
+                      }
+                    }
+                  }
+                }).catch(() => {
+                  // Keep placeholder if reading fails
+                });
+                promises.push(promise);
+              }
+            }
+          } else {
+            // For non-viewport-specific variables
+            const originalValue = getComputedStyle(document.documentElement)
+              .getPropertyValue(variableName)
+              .trim();
+            this.originalValues.set(controlKey, originalValue || '0');
+          }
         });
+        
+        // Wait for all async reads to complete
+        await Promise.all(promises);
       }
 
       private setupVariableControls() {
-        const controls = this.$el.querySelectorAll('[data-css-var]');
-        
-        controls.forEach((control) => {
+        // Handle all variables (including viewport-specific ones)
+        const allControls = this.$el.querySelectorAll('[data-css-var]');
+        allControls.forEach((control) => {
           const variableName = control.getAttribute('data-css-var');
+          const viewport = control.getAttribute('data-viewport') as 'small' | 'large' | null;
           if (!variableName) return;
 
-          if (!this.variableControls.has(variableName)) {
-            const slider = this.$el.querySelector(
-              `input[type="range"][data-css-var="${variableName}"]`
-            ) as HTMLInputElement;
-            const numberInput = this.$el.querySelector(
-              `input[type="number"][data-css-var="${variableName}"]`
-            ) as HTMLInputElement;
-            const valueDisplay = this.$el.querySelector(
-              `[data-css-var-value="${variableName}"]`
-            ) as HTMLElement;
-            const resetIcon = this.$el.querySelector(
-              `button.reset-icon[data-css-var="${variableName}"]`
-            ) as HTMLButtonElement;
+          // Create unique key for viewport-specific variables
+          const controlKey = viewport ? `${variableName}-${viewport}` : variableName;
+          
+          if (!this.variableControls.has(controlKey)) {
+            const container = control.closest('[data-css-var-container]') as HTMLElement;
+            const mediaQuery = container?.getAttribute('data-media-query') || undefined;
+            
+            const slider = viewport
+              ? this.$el.querySelector(
+                  `input[type="range"][data-css-var="${variableName}"][data-viewport="${viewport}"]`
+                ) as HTMLInputElement
+              : this.$el.querySelector(
+                  `input[type="range"][data-css-var="${variableName}"]:not([data-viewport])`
+                ) as HTMLInputElement;
+                
+            const numberInput = viewport
+              ? this.$el.querySelector(
+                  `input[type="number"][data-css-var="${variableName}"][data-viewport="${viewport}"]`
+                ) as HTMLInputElement
+              : this.$el.querySelector(
+                  `input[type="number"][data-css-var="${variableName}"]:not([data-viewport])`
+                ) as HTMLInputElement;
+                
+            const valueDisplay = viewport
+              ? this.$el.querySelector(
+                  `[data-css-var-value="${variableName}"][data-viewport="${viewport}"]`
+                ) as HTMLElement
+              : this.$el.querySelector(
+                  `[data-css-var-value="${variableName}"]:not([data-viewport])`
+                ) as HTMLElement;
+                
+            const resetIcon = viewport
+              ? this.$el.querySelector(
+                  `button.reset-icon[data-css-var="${variableName}"][data-viewport="${viewport}"]`
+                ) as HTMLButtonElement
+              : this.$el.querySelector(
+                  `button.reset-icon[data-css-var="${variableName}"]:not([data-viewport])`
+                ) as HTMLButtonElement;
 
             if (slider && numberInput && valueDisplay && resetIcon) {
-              // Get original value (already stored in storeOriginalValues)
-              const originalValue = this.originalValues.get(variableName) || '0';
-
-              this.variableControls.set(variableName, {
-                slider,
-                numberInput,
-                valueDisplay,
-                resetIcon,
-              });
-
-              // Get initial value from CSS (will be overridden by saved values if they exist)
-              const initialValue = originalValue;
-              const numericValue = this.parseValue(initialValue);
-              
-              if (numericValue !== null) {
-                slider.value = numericValue.toString();
-                numberInput.value = numericValue.toString();
-              } else {
-                // Default to 0 if value can't be parsed
-                slider.value = '0';
-                numberInput.value = '0';
-              }
-
-              // Bind events
-              slider.addEventListener('input', () => {
-                this.updateVariable(variableName, slider.value);
-              });
-
-              numberInput.addEventListener('input', () => {
-                this.updateVariable(variableName, numberInput.value);
-              });
-
-              // Sync slider and number input
-              slider.addEventListener('input', () => {
-                numberInput.value = slider.value;
-              });
-
-              numberInput.addEventListener('input', () => {
-                const numValue = parseFloat(numberInput.value);
-                if (!isNaN(numValue)) {
-                  slider.value = numValue.toString();
-                }
-              });
-
-              // Bind reset icon
-              resetIcon.addEventListener('click', () => {
-                this.resetVariable(variableName);
-              });
+              this.setupVariable(variableName, slider, numberInput, valueDisplay, resetIcon, viewport || undefined, mediaQuery);
             }
           }
         });
       }
 
+      private setupVariable(
+        variableName: string,
+        slider: HTMLInputElement,
+        numberInput: HTMLInputElement,
+        valueDisplay: HTMLElement,
+        resetIcon: HTMLButtonElement,
+        viewport?: 'small' | 'large',
+        mediaQuery?: string
+      ) {
+        const controlKey = viewport ? `${variableName}-${viewport}` : variableName;
+        let originalValue = this.originalValues.get(controlKey);
+        
+        // If no original value stored yet (for async loading), try to get current value
+        if (!originalValue || originalValue === '0') {
+          if (viewport) {
+            const currentViewport = this.getCurrentViewport();
+            if (viewport === currentViewport) {
+              originalValue = getComputedStyle(document.documentElement)
+                .getPropertyValue(variableName)
+                .trim() || '0';
+              this.originalValues.set(controlKey, originalValue);
+            }
+          } else {
+            originalValue = getComputedStyle(document.documentElement)
+              .getPropertyValue(variableName)
+              .trim() || '0';
+            this.originalValues.set(controlKey, originalValue);
+          }
+        }
+
+        this.variableControls.set(controlKey, {
+          slider,
+          numberInput,
+          valueDisplay,
+          resetIcon,
+          viewport,
+          mediaQuery,
+        });
+
+        const numericValue = this.parseValue(originalValue || '0');
+        if (numericValue !== null && numericValue !== 0) {
+          slider.value = numericValue.toString();
+          numberInput.value = numericValue.toString();
+        } else {
+          // If value is 0 or invalid, try to read it again after a short delay
+          // This handles the case where async reading hasn't completed yet
+          setTimeout(() => {
+            const updatedValue = this.originalValues.get(controlKey);
+            if (updatedValue && updatedValue !== '0') {
+              const numVal = this.parseValue(updatedValue);
+              if (numVal !== null) {
+                slider.value = numVal.toString();
+                numberInput.value = numVal.toString();
+                this.updateDisplayValue(controlKey);
+              }
+            }
+          }, 500);
+        }
+
+        // Bind events
+        slider.addEventListener('input', () => {
+          this.updateVariable(variableName, slider.value, viewport, mediaQuery);
+        });
+
+        numberInput.addEventListener('input', () => {
+          this.updateVariable(variableName, numberInput.value, viewport, mediaQuery);
+        });
+
+        slider.addEventListener('input', () => {
+          numberInput.value = slider.value;
+        });
+
+        numberInput.addEventListener('input', () => {
+          const numValue = parseFloat(numberInput.value);
+          if (!isNaN(numValue)) {
+            slider.value = numValue.toString();
+          }
+        });
+
+        resetIcon.addEventListener('click', () => {
+          this.resetVariable(variableName, viewport);
+        });
+      }
+
       private getCurrentValue(variableName: string): string {
+        // For viewport-specific variables, extract the base name
+        const baseName = variableName.replace(/-small$|-large$/, '');
         const value = getComputedStyle(document.documentElement)
-          .getPropertyValue(variableName)
+          .getPropertyValue(baseName)
           .trim();
         return value || '0';
       }
@@ -297,138 +729,205 @@
         return match ? parseFloat(match[1]) : null;
       }
 
-      private updateVariable(variableName: string, value: string, save: boolean = true) {
+      private updateVariable(variableName: string, value: string, viewport?: 'small' | 'large', mediaQuery?: string, save: boolean = true) {
         const numValue = parseFloat(value);
         if (isNaN(numValue)) return;
 
+        const controlKey = viewport ? `${variableName}-${viewport}` : variableName;
+        const control = this.variableControls.get(controlKey);
+        if (!control) return;
+
         // Determine unit from original value, default to px
-        const originalValue = this.getCurrentValue(variableName);
+        const originalValue = this.originalValues.get(controlKey) || this.getCurrentValue(variableName);
         const unitMatch = originalValue.match(/[\d.]+(.*)/);
         const unit = unitMatch && unitMatch[1] ? unitMatch[1] : 'px';
 
         const newValue = `${numValue}${unit}`;
-        document.documentElement.style.setProperty(variableName, newValue);
         
-        this.updateDisplayValue(variableName);
-        this.updateModifiedState(variableName);
-        if (save) {
-          this.saveValue(variableName, numValue);
+        // Only apply if this is for the current viewport or if no viewport specified
+        if (viewport) {
+          const currentViewport = this.getCurrentViewport();
+          if (viewport === currentViewport) {
+            // Apply inline style only when the corresponding media query is active
+            document.documentElement.style.setProperty(variableName, newValue);
+          }
+          // Always save the value for this viewport
+          if (save) {
+            this.saveValue(controlKey, numValue);
+          }
+        } else {
+          // Non-viewport-specific variable
+          document.documentElement.style.setProperty(variableName, newValue);
+          if (save) {
+            this.saveValue(variableName, numValue);
+          }
+        }
+        
+        this.updateDisplayValue(controlKey);
+        this.updateModifiedState(controlKey);
+      }
+
+
+      private updateDisplayValue(controlKey: string) {
+        const control = this.variableControls.get(controlKey);
+        if (!control) return;
+
+        // For viewport-specific variables, show the value only when that viewport is active
+        if (control.viewport) {
+          const currentViewport = this.getCurrentViewport();
+          if (control.viewport === currentViewport) {
+            const currentValue = this.getCurrentValue(controlKey.split('-').slice(0, -1).join('-') || controlKey);
+            control.valueDisplay.textContent = currentValue;
+          } else {
+            // Show saved value or original value for inactive viewport
+            const variableName = controlKey.replace(`-${control.viewport}`, '');
+            const original = this.originalValues.get(controlKey);
+            control.valueDisplay.textContent = original || '0';
+          }
+        } else {
+          const variableName = controlKey;
+          const currentValue = this.getCurrentValue(variableName);
+          control.valueDisplay.textContent = currentValue;
         }
       }
 
-      private updateDisplayValue(variableName: string) {
-        const control = this.variableControls.get(variableName);
-        if (!control) return;
-
-        const currentValue = this.getCurrentValue(variableName);
-        control.valueDisplay.textContent = currentValue;
-      }
-
       private updateDisplayValues() {
-        this.variableControls.forEach((_, variableName) => {
-          this.updateDisplayValue(variableName);
-          this.updateModifiedState(variableName);
+        this.variableControls.forEach((_, controlKey) => {
+          this.updateDisplayValue(controlKey);
+          this.updateModifiedState(controlKey);
         });
       }
 
       private setupResizeListener() {
-        // Use a debounced resize listener to update responsive variables
+        // Use a debounced resize listener to update viewport-specific variables
         window.addEventListener('resize', () => {
           if (this.resizeTimeout) {
             clearTimeout(this.resizeTimeout);
           }
           
           this.resizeTimeout = window.setTimeout(() => {
-            // Update only responsive variables when viewport changes
-            this.responsiveVariables.forEach((variableName) => {
-              if (this.variableControls.has(variableName)) {
-                // Only update if value hasn't been manually overridden
-                const control = this.variableControls.get(variableName);
-                if (!control) return;
+            const currentViewport = this.getCurrentViewport();
+            
+            // Update all viewport-specific controls
+            this.variableControls.forEach((control, controlKey) => {
+              if (control.viewport) {
+                const variableName = controlKey.replace(`-${control.viewport}`, '');
                 
-                // Check if there's a saved override value
-                try {
-                  const saved = JSON.parse(
-                    sessionStorage.getItem(this.storageKey) || '{}'
-                  );
+                // Store original value for current viewport
+                if (control.viewport === currentViewport) {
+                  const currentValue = getComputedStyle(document.documentElement)
+                    .getPropertyValue(variableName)
+                    .trim();
+                  this.originalValues.set(controlKey, currentValue || '0');
                   
-                  // If no saved override, update the display and controls to show current responsive value
-                  if (typeof saved[variableName] !== 'number') {
-                    const currentValue = this.getCurrentValue(variableName);
-                    const numericValue = this.parseValue(currentValue);
-                    
-                    if (numericValue !== null) {
-                      // Update slider and number input to reflect current responsive value
-                      control.slider.value = numericValue.toString();
-                      control.numberInput.value = numericValue.toString();
-                    }
-                    
-                    this.updateDisplayValue(variableName);
-                    this.updateModifiedState(variableName);
-                  }
-                } catch (error) {
-                  // If error reading storage, just update display
-                  const currentValue = this.getCurrentValue(variableName);
+                  // Update controls with current value
                   const numericValue = this.parseValue(currentValue);
-                  
                   if (numericValue !== null) {
                     control.slider.value = numericValue.toString();
                     control.numberInput.value = numericValue.toString();
                   }
                   
-                  this.updateDisplayValue(variableName);
-                  this.updateModifiedState(variableName);
+                  // Check if there's a saved override
+                  try {
+                    const saved = JSON.parse(
+                      sessionStorage.getItem(this.storageKey) || '{}'
+                    );
+                    
+                    if (typeof saved[controlKey] === 'number') {
+                      // Apply saved override
+                      const unitMatch = currentValue.match(/[\d.]+(.*)/);
+                      const unit = unitMatch && unitMatch[1] ? unitMatch[1] : 'px';
+                      document.documentElement.style.setProperty(
+                        variableName,
+                        `${saved[controlKey]}${unit}`
+                      );
+                    } else {
+                      // Remove inline style to use CSS value
+                      document.documentElement.style.removeProperty(variableName);
+                    }
+                  } catch (error) {
+                    // Ignore
+                  }
+                } else {
+                  // For inactive viewport, try to read its value using iframe
+                  this.readValueForViewport(variableName, control.viewport).then((value: string) => {
+                    this.originalValues.set(controlKey, value || '0');
+                    const numericValue = this.parseValue(value);
+                    if (numericValue !== null) {
+                      control.slider.value = numericValue.toString();
+                      control.numberInput.value = numericValue.toString();
+                    }
+                    this.updateDisplayValue(controlKey);
+                  }).catch(() => {
+                    // Keep existing value if reading fails
+                  });
                 }
+                
+                // Update display and controls
+                this.updateDisplayValue(controlKey);
+                this.updateModifiedState(controlKey);
               }
             });
           }, 150);
         });
       }
 
-      private updateModifiedState(variableName: string) {
+      private updateModifiedState(controlKey: string) {
+        const control = this.variableControls.get(controlKey);
+        if (!control) return;
+
+        // Find the container for this control
+        const variableName = control.viewport 
+          ? controlKey.replace(`-${control.viewport}`, '')
+          : controlKey;
         const container = this.$el.querySelector(
-          `[data-css-var-container="${variableName}"]`
+          `[data-css-var-container="${variableName}"][data-viewport="${control.viewport || ''}"]`
         ) as HTMLElement;
         if (!container) return;
 
-        const control = this.variableControls.get(variableName);
-        if (!control) return;
-
-        const isResponsive = this.responsiveVariables.includes(variableName);
         let isModified = false;
 
-        if (isResponsive) {
-          // For responsive variables, check if there's a manual override in sessionStorage
-          // or an inline style override
+        // Check if there's a saved override
+        try {
+          const saved = JSON.parse(
+            sessionStorage.getItem(this.storageKey) || '{}'
+          );
+          isModified = typeof saved[controlKey] === 'number';
+        } catch (error) {
+          isModified = false;
+        }
+
+        // For viewport-specific variables, also check inline style if current viewport
+        if (control.viewport) {
+          const currentViewport = this.getCurrentViewport();
+          if (control.viewport === currentViewport) {
+            const inlineStyle = document.documentElement.style.getPropertyValue(variableName);
+            if (inlineStyle && inlineStyle.trim() !== '') {
+              isModified = true;
+            }
+          }
+        } else {
+          // For non-viewport-specific, compare with original
+          const originalValue = this.originalValues.get(controlKey) || '0';
+          const currentValue = this.getCurrentValue(variableName);
+          const normalizedOriginal = originalValue.trim() || '0';
+          const normalizedCurrent = currentValue.trim() || '0';
+          isModified = normalizedOriginal !== normalizedCurrent || isModified;
+        }
+        
+        // Also check if there's a saved value
+        if (!isModified) {
           try {
             const saved = JSON.parse(
               sessionStorage.getItem(this.storageKey) || '{}'
             );
-            isModified = typeof saved[variableName] === 'number';
-          } catch (error) {
-            isModified = false;
+            isModified = typeof saved[controlKey] === 'number';
+          } catch {
+            // Ignore
           }
-          
-          // Also check if there's an inline style override
-          const inlineStyle = document.documentElement.style.getPropertyValue(variableName);
-          if (inlineStyle && inlineStyle.trim() !== '') {
-            isModified = true;
-          }
-        } else {
-          // For non-responsive variables, compare current value with original
-          const originalValue = this.originalValues.get(variableName) || '0';
-          const currentValue = this.getCurrentValue(variableName);
-          
-          // Normalize values for comparison (remove whitespace, handle empty strings)
-          const normalizedOriginal = originalValue.trim() || '0';
-          const normalizedCurrent = currentValue.trim() || '0';
-          
-          // Check if values differ
-          isModified = normalizedOriginal !== normalizedCurrent;
         }
         
         container.classList.toggle('-modified', isModified);
-        // Show/hide reset icon based on modified state (using visibility to prevent layout shift)
         control.resetIcon.style.visibility = isModified ? 'visible' : 'hidden';
         control.resetIcon.style.pointerEvents = isModified ? 'auto' : 'none';
       }
@@ -451,16 +950,28 @@
             sessionStorage.getItem(this.storageKey) || '{}'
           );
 
-          this.variableControls.forEach((control, variableName) => {
-            const savedValue = saved[variableName];
+          this.variableControls.forEach((control, controlKey) => {
+            const savedValue = saved[controlKey];
             if (typeof savedValue === 'number') {
               control.slider.value = savedValue.toString();
               control.numberInput.value = savedValue.toString();
-              // Apply the saved value to the CSS variable
-              this.updateVariable(variableName, savedValue.toString(), false);
+              
+              // Extract variable name and viewport from controlKey
+              const parts = controlKey.split('-');
+              const viewport = control.viewport;
+              const variableName = viewport 
+                ? controlKey.replace(`-${viewport}`, '')
+                : controlKey;
+              
+              this.updateVariable(
+                variableName, 
+                savedValue.toString(), 
+                viewport, 
+                control.mediaQuery, 
+                false
+              );
             } else {
-              // Even if no saved value, check modified state in case CSS was changed externally
-              this.updateModifiedState(variableName);
+              this.updateModifiedState(controlKey);
             }
           });
         } catch (error) {
@@ -468,8 +979,9 @@
         }
       }
 
-      private resetVariable(variableName: string) {
-        const control = this.variableControls.get(variableName);
+      private resetVariable(variableName: string, viewport?: 'small' | 'large') {
+        const controlKey = viewport ? `${variableName}-${viewport}` : variableName;
+        const control = this.variableControls.get(controlKey);
         if (!control) return;
 
         // Remove from sessionStorage first
@@ -477,34 +989,35 @@
           const saved = JSON.parse(
             sessionStorage.getItem(this.storageKey) || '{}'
           );
-          delete saved[variableName];
+          delete saved[controlKey];
           sessionStorage.setItem(this.storageKey, JSON.stringify(saved));
         } catch (error) {
           console.warn('Unable to remove CSS variable value from storage', error);
         }
 
-        // Remove the inline style to restore original CSS value
-        document.documentElement.style.removeProperty(variableName);
+        // Remove the inline style only if this is the current viewport
+        if (viewport) {
+          const currentViewport = this.getCurrentViewport();
+          if (viewport === currentViewport) {
+            document.documentElement.style.removeProperty(variableName);
+          }
+        } else {
+          document.documentElement.style.removeProperty(variableName);
+        }
 
-        // For responsive variables, get current value (which may vary by viewport)
-        // For non-responsive, use stored original value
-        const isResponsive = this.responsiveVariables.includes(variableName);
-        const valueToUse = isResponsive 
-          ? this.getCurrentValue(variableName)
-          : (this.originalValues.get(variableName) || '0');
-
-        // Update controls to show current value
-        const numericValue = this.parseValue(valueToUse);
+        // Get original value
+        const originalValue = this.originalValues.get(controlKey) || '0';
+        const numericValue = this.parseValue(originalValue);
+        
         if (numericValue !== null) {
           control.slider.value = numericValue.toString();
           control.numberInput.value = numericValue.toString();
         }
 
         // Update display and modified state
-        // Use a small delay to ensure DOM has updated
         setTimeout(() => {
-          this.updateDisplayValue(variableName);
-          this.updateModifiedState(variableName);
+          this.updateDisplayValue(controlKey);
+          this.updateModifiedState(controlKey);
         }, 0);
       }
     },
@@ -516,29 +1029,21 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
-    padding: 13px 16px 16px;
-    border-top: 1px solid var(--debug-view-color-lines, #e3e1e1);
+    margin-top: 8px;
+    padding-top: 8px;
 
-    > .title {
-      font-weight: bold;
-      margin-bottom: 2px;
-      text-transform: uppercase;
-      letter-spacing: 0.64px;
-      font-size: 10px;
-      color: rgba(0, 0, 0, 0.6);
-    }
+      > .variable-control {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 8px;
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
 
-    > .variable-control {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      padding: 8px;
-      border-radius: 4px;
-      transition: background-color 0.2s ease;
+        &.-modified {
+          background-color: rgba(255, 200, 200, 0.3);
+        }
 
-      &.-modified {
-        background-color: rgba(255, 200, 200, 0.3);
-      }
 
       > .label {
         display: flex;
@@ -552,7 +1057,8 @@
           font-weight: 600;
           font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
 
-          > .responsive-badge {
+          > .responsive-badge,
+          > .viewport-badge {
             display: inline-block;
             margin-left: 6px;
             padding: 2px 6px;

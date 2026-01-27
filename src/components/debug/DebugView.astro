@@ -102,8 +102,6 @@ const astroVersion = Astro.generator.match(/v(.*)/)?.[1] || 'unknown';
       <div class="detail _hidden-vl">Small Viewport</div>
     </div>
 
-    <DebugCssVariables />
-
     <div class="variables">
       <div class="title">Variables</div>
       <div class="checkbox">
@@ -118,6 +116,7 @@ const astroVersion = Astro.generator.match(/v(.*)/)?.[1] || 'unknown';
           <span class="shortcut">Ctrl + V</span>
         </label>
       </div>
+      <DebugCssVariables />
       <pre
         class="list"
         data-debug-variables>
@@ -680,7 +679,8 @@ const astroVersion = Astro.generator.match(/v(.*)/)?.[1] || 'unknown';
         margin: 0;
         /*padding: 12px 16px;*/
 
-        body:has(input#debug-view-show-variables:not(:checked)) & > .list {
+        body:has(input#debug-view-show-variables:not(:checked)) & > .list,
+        body:has(input#debug-view-show-variables:not(:checked)) & > :global(.debug-css-variables) {
           display: none;
         }
 
