@@ -6,9 +6,9 @@ import {
   json,
   withCORS,
 } from '../utils';
-import type {DastroTypes} from "../../core/lib-types.ts";
-import type {RecordWithParent} from "../../core/routing.ts";
-import {executeQuery} from "@datocms/cda-client";
+import type { DastroTypes } from '../../core/lib-types.ts';
+import type { RecordWithParent } from '../../core/routing.ts';
+import { executeQuery } from '@datocms/cda-client';
 
 type PreviewLink = {
   label: string;
@@ -49,7 +49,12 @@ export const POST: APIRoute = async ({ url, request, locals }) => {
      * along with information about which locale they are currently viewing in
      * the interface
      */
-    const { environmentId, item, itemType, locale: apiLocale } = await request.json();
+    const {
+      environmentId,
+      item,
+      itemType,
+      locale: apiLocale,
+    } = await request.json();
     const siteLocale = normalizedSiteLocale(apiLocale);
 
     const pageDefinition = pageDefinitionList().find(
@@ -72,7 +77,7 @@ export const POST: APIRoute = async ({ url, request, locals }) => {
           apiKey: pageDefinition.apiKey,
           locale: siteLocale ?? '',
           environmentId,
-          token: config.datocms.token
+          token: config.datocms.token,
         },
         0,
       );
@@ -183,13 +188,15 @@ async function loadParentsRecursively(
     },
   )) as any;
 
-  if (loadedParent?.parent?.id) {
-    loadedParent.parent = await loadParentsRecursively(
-      loadedParent?.parent?.id,
+  const loadedParentRecord = loadedParent?.[opts.apiKey];
+
+  if (loadedParentRecord?.parent?.id) {
+    loadedParentRecord.parent = await loadParentsRecursively(
+      loadedParentRecord?.parent?.id,
       opts,
       depth + 1,
     );
   }
 
-  return loadedParent?.[opts.apiKey] || null;
+  return loadedParentRecord || null;
 }
