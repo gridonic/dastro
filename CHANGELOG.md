@@ -1,3 +1,8 @@
+### [1.1.22](https://github.com/gridonic/dastro/compare/v1.1.21...v1.1.22)
+
+- add dastro and astro version to system info
+- add partitioned cookie for draft-mode and environment-switch for independent preview
+
 ### [1.1.21](https://github.com/gridonic/dastro/compare/v1.1.20...v1.1.21)
 
 - make sure that browser never uses locally cached pages when switching to draft mode
