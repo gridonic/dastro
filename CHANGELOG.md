@@ -1,3 +1,7 @@
+### [1.1.23](https://github.com/gridonic/dastro/compare/v1.1.22...v1.1.23)
+
+- make preview links for hierarchies with depths more than 2 work
+
 ### [1.1.22](https://github.com/gridonic/dastro/compare/v1.1.21...v1.1.22)
 
 - add dastro and astro version to system info
