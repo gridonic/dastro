@@ -1,10 +1,12 @@
 import jwt, { type JwtPayload } from 'jsonwebtoken';
 import type { AstroCookieSetOptions } from 'astro';
 import { executeQuery } from '@datocms/cda-client';
-import type {DastroConfig, DastroTypes} from "../core/lib-types.ts";
-import type {AstroContext} from "../astro.context.ts";
+import type { DastroConfig, DastroTypes } from '../core/lib-types.ts';
+import type { AstroContext } from '../astro.context.ts';
 
-export function environmentSwitch<T extends DastroTypes>(config: DastroConfig<T>) {
+export function environmentSwitch<T extends DastroTypes>(
+  config: DastroConfig<T>,
+) {
   const CUSTOM_DATO_ENVIRONMENT_COOKIE_NAME = 'dato_environment';
 
   function isDatoEnvironmentSwitchAllowed() {
@@ -54,7 +56,7 @@ export function environmentSwitch<T extends DastroTypes>(config: DastroConfig<T>
     if (await testEnvironmentExists(environment)) {
       context.cookies.set(
         CUSTOM_DATO_ENVIRONMENT_COOKIE_NAME,
-        jwt.sign({environment}, config.api.signedCookieJwtSecret),
+        jwt.sign({ environment }, config.api.signedCookieJwtSecret),
         cookieOptions(),
       );
     }
@@ -78,6 +80,7 @@ export function environmentSwitch<T extends DastroTypes>(config: DastroConfig<T>
       sameSite: 'none',
       httpOnly: false,
       secure: true,
+      ...({ partitioned: true } as AstroCookieSetOptions),
     };
   }
 
@@ -86,6 +89,6 @@ export function environmentSwitch<T extends DastroTypes>(config: DastroConfig<T>
     usesDefaultDatoEnvironment,
     getDatoEnvironment,
     switchDatoEnvironment,
-    CUSTOM_DATO_ENVIRONMENT_COOKIE_NAME
-  }
+    CUSTOM_DATO_ENVIRONMENT_COOKIE_NAME,
+  };
 }
