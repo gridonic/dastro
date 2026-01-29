@@ -1,3 +1,7 @@
+### [1.1.24](https://github.com/gridonic/dastro/compare/v1.1.23...v1.1.24)
+
+- Add CSS variable sliders to the debug panel.
+
 ### [1.1.23](https://github.com/gridonic/dastro/compare/v1.1.22...v1.1.23)
 
 - make preview links for hierarchies with depths more than 2 work
