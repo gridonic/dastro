@@ -1,3 +1,10 @@
+### [1.2.0](https://github.com/gridonic/dastro/compare/v1.1.24...v1.2.0)
+
+- Adds lefthook to dastro
+- Dependency Updates
+- Video Player update
+- **BREAKING:** Font Api from Astro has changed and needs to be updated, @see https://github.com/withastro/astro/releases/tag/astro%405.16.14
+
 ### [1.1.24](https://github.com/gridonic/dastro/compare/v1.1.23...v1.1.24)
 
 - Add CSS variable sliders to the debug panel.
