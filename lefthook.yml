@@ -1,0 +1,8 @@
+extends:
+  - 'config/lefthook-dastro.yml'
+
+pre-commit:
+  jobs:
+    - name: test
+      run: npm run test
+
