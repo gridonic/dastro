@@ -80,7 +80,7 @@ export function environmentSwitch<T extends DastroTypes>(
       sameSite: 'none',
       httpOnly: false,
       secure: true,
-      ...({ partitioned: true } as AstroCookieSetOptions),
+      partitioned: true,
     };
   }
 

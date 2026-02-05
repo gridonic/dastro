@@ -51,7 +51,7 @@ export function draftMode<T extends DastroTypes>(config: DastroConfig<T>) {
       sameSite: 'none',
       httpOnly: false,
       secure: true,
-      ...({ partitioned: true } as AstroCookieSetOptions),
+      partitioned: true,
     };
   }
 
