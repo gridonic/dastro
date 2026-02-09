@@ -127,8 +127,8 @@ export const GET: APIRoute = async ({ url, locals }) => {
       siteLocale ?? defaultLocale,
     );
 
-    const slug = slugs[siteLocale ?? defaultLocale];
-    const title = titles[siteLocale ?? defaultLocale] ?? null;
+    const slug = slugs[apiLocale] ?? null;
+    const title = titles[apiLocale] ?? null;
 
     if (!websitePath) {
       return invalidRequestResponse(
@@ -162,10 +162,10 @@ export const GET: APIRoute = async ({ url, locals }) => {
 
     // Build the response in the format expected by the plugin
     const response: SeoAnalysis = {
-      locale: root.querySelector('html')?.getAttribute('lang') || 'en',
+      locale: root.querySelector('html')?.getAttribute('lang') || 'unknown',
       slug: slug ?? 'unknown',
-      permalink: websitePath,
       title: title ?? 'unknown',
+      permalink: websitePath,
       description:
         root
           .querySelector('meta[name="description"]')
