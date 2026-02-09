@@ -55,6 +55,12 @@ export function draftMode<T extends DastroTypes>(config: DastroConfig<T>) {
     };
   }
 
+  function draftModeHeaders(): HeadersInit {
+    return {
+      Cookie: `${DRAFT_MODE_COOKIE_NAME}=${jwtToken()};`,
+    };
+  }
+
   function addExecutedQueryInDraftMode<QueryResult, QueryVariables>(
     executedQuery: ExecutedQuery<QueryResult, QueryVariables>,
     context: AstroContext<'cookies' | 'locals'>,
@@ -87,6 +93,7 @@ export function draftMode<T extends DastroTypes>(config: DastroConfig<T>) {
     isDraftModeEnabled,
     enableDraftMode,
     disableDraftMode,
+    draftModeHeaders,
     addExecutedQueryInDraftMode,
     getExecutedDraftQueries,
     DRAFT_MODE_COOKIE_NAME,

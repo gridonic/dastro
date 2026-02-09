@@ -23,6 +23,7 @@ interface Options {
       draftModeDisable?: boolean;
       environmentSwitch?: boolean;
       previewLinks?: boolean;
+      seoAnalysis?: boolean;
       sitemap?: boolean;
       robots?: boolean;
     };
@@ -199,6 +200,13 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
           injectRoute({
             pattern: '/api/cms/preview-links',
             entrypoint: 'dastro/routes/cms/preview-links.ts',
+          });
+        }
+
+        if (!overwrite?.seoAnalysis) {
+          injectRoute({
+            pattern: '/api/cms/seo-analysis',
+            entrypoint: 'dastro/routes/cms/seo-analysis.ts',
           });
         }
 

@@ -26,6 +26,7 @@
     "./routes/cms/draft-mode/disable.ts": "./src/routes/cms/draft-mode/disable.ts",
     "./routes/cms/environment/switch.ts": "./src/routes/cms/environment/switch.ts",
     "./routes/cms/preview-links.ts": "./src/routes/cms/preview-links.ts",
+    "./routes/cms/seo-analysis.ts": "./src/routes/cms/seo-analysis.ts",
     "./middleware/html-streaming-prevention.middleware.ts": "./src/middleware/html-streaming-prevention.middleware.ts",
     "./middleware/request-logger.middleware.ts": "./src/middleware/request-logger.middleware.ts"
   },
@@ -63,6 +64,7 @@
     "jsonwebtoken": "^9.0.3",
     "lefthook": "^2.1.0",
     "lodash": "^4.17.23",
+    "node-html-parser": "^7.0.2",
     "serialize-error": "^13.0.1",
     "typescript": "^5.9.3"
   },

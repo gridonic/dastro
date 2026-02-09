@@ -1,9 +1,17 @@
-import {ApiError} from '@datocms/cma-client';
-import {serializeError} from 'serialize-error';
-import type {DastroConfig, DastroTypes} from "../core/lib-types.ts";
+import { ApiError } from '@datocms/cma-client';
+import { serializeError } from 'serialize-error';
+import type { DastroConfig, DastroTypes } from '../core/lib-types.ts';
+import type { RecordWithParent } from '../core/routing.ts';
+import { executeQuery } from '@datocms/cda-client';
 
-export function checkSecretApiTokenCorrectness(dastroConfig: DastroConfig<DastroTypes>, token: string | null): boolean {
-  return dastroConfig.environment === 'local' || token === dastroConfig.api.secretApiToken;
+export function checkSecretApiTokenCorrectness(
+  dastroConfig: DastroConfig<DastroTypes>,
+  token: string | null,
+): boolean {
+  return (
+    dastroConfig.environment === 'local' ||
+    token === dastroConfig.api.secretApiToken
+  );
 }
 
 export function withCORS(responseInit?: ResponseInit): ResponseInit {
@@ -44,7 +52,7 @@ export function handleUnexpectedError(error: unknown) {
         request: error.request,
         response: error.response,
       },
-      withCORS({status: 500}),
+      withCORS({ status: 500 }),
     );
   }
 
@@ -57,7 +65,7 @@ export function invalidRequestResponse(error: unknown, status = 422) {
       success: false,
       error,
     },
-    withCORS({status}),
+    withCORS({ status }),
   );
 }
 
@@ -67,6 +75,57 @@ export function successfulResponse(data?: unknown, status = 200) {
       success: true,
       data,
     },
-    withCORS({status}),
+    withCORS({ status }),
   );
+}
+
+// TODO: need this in other places? define it in config? define it per page definition?
+const MAX_HIERARCHY_DEPTH = 10;
+
+export async function loadParentsRecursively(
+  parentId: string,
+  opts: {
+    apiKey: string;
+    locale: string;
+    environmentId: string;
+    token: string;
+  },
+  depth: number,
+): Promise<RecordWithParent<DastroTypes> | null> {
+  if (depth >= MAX_HIERARCHY_DEPTH) {
+    return null;
+  }
+
+  const loadedParent = (await executeQuery(
+    `
+{
+  ${opts.apiKey}(locale: ${opts.locale}, filter: { id: { eq: "${parentId}" } }) {
+    _allTranslatedSlugLocales {
+      locale
+      value
+    }
+    parent {
+      id
+    }
+  }
+}`,
+    {
+      excludeInvalid: true,
+      includeDrafts: true,
+      token: opts.token as any,
+      environment: opts.environmentId,
+    },
+  )) as any;
+
+  const loadedParentRecord = loadedParent?.[opts.apiKey];
+
+  if (loadedParentRecord?.parent?.id) {
+    loadedParentRecord.parent = await loadParentsRecursively(
+      loadedParentRecord?.parent?.id,
+      opts,
+      depth + 1,
+    );
+  }
+
+  return loadedParentRecord || null;
 }

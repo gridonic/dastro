@@ -1,0 +1,180 @@
+import { buildClient } from '@datocms/cma-client';
+import type { APIRoute } from 'astro';
+import { parse } from 'node-html-parser';
+import {
+  checkSecretApiTokenCorrectness,
+  handleUnexpectedError,
+  invalidRequestResponse,
+  json,
+  loadParentsRecursively,
+  withCORS,
+} from '../utils.ts';
+import type { DastroTypes } from '../../core/lib-types.ts';
+
+export const OPTIONS: APIRoute = () => {
+  return new Response('OK', withCORS());
+};
+
+type SeoAnalysis = {
+  locale: string;
+  slug: string | 'unknown';
+  permalink: string;
+  title: string | null;
+  description: string | null;
+  content: string;
+};
+
+/**
+ * This route handler implements the Frontend metadata endpoint required for the
+ * "SEO/Readability Analysis" plugin:
+ *
+ * https://www.datocms.com/marketplace/plugins/i/datocms-plugin-seo-readability-analysis#the-frontend-metadata-endpoint
+ */
+
+export const GET: APIRoute = async ({ url, locals }) => {
+  const { pageDefinitionList, resolveRecordUrl } = locals.dastro.routing();
+  const { normalizedSiteLocale, defaultLocale } = locals.dastro.i18n();
+  const { draftModeHeaders } = locals.dastro.draftMode();
+  const { config } = locals.dastro;
+
+  try {
+    // Parse query string parameters
+    const token = url.searchParams.get('token');
+
+    // Ensure that the request is coming from a trusted source
+    if (!checkSecretApiTokenCorrectness(config, token)) {
+      return invalidRequestResponse('Invalid token', 401);
+    }
+
+    /**
+     * The plugin sends the record and model for which the user wants to perform
+     * a SEO/Readability analysis, along with information about which locale
+     * they are currently viewing in the interface
+     */
+    const itemId = url.searchParams.get('itemId');
+    const itemTypeId = url.searchParams.get('itemTypeId');
+    const itemTypeApiKey = url.searchParams.get('itemTypeApiKey');
+    const apiLocale = url.searchParams.get('locale');
+    const sandboxEnvironmentId = url.searchParams.get('sandboxEnvironmentId');
+
+    if (
+      !itemId ||
+      !itemTypeApiKey ||
+      !itemTypeId ||
+      !apiLocale ||
+      !sandboxEnvironmentId
+    ) {
+      return invalidRequestResponse('Missing required parameters');
+    }
+
+    const siteLocale = normalizedSiteLocale(apiLocale);
+
+    const pageDefinition = pageDefinitionList().find(
+      (p) => p.apiKey === itemTypeApiKey,
+    );
+
+    if (!pageDefinition) {
+      return invalidRequestResponse(
+        `No page definition found for api key "${itemTypeApiKey}"`,
+        400,
+      );
+    }
+
+    const client = buildClient({
+      apiToken: config.datocms.token,
+      environment: sandboxEnvironmentId,
+    });
+
+    const { data: item } = await client.items.rawFind(itemId, {
+      version: 'current',
+    });
+
+    // We can use this info to generate the frontend URL, and the page slug
+    const slugs =
+      typeof item.attributes.translated_slug === 'string'
+        ? { [defaultLocale]: item.attributes.translated_slug }
+        : (item.attributes.translated_slug as Record<string, string>);
+
+    const titles =
+      typeof item.attributes.title === 'string'
+        ? { [defaultLocale]: item.attributes.title }
+        : (item.attributes.title as Record<string, string>);
+
+    let parent = null;
+    if (item.attributes.parent_id) {
+      // Unfortunately, we need to do another fetch, because we have no info about a possible parent in the item
+      parent = await loadParentsRecursively(
+        item.attributes.parent_id as any,
+        {
+          apiKey: pageDefinition.apiKey,
+          locale: siteLocale ?? '',
+          environmentId: sandboxEnvironmentId,
+          token: config.datocms.token,
+        },
+        0,
+      );
+    }
+
+    const websitePath = resolveRecordUrl(
+      {
+        __typename: pageDefinition.type,
+        _allTranslatedSlugLocales: Object.keys(slugs).map((locale) => ({
+          locale: locale as DastroTypes['SiteLocale'],
+          value: slugs[locale],
+        })),
+        parent,
+      },
+      siteLocale ?? defaultLocale,
+    );
+
+    const slug = slugs[siteLocale ?? defaultLocale];
+    const title = titles[siteLocale ?? defaultLocale] ?? null;
+
+    if (!websitePath) {
+      return invalidRequestResponse(
+        `Don't know which route corresponds to record #${itemId} (model: ${itemTypeApiKey})!`,
+      );
+    }
+
+    /*
+     * We need to retrieve the page from the frontend, in its draft version. To
+     * do this, we set the cookies that are obtained by temporarily enabling
+     * Draft Mode.
+     */
+    const pageRequest = await fetch(new URL(websitePath, url).toString(), {
+      headers: draftModeHeaders(),
+    });
+
+    if (!pageRequest.ok) {
+      return invalidRequestResponse(
+        `Invalid status for ${websitePath}: ${pageRequest.status}`,
+      );
+    }
+
+    // Parse the HTML response into a DOM tree
+    const root = parse(await pageRequest.text());
+
+    const contentEl = root.querySelector('main') ?? root.querySelector('body');
+
+    if (!contentEl) {
+      return invalidRequestResponse('No content found');
+    }
+
+    // Build the response in the format expected by the plugin
+    const response: SeoAnalysis = {
+      locale: root.querySelector('html')?.getAttribute('lang') || 'en',
+      slug: slug ?? 'unknown',
+      permalink: websitePath,
+      title: title ?? 'unknown',
+      description:
+        root
+          .querySelector('meta[name="description"]')
+          ?.getAttribute('content') ?? null,
+      content: contentEl.innerHTML,
+    };
+
+    return json(response, withCORS());
+  } catch (error) {
+    return handleUnexpectedError(error);
+  }
+};

@@ -4,11 +4,10 @@ import {
   handleUnexpectedError,
   invalidRequestResponse,
   json,
+  loadParentsRecursively,
   withCORS,
 } from '../utils';
 import type { DastroTypes } from '../../core/lib-types.ts';
-import type { RecordWithParent } from '../../core/routing.ts';
-import { executeQuery } from '@datocms/cda-client';
 
 type PreviewLink = {
   label: string;
@@ -148,55 +147,3 @@ export const POST: APIRoute = async ({ url, request, locals }) => {
     return handleUnexpectedError(error);
   }
 };
-
-// TODO: need this in other places? define it in config? define it per page definition?
-const MAX_HIERARCHY_DEPTH = 10;
-
-async function loadParentsRecursively(
-  parentId: string,
-  opts: {
-    apiKey: string;
-    locale: string;
-    environmentId: string;
-    token: string;
-  },
-  depth: number,
-): Promise<RecordWithParent<DastroTypes> | null> {
-  if (depth >= MAX_HIERARCHY_DEPTH) {
-    return null;
-  }
-
-  const loadedParent = (await executeQuery(
-    `
-{
-  ${opts.apiKey}(locale: ${opts.locale}, filter: { id: { eq: "${parentId}" } }) {
-    _allTranslatedSlugLocales {
-      locale
-      value
-    }
-    parent {
-      id
-    }
-  }
-}`,
-    {
-      // variables: variables,
-      excludeInvalid: true,
-      includeDrafts: true,
-      token: opts.token as any,
-      environment: opts.environmentId,
-    },
-  )) as any;
-
-  const loadedParentRecord = loadedParent?.[opts.apiKey];
-
-  if (loadedParentRecord?.parent?.id) {
-    loadedParentRecord.parent = await loadParentsRecursively(
-      loadedParentRecord?.parent?.id,
-      opts,
-      depth + 1,
-    );
-  }
-
-  return loadedParentRecord || null;
-}
