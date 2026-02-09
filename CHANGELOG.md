@@ -1,3 +1,7 @@
+### [1.2.2](https://github.com/gridonic/dastro/compare/v1.2.1...v1.2.2)
+
+- fix(seo): use apiLocale and reorder response fields
+
 ### [1.2.1](https://github.com/gridonic/dastro/compare/v1.2.0...v1.2.1)
 
 - add dynamic endpoint for seo analysis
