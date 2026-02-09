@@ -1,3 +1,7 @@
+### [1.2.1](https://github.com/gridonic/dastro/compare/v1.2.0...v1.2.1)
+
+- add dynamic endpoint for seo analysis
+
 ### [1.2.0](https://github.com/gridonic/dastro/compare/v1.1.24...v1.2.0)
 
 - Adds lefthook to dastro
