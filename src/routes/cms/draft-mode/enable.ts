@@ -9,15 +9,15 @@ import {
  * This route handler enables Draft Mode and redirects to the given URL.
  */
 export const GET: APIRoute = async (event) => {
-  const { enableDraftMode } = event.locals.dastro.draftMode();
+  const { enableDraftMode, redirectUrlWithoutDraftModeSwitch } =
+    event.locals.dastro.draftMode();
   const { isDatoEnvironmentSwitchAllowed, switchDatoEnvironment } =
     event.locals.dastro.environmentSwitch();
 
   const { url } = event;
 
   const token = url.searchParams.get('token');
-  const redirectUrl =
-    url.searchParams.get('url') || url.searchParams.get('redirect') || '/';
+  const redirectUrl = redirectUrlWithoutDraftModeSwitch(url);
   const environment = url.searchParams.get('environment');
 
   try {
@@ -44,6 +44,7 @@ export const GET: APIRoute = async (event) => {
   }
 
   const redirectUrlWithDraftMode = new URL(redirectUrl, url.origin);
+
   redirectUrlWithDraftMode.searchParams.set(
     'draftModeEnabledAt',
     Date.now().toString(),

@@ -89,6 +89,25 @@ export function draftMode<T extends DastroTypes>(config: DastroConfig<T>) {
     return locals.draftMode?.executedQueries ?? [];
   }
 
+  // if the redirect url of the draft mode switch contains another draft mode switch, remove it and use the next redirect url instead
+  function redirectUrlWithoutDraftModeSwitch(originalUrl: URL): string {
+    const redirectUrl =
+      originalUrl.searchParams.get('redirect') ||
+      originalUrl.searchParams.get('url') ||
+      '/';
+
+    if (!redirectUrl.startsWith('/api/cms/draft-mode/')) {
+      return redirectUrl;
+    }
+
+    const nextRedirectUrl = new URL(redirectUrl, originalUrl.origin);
+    return (
+      nextRedirectUrl.searchParams.get('redirect') ||
+      nextRedirectUrl.searchParams.get('url') ||
+      '/'
+    );
+  }
+
   return {
     isDraftModeEnabled,
     enableDraftMode,
@@ -96,6 +115,7 @@ export function draftMode<T extends DastroTypes>(config: DastroConfig<T>) {
     draftModeHeaders,
     addExecutedQueryInDraftMode,
     getExecutedDraftQueries,
+    redirectUrlWithoutDraftModeSwitch,
     DRAFT_MODE_COOKIE_NAME,
   };
 }

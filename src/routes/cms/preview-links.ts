@@ -115,7 +115,7 @@ export const POST: APIRoute = async ({ url, request, locals }) => {
              * We generate the URL in a way that it first passes through the
              * endpoint that enables the Draft Mode.
              */
-            `/api/cms/draft-mode/enable?url=${recordUrl}&environment=${environmentId}&token=${token}`,
+            `/api/cms/draft-mode/enable?redirect=${recordUrl}&environment=${environmentId}&token=${token}`,
             request.url,
           ).toString(),
         });
@@ -134,7 +134,7 @@ export const POST: APIRoute = async ({ url, request, locals }) => {
              * We generate the URL in a way that it first passes through the
              * endpoint that disables the Draft Mode.
              */
-            `/api/cms/draft-mode/disable?url=${recordUrl}&environment=${environmentId}&token=${token}`,
+            `/api/cms/draft-mode/disable?redirect=${recordUrl}&environment=${environmentId}&token=${token}`,
             request.url,
           ).toString(),
         });

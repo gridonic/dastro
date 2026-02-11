@@ -327,13 +327,13 @@ const astroVersion = Astro.generator.match(/v(.*)/)?.[1] || 'unknown';
         const toggle = this.$el.querySelector('.draftmode .button');
         toggle?.addEventListener('click', () => {
           if (this.draftModeEnabled) {
-            window.location.href = '/api/cms/draft-mode/disable';
+            window.location.href = `/api/cms/draft-mode/disable?redirect=${encodeURIComponent(window.location.pathname)}`;
           } else {
             const token =
               this.environment !== 'local'
                 ? prompt('Enter a token to toggle draft mode')
                 : '';
-            window.location.href = `/api/cms/draft-mode/enable?token=${token}`;
+            window.location.href = `/api/cms/draft-mode/enable?token=${token}&redirect=${encodeURIComponent(window.location.pathname)}`;
           }
         });
       }
@@ -704,7 +704,9 @@ const astroVersion = Astro.generator.match(/v(.*)/)?.[1] || 'unknown';
         /*padding: 12px 16px;*/
 
         body:has(input#debug-view-show-variables:not(:checked)) & > .list,
-        body:has(input#debug-view-show-variables:not(:checked)) & > :global(.debug-css-variables) {
+        body:has(input#debug-view-show-variables:not(:checked))
+          &
+          > :global(.debug-css-variables) {
           display: none;
         }
 
