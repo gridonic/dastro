@@ -30,7 +30,7 @@ export interface DastroConfig<T extends DastroTypes> {
     token: string;
     environment: string;
     allowEnvironmentSwitch: boolean;
-    editingUrl: string;
+    baseEditingUrl: string;
   };
   api: {
     secretApiToken: string;

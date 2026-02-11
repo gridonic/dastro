@@ -12,10 +12,11 @@ export function datocms<T extends DastroTypes>(config: DastroConfig<T>) {
     query: TypedDocumentNode<TResult, TVariables>,
     variables?: TVariables,
     options: {
+      ignoreContentLink?: boolean;
       excludeInvalid?: boolean;
     } = {},
   ) {
-    const { excludeInvalid = true } = options;
+    const { excludeInvalid = true, ignoreContentLink = false } = options;
     // // TODO: temporary to watch /  debug query execution
     // console.debug('Query: ', {
     //   name: (
@@ -34,8 +35,10 @@ export function datocms<T extends DastroTypes>(config: DastroConfig<T>) {
       includeDrafts: isDraftModeEnabled(context),
       token: config.datocms.token,
       environment: getDatoEnvironment(context),
-      baseEditingUrl: config.datocms.editingUrl,
-      ...(isVisualEditingEnabled() ? { contentLink: 'v1' } : {}),
+      baseEditingUrl: config.datocms.baseEditingUrl,
+      ...(!ignoreContentLink && isVisualEditingEnabled()
+        ? { contentLink: 'v1' }
+        : {}),
     } satisfies ExecuteQueryOptions<TVariables>;
 
     addExecutedQueryInDraftMode(

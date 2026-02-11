@@ -99,6 +99,15 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
                 access: 'secret',
                 context: 'server',
               }),
+              DATO_CMS_CMA_TOKEN: envField.string({
+                access: 'secret',
+                context: 'server',
+                optional: true,
+              }),
+              DATO_CMS_BASE_EDITING_URL: envField.string({
+                access: 'secret',
+                context: 'server',
+              }),
               DATO_CMS_ENVIRONMENT: envField.string({
                 access: 'public',
                 context: 'server',
