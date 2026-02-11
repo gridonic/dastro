@@ -4,6 +4,7 @@ import type { DastroConfig, DastroTypes } from '../core/lib-types.ts';
 import type { AstroContext } from '../astro.context.ts';
 import { draftMode } from './draft-mode.ts';
 import { environmentSwitch } from './environment-switch.ts';
+import { visualEditing } from './visual-editing.ts';
 
 export function datocms<T extends DastroTypes>(config: DastroConfig<T>) {
   async function datoFetch<TResult, TVariables>(
@@ -25,6 +26,7 @@ export function datocms<T extends DastroTypes>(config: DastroConfig<T>) {
     const { isDraftModeEnabled, addExecutedQueryInDraftMode } =
       draftMode<T>(config);
     const { getDatoEnvironment } = environmentSwitch<T>(config);
+    const { isVisualEditingEnabled } = visualEditing(context);
 
     const queryOptions = {
       variables,
@@ -32,6 +34,8 @@ export function datocms<T extends DastroTypes>(config: DastroConfig<T>) {
       includeDrafts: isDraftModeEnabled(context),
       token: config.datocms.token,
       environment: getDatoEnvironment(context),
+      baseEditingUrl: config.datocms.editingUrl,
+      ...(isVisualEditingEnabled() ? { contentLink: 'v1' } : {}),
     } satisfies ExecuteQueryOptions<TVariables>;
 
     addExecutedQueryInDraftMode(

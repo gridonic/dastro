@@ -1,7 +1,7 @@
 ---
 import '@/sass/styles.scss';
 
-import { QueryListener, Seo } from '@datocms/astro';
+import { ContentLink, QueryListener, Seo } from '@datocms/astro';
 
 import type { Page, MetaTag } from '../../core/page';
 import type { DastroTypes } from '../../core/lib-types';
@@ -11,6 +11,7 @@ import DebugGridContainer from '../debug/DebugGridContainer.astro';
 import AutoDebugGrid from '../debug/AutoDebugGrid.astro';
 import DebugView from '../debug/DebugView.astro';
 import DebugInfo from '../debug/DebugInfo.astro';
+import { visualEditing } from '../../datocms/visual-editing.ts';
 
 interface Props<T extends DastroTypes = DastroTypes> {
   page: Page<T>;
@@ -65,6 +66,7 @@ function i18nLinkTags(): MetaTag[] {
   ];
 }
 
+const { isVisualEditingEnabled } = visualEditing(Astro);
 const executedDraftQueries = getExecutedDraftQueries(Astro);
 ---
 
@@ -128,6 +130,9 @@ const executedDraftQueries = getExecutedDraftQueries(Astro);
     </slot>
     <slot name="body:query-listeners">
       {executedDraftQueries.map((q) => <QueryListener {...q} />)}
+    </slot>
+    <slot name="body:visual-editing">
+      {isVisualEditingEnabled() && <ContentLink />}
     </slot>
     <slot name="body:after" />
   </body>
