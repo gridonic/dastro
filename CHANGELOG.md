@@ -1,3 +1,8 @@
+### [1.3.0](https://github.com/gridonic/dastro/compare/v1.2.2...v1.3.0)
+
+- BREAKING: Add DATO_CMS_BASE_EDITING_URL to your project and set baseEditingUrl in dastro config
+- Adds support for visual editing in datocms via content link
+
 ### [1.2.2](https://github.com/gridonic/dastro/compare/v1.2.1...v1.2.2)
 
 - fix(seo): use apiLocale and reorder response fields
