@@ -132,7 +132,7 @@ const executedDraftQueries = getExecutedDraftQueries(Astro);
       {executedDraftQueries.map((q) => <QueryListener {...q} />)}
     </slot>
     <slot name="body:visual-editing">
-      {isVisualEditingEnabled() && <ContentLink />}
+      {isVisualEditingEnabled() && <ContentLink stripStega={true} />}
     </slot>
     <slot name="body:after" />
   </body>
