@@ -17,6 +17,11 @@ import VideoPlayer from './media/VideoPlayer.astro';
 import Modules from './module/Modules.astro';
 import HeaderModule from './module/HeaderModule.astro';
 
+import ContentLinkUrl from './content-link/ContentLinkUrl.astro';
+import ContentLinkSource from './content-link/ContentLinkSource.astro';
+import ContentLinkGroup from './content-link/ContentLinkGroup.astro';
+import ContentLinkBoundary from './content-link/ContentLinkBoundary.astro';
+
 export {
   LayoutBase,
   DebugView,
@@ -28,5 +33,9 @@ export {
   VideoAsset,
   VideoPlayer,
   HeaderModule,
-  Modules
+  ContentLinkUrl,
+  ContentLinkSource,
+  ContentLinkGroup,
+  ContentLinkBoundary,
+  Modules,
 };

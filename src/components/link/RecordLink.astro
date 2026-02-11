@@ -35,6 +35,7 @@ const { resolveRecordUrl } = Astro.locals.dastro.routing();
       href={resolveRecordUrl(record, Astro.locals.locale)}
       target={target}
       title={linkTitle}
+      data-datocms-content-link-boundary
       {...rest}
     >
       <slot>{record.title || 'Untitled'}</slot>

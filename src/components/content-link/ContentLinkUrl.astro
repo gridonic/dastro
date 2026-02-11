@@ -1,0 +1,21 @@
+---
+import type { ClassValue } from '../component.types.ts';
+
+interface Props {
+  url: string;
+  tagName?: keyof HTMLElementTagNameMap;
+  class?: ClassValue;
+}
+
+const {
+  url,
+  tagName: TagName = 'div',
+  class: classNames,
+  ...rest
+} = Astro.props;
+---
+
+<!-- @see: https://github.com/datocms/astro-datocms/tree/main/src/ContentLink#data-datocms-content-link-url -->
+<TagName data-datocms-content-link-url={url} class:list={classNames} {...rest}>
+  <slot />
+</TagName>
