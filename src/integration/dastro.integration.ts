@@ -75,6 +75,7 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
           scopedStyleStrategy: 'class',
 
           env: {
+            validateSecrets: true,
             schema: {
               APP_BASE_URL: envField.string({
                 access: 'public',
