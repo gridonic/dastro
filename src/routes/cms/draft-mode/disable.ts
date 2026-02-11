@@ -16,7 +16,8 @@ export const GET: APIRoute = async (event) => {
   const { url } = event;
 
   const token = url.searchParams.get('token'); // For disabling, token only needed when switching environment
-  const redirectUrl = url.searchParams.get('url') || '/';
+  const redirectUrl =
+    url.searchParams.get('url') || url.searchParams.get('redirect') || '/';
   const environment = url.searchParams.get('environment');
 
   try {
