@@ -1,7 +1,10 @@
 ### [1.3.0](https://github.com/gridonic/dastro/compare/v1.2.2...v1.3.0)
 
-- BREAKING: Add DATO_CMS_BASE_EDITING_URL to your project and set baseEditingUrl in dastro config
+- **BREAKING:** Add DATO_CMS_BASE_EDITING_URL to your project and set baseEditingUrl in dastro config
 - Adds support for visual editing in datocms via content link
+- Upgrade Instructions
+  - [Boilerplate Commit](https://github.com/gridonic/astro-boilerplate/commit/e79be9c89f756b48f7e40b3a0284ef2ed22cf045)
+  - [Boilerplate Commit Patch](https://github.com/gridonic/astro-boilerplate/commit/e79be9c89f756b48f7e40b3a0284ef2ed22cf045.patch)
 
 ### [1.2.2](https://github.com/gridonic/dastro/compare/v1.2.1...v1.2.2)
 
