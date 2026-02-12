@@ -1,3 +1,7 @@
+### [1.3.1](https://github.com/gridonic/dastro/compare/v1.3.0...v1.3.1)
+
+- Improve coloring in debug view
+
 ### [1.3.0](https://github.com/gridonic/dastro/compare/v1.2.2...v1.3.0)
 
 - **BREAKING:** Add DATO_CMS_BASE_EDITING_URL to your project and set baseEditingUrl in dastro config
