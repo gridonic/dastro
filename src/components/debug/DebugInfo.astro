@@ -24,7 +24,7 @@ const datoEnvironment = getDatoEnvironment(Astro);
   data-astro-version={astroVersion}
   data-dato-environment={datoEnvironment}
 >
-  {draftModeEnabled && <div class="draft-mode-enabled">Draft</div>}
+  {draftModeEnabled && <div class="draft-mode-enabled">Draft Mode</div>}
 </div>
 
 <script>
@@ -58,21 +58,22 @@ const datoEnvironment = getDatoEnvironment(Astro);
       position: fixed;
       right: 0;
       top: 0;
-      padding: 4px;
+      padding: 5px 7px;
       z-index: calc(var(--z-debug) + 1);
 
       display: flex;
       align-items: center;
       justify-content: center;
 
+      font-family: system-ui, sans-serif;
+      font-weight: bold;
       font-size: 10px;
       line-height: 1;
 
       /*border: 1px solid #632804;*/
-      border-bottom-left-radius: 4px;
-      color: white;
-      background: hsl(2, 85%, 69%);
-      opacity: 0.5;
+      border-bottom-left-radius: 3px;
+      color: black;
+      background: rgba(255, 221, 51, 0.3);
 
       &:hover {
         opacity: 1;
