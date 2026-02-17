@@ -13,6 +13,12 @@ const { data, class: classNames } = Astro.props;
 <script>
   import { registerComponent, BaseComponent } from '../../client';
 
+  const PLAY_BUTTON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="104" height="76" viewBox="0 0 104 76" fill="none" aria-hidden="true">
+    <rect width="104" height="76" rx="16" fill="white" fill-opacity="0.01"/>
+    <rect x="5.25" y="5.25" width="93.5" height="65.5" rx="14.75" stroke="white" stroke-width="2.5"/>
+    <path d="M42.25 22.6338C42.2502 22.0429 42.9021 21.6839 43.4014 22L67.6631 37.3662C68.128 37.6607 68.128 38.3393 67.6631 38.6338L43.4014 54C42.9021 54.3161 42.2502 53.9571 42.25 53.3662V22.6338Z" stroke="white" stroke-width="2.5"/>
+  </svg>`;
+
   registerComponent(
     '[data-video-player]',
     class VideoPlayer extends BaseComponent {
@@ -28,6 +34,22 @@ const { data, class: classNames } = Astro.props;
             $placeholder.classList.add('-hidden');
             $video.style.display = 'block';
             $video.play();
+          });
+        }
+
+        this.$el
+          .querySelectorAll<HTMLElement>('.lyt-playbtn')
+          .forEach(($btn) => {
+            $btn.insertAdjacentHTML('beforeend', PLAY_BUTTON_SVG);
+          });
+
+        if (this.$el.querySelector('lite-vimeo')) {
+          customElements.whenDefined('lite-vimeo').then(() => {
+            this.$el
+              .querySelectorAll<HTMLElement>('.ltv-playbtn')
+              .forEach(($btn) => {
+                $btn.insertAdjacentHTML('beforeend', PLAY_BUTTON_SVG);
+              });
           });
         }
       }
@@ -212,11 +234,17 @@ const { data, class: classNames } = Astro.props;
       &::before {
         opacity: 0;
       }
+    }
 
-      :global(.lty-playbtn),
-      :global(.ltv-playbtn) {
-        @include play-button;
-      }
+    :global(lite-youtube > .lyt-playbtn),
+    :global(lite-vimeo > .ltv-playbtn) {
+      @include play-button;
+      filter: none;
+    }
+
+    :global(lite-vimeo > .ltv-playbtn)::before,
+    :global(lite-vimeo > .ltv-playbtn)::after {
+      display: none;
     }
   }
 </style>
