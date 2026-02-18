@@ -24,6 +24,7 @@ export function dastroTest(
       allowEnvironmentSwitch: false,
       environment: 'main',
       token: 'datocms-token',
+      baseEditingUrl: 'https://testing.dastro.com',
     },
     dev: {
       debugViewEnabled: false,
@@ -100,6 +101,8 @@ export function dastroTest(
       globalStore: {},
       dastro: dastroContext,
       page: {},
+      netlify: { context: null },
+      draftMode: { executedQueries: [] },
     },
   };
 
