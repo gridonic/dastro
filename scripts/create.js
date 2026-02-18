@@ -159,6 +159,18 @@ async function createProject() {
       }
     }
 
+    // Update DATO_CMS_BASE_EDITING_URL with the project name
+    console.log('📝 Updating DATO_CMS_BASE_EDITING_URL in .env.example...');
+    const envExamplePathForUrl = join(projectPath, '.env.example');
+    if (existsSync(envExamplePathForUrl)) {
+      let envContent2 = readFileSync(envExamplePathForUrl, 'utf8');
+      envContent2 = envContent2.replace(
+        /DATO_CMS_BASE_EDITING_URL=.*/,
+        `DATO_CMS_BASE_EDITING_URL=https://${projectName}.admin.datocms.com`,
+      );
+      writeFileSync(envExamplePathForUrl, envContent2);
+    }
+
     // Copy .env.example to .env
     console.log('📋 Setting up environment file...');
     const envExamplePath = join(projectPath, '.env.example');
