@@ -373,6 +373,8 @@
       > = new Map();
       private originalValues: Map<string, string> = new Map();
       private resizeTimeout: number | null = null;
+      private active = false;
+      private initialized = false;
 
       private getCurrentViewport(): 'small' | 'large' {
         // Use width-based detection (typically 768px breakpoint)
@@ -445,12 +447,13 @@
         return null;
       }
 
-      private async readValueForViewport(
-        variableName: string,
+      private async readValuesForViewport(
+        variableNames: string[],
         targetViewport: 'small' | 'large',
-      ): Promise<string> {
-        // Use the current page URL so the iframe has all the same styles
-        return new Promise<string>((resolve) => {
+      ): Promise<Map<string, string>> {
+        if (variableNames.length === 0) return new Map();
+
+        return new Promise<Map<string, string>>((resolve) => {
           const iframe = document.createElement('iframe');
           const targetWidth = targetViewport === 'small' ? 767 : 1920;
 
@@ -476,7 +479,7 @@
             }
           };
 
-          const readValue = () => {
+          const readValues = (): Map<string, string> | null => {
             try {
               const iframeWindow = iframe.contentWindow;
               const iframeDoc =
@@ -486,49 +489,56 @@
                 return null;
               }
 
-              // Read the value from the iframe's computed styles
-              const value = getComputedStyle(iframeDoc.documentElement)
-                .getPropertyValue(variableName)
-                .trim();
-
-              return value || null;
+              const styles = getComputedStyle(iframeDoc.documentElement);
+              const results = new Map<string, string>();
+              for (const name of variableNames) {
+                const value = styles.getPropertyValue(name).trim();
+                results.set(name, value || '0');
+              }
+              return results;
             } catch (error) {
               return null;
             }
           };
 
+          const resolveWith = (results: Map<string, string>) => {
+            if (resolved) return;
+            resolved = true;
+            cleanup();
+            resolve(results);
+          };
+
+          const emptyResults = () => {
+            const m = new Map<string, string>();
+            for (const name of variableNames) m.set(name, '0');
+            return m;
+          };
+
           iframe.onload = () => {
-            // Wait for stylesheets to load and media queries to evaluate
-            // Try multiple times with increasing delays
             const attempts = [
               () =>
                 setTimeout(() => {
-                  const value = readValue();
-                  if (value && value !== '0') {
-                    resolved = true;
-                    cleanup();
-                    resolve(value);
+                  const results = readValues();
+                  if (
+                    results &&
+                    [...results.values()].some((v) => v && v !== '0')
+                  ) {
+                    resolveWith(results);
                   }
                 }, 100),
               () =>
                 setTimeout(() => {
-                  if (!resolved) {
-                    const value = readValue();
-                    if (value && value !== '0') {
-                      resolved = true;
-                      cleanup();
-                      resolve(value);
-                    }
+                  const results = readValues();
+                  if (
+                    results &&
+                    [...results.values()].some((v) => v && v !== '0')
+                  ) {
+                    resolveWith(results);
                   }
                 }, 500),
               () =>
                 setTimeout(() => {
-                  if (!resolved) {
-                    const value = readValue();
-                    resolved = true;
-                    cleanup();
-                    resolve(value || '0');
-                  }
+                  resolveWith(readValues() || emptyResults());
                 }, 1000),
             ];
 
@@ -536,47 +546,81 @@
           };
 
           iframe.onerror = () => {
-            resolved = true;
-            cleanup();
-            resolve('0');
+            resolveWith(emptyResults());
           };
 
           document.body.appendChild(iframe);
           iframe.src = window.location.href;
 
-          // Timeout fallback
           setTimeout(() => {
-            if (!resolved) {
-              resolved = true;
-              const value = readValue();
-              cleanup();
-              resolve(value || '0');
-            }
+            resolveWith(readValues() || emptyResults());
           }, 3000);
         });
       }
 
       async init() {
-        // Store original values first, before any modifications
-        await this.storeOriginalValues();
-        // Set up controls
-        this.setupVariableControls();
-        // Load saved values after controls are set up
-        // This will override initial CSS values if saved values exist
+        const checkbox = document.getElementById(
+          'debug-view-show-variables',
+        ) as HTMLInputElement | null;
+        if (!checkbox) return;
+
+        checkbox.addEventListener('change', () => {
+          if (checkbox.checked) {
+            this.activate();
+          } else {
+            this.deactivate();
+          }
+        });
+
+        // DebugView restores checkbox state from localStorage in its own init.
+        // Read localStorage directly so we don't depend on init order.
+        const saved = localStorage.getItem('debug-view-show-variables');
+        if (saved === 'true') {
+          await this.activate();
+        }
+      }
+
+      private async activate() {
+        this.active = true;
+
+        if (!this.initialized) {
+          await this.storeOriginalValues();
+          this.setupVariableControls();
+          this.setupResizeListener();
+          this.initialized = true;
+        }
+
         this.loadSavedValues();
-        // Update display to show current values
         this.updateDisplayValues();
-        // Set up resize listener for viewport-specific variables
-        this.setupResizeListener();
+      }
+
+      private deactivate() {
+        this.active = false;
+
+        // Remove all inline style overrides so CSS defaults take effect
+        const cleared = new Set<string>();
+        this.variableControls.forEach((control, controlKey) => {
+          const variableName = control.viewport
+            ? controlKey.replace(`-${control.viewport}`, '')
+            : controlKey;
+          if (!cleared.has(variableName)) {
+            document.documentElement.style.removeProperty(variableName);
+            cleared.add(variableName);
+          }
+        });
       }
 
       private async storeOriginalValues() {
-        // Store original values for each control (including viewport-specific ones)
         const containers = this.$el.querySelectorAll(
           '[data-css-var-container]',
         );
         const currentViewport = this.getCurrentViewport();
-        const promises: Promise<void>[] = [];
+
+        // Collect variables that need iframe reading, grouped by viewport
+        const iframeNeeded = new Map<
+          'small' | 'large',
+          { variableName: string; controlKey: string }[]
+        >();
 
         containers.forEach((container) => {
           const variableName = container.getAttribute('data-css-var-container');
@@ -591,18 +635,14 @@
             : variableName;
 
           if (viewport) {
-            // For viewport-specific variables
             if (viewport === currentViewport) {
-              // Current viewport - read directly
               const originalValue = getComputedStyle(document.documentElement)
                 .getPropertyValue(variableName)
                 .trim();
               this.originalValues.set(controlKey, originalValue || '0');
             } else {
-              // Other viewport - try to read from stylesheet first, then fallback to iframe
               let foundValue = false;
 
-              // Try to read from stylesheet rules directly
               try {
                 const value = this.readValueFromStylesheet(
                   variableName,
@@ -617,37 +657,14 @@
               }
 
               if (!foundValue) {
-                // Set a temporary placeholder first
                 this.originalValues.set(controlKey, '0');
-
-                // Read using iframe simulation (async)
-                const promise = this.readValueForViewport(
-                  variableName,
-                  viewport,
-                )
-                  .then((value: string) => {
-                    if (value && value !== '0') {
-                      this.originalValues.set(controlKey, value);
-                      // Update controls if they exist
-                      const control = this.variableControls.get(controlKey);
-                      if (control) {
-                        const numericValue = this.parseValue(value);
-                        if (numericValue !== null) {
-                          control.slider.value = numericValue.toString();
-                          control.numberInput.value = numericValue.toString();
-                          this.updateDisplayValue(controlKey);
-                        }
-                      }
-                    }
-                  })
-                  .catch(() => {
-                    // Keep placeholder if reading fails
-                  });
-                promises.push(promise);
+                if (!iframeNeeded.has(viewport)) {
+                  iframeNeeded.set(viewport, []);
+                }
+                iframeNeeded.get(viewport)!.push({ variableName, controlKey });
               }
             }
           } else {
-            // For non-viewport-specific variables
             const originalValue = getComputedStyle(document.documentElement)
               .getPropertyValue(variableName)
               .trim();
@@ -655,7 +672,34 @@
           }
         });
 
-        // Wait for all async reads to complete
+        // One iframe per viewport for all variables that need it
+        const promises: Promise<void>[] = [];
+        iframeNeeded.forEach((entries, viewport) => {
+          const variableNames = entries.map((e) => e.variableName);
+          const promise = this.readValuesForViewport(variableNames, viewport)
+            .then((results) => {
+              for (const { variableName, controlKey } of entries) {
+                const value = results.get(variableName);
+                if (value && value !== '0') {
+                  this.originalValues.set(controlKey, value);
+                  const control = this.variableControls.get(controlKey);
+                  if (control) {
+                    const numericValue = this.parseValue(value);
+                    if (numericValue !== null) {
+                      control.slider.value = numericValue.toString();
+                      control.numberInput.value = numericValue.toString();
+                      this.updateDisplayValue(controlKey);
+                    }
+                  }
+                }
+              }
+            })
+            .catch(() => {
+              // Keep placeholders if reading fails
+            });
+          promises.push(promise);
+        });
+
         await Promise.all(promises);
       }
 
@@ -976,91 +1020,107 @@
       }
 
       private setupResizeListener() {
-        // Use a debounced resize listener to update viewport-specific variables
         window.addEventListener('resize', () => {
           if (this.resizeTimeout) {
             clearTimeout(this.resizeTimeout);
           }
 
           this.resizeTimeout = window.setTimeout(() => {
+            if (!this.active) return;
+
             const currentViewport = this.getCurrentViewport();
 
-            // Update all viewport-specific controls
+            // Collect inactive viewport variables for batched iframe reading
+            const iframeNeeded = new Map<
+              'small' | 'large',
+              { variableName: string; controlKey: string }[]
+            >();
+
             this.variableControls.forEach((control, controlKey) => {
-              if (control.viewport) {
-                const variableName = controlKey.replace(
-                  `-${control.viewport}`,
-                  '',
-                );
+              if (!control.viewport) return;
 
-                // Store original value for current viewport
-                if (control.viewport === currentViewport) {
-                  const currentValue = getComputedStyle(
-                    document.documentElement,
-                  )
-                    .getPropertyValue(variableName)
-                    .trim();
-                  this.originalValues.set(controlKey, currentValue || '0');
+              const variableName = controlKey.replace(
+                `-${control.viewport}`,
+                '',
+              );
 
-                  // Update controls with current value
-                  const numericValue = this.parseValue(currentValue);
-                  if (numericValue !== null) {
-                    control.slider.value = numericValue.toString();
-                    control.numberInput.value = numericValue.toString();
-                  }
+              if (control.viewport === currentViewport) {
+                const currentValue = getComputedStyle(
+                  document.documentElement,
+                )
+                  .getPropertyValue(variableName)
+                  .trim();
+                this.originalValues.set(controlKey, currentValue || '0');
 
-                  // Check if there's a saved override
-                  try {
-                    const saved = JSON.parse(
-                      sessionStorage.getItem(this.storageKey) || '{}',
-                    );
+                const numericValue = this.parseValue(currentValue);
+                if (numericValue !== null) {
+                  control.slider.value = numericValue.toString();
+                  control.numberInput.value = numericValue.toString();
+                }
 
-                    if (typeof saved[controlKey] === 'number') {
-                      // Apply saved override
-                      if (this.isUnitlessVariable(variableName)) {
-                        document.documentElement.style.setProperty(
-                          variableName,
-                          saved[controlKey].toString(),
-                        );
-                      } else {
-                        const unitMatch = currentValue.match(/[\d.]+(.*)/);
-                        const unit =
-                          unitMatch && unitMatch[1] ? unitMatch[1] : 'px';
-                        document.documentElement.style.setProperty(
-                          variableName,
-                          `${saved[controlKey]}${unit}`,
-                        );
-                      }
-                    } else {
-                      // Remove inline style to use CSS value
-                      document.documentElement.style.removeProperty(
+                try {
+                  const saved = JSON.parse(
+                    sessionStorage.getItem(this.storageKey) || '{}',
+                  );
+
+                  if (typeof saved[controlKey] === 'number') {
+                    if (this.isUnitlessVariable(variableName)) {
+                      document.documentElement.style.setProperty(
                         variableName,
+                        saved[controlKey].toString(),
+                      );
+                    } else {
+                      const unitMatch = currentValue.match(/[\d.]+(.*)/);
+                      const unit =
+                        unitMatch && unitMatch[1] ? unitMatch[1] : 'px';
+                      document.documentElement.style.setProperty(
+                        variableName,
+                        `${saved[controlKey]}${unit}`,
                       );
                     }
-                  } catch (error) {
-                    // Ignore
+                  } else {
+                    document.documentElement.style.removeProperty(
+                      variableName,
+                    );
                   }
-                } else {
-                  // For inactive viewport, try to read its value using iframe
-                  this.readValueForViewport(variableName, control.viewport)
-                    .then((value: string) => {
-                      this.originalValues.set(controlKey, value || '0');
+                } catch (error) {
+                  // Ignore
+                }
+              } else {
+                if (!iframeNeeded.has(control.viewport)) {
+                  iframeNeeded.set(control.viewport, []);
+                }
+                iframeNeeded
+                  .get(control.viewport)!
+                  .push({ variableName, controlKey });
+              }
+
+              this.updateDisplayValue(controlKey);
+              this.updateModifiedState(controlKey);
+            });
+
+            // One iframe per inactive viewport for all variables
+            iframeNeeded.forEach((entries, viewport) => {
+              const variableNames = entries.map((e) => e.variableName);
+              this.readValuesForViewport(variableNames, viewport)
+                .then((results) => {
+                  for (const { variableName, controlKey } of entries) {
+                    const value = results.get(variableName);
+                    this.originalValues.set(controlKey, value || '0');
+                    const control = this.variableControls.get(controlKey);
+                    if (control && value) {
                       const numericValue = this.parseValue(value);
                       if (numericValue !== null) {
                         control.slider.value = numericValue.toString();
                         control.numberInput.value = numericValue.toString();
                       }
-                      this.updateDisplayValue(controlKey);
-                    })
-                    .catch(() => {
-                      // Keep existing value if reading fails
-                    });
-                }
-
-                // Update display and controls
-                this.updateDisplayValue(controlKey);
-                this.updateModifiedState(controlKey);
-              }
+                    }
+                    this.updateDisplayValue(controlKey);
+                  }
+                })
+                .catch(() => {
+                  // Keep existing values if reading fails
+                });
             });
           }, 150);
         });
