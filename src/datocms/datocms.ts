@@ -52,7 +52,14 @@ export function datocms<T extends DastroTypes>(config: DastroConfig<T>) {
     return executeQuery(query, queryOptions);
   }
 
+  function downloadableAssetUrl(asset: { filename: string; url: string }) {
+    const url = new URL(asset.url);
+    url.searchParams.set('dl', asset.filename);
+    return url.toString();
+  }
+
   return {
     datoFetch,
+    downloadableAssetUrl,
   };
 }
