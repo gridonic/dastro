@@ -1,3 +1,9 @@
+### [1.3.2](https://github.com/gridonic/dastro/compare/v1.3.1...v1.3.2)
+
+- add downloadableAssetUrl helper
+- less iframe calls in css var debugger
+- update create cli command to set cms base editing url
+
 ### [1.3.1](https://github.com/gridonic/dastro/compare/v1.3.0...v1.3.1)
 
 - Improve coloring in debug view
