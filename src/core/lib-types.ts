@@ -2,6 +2,7 @@ import type { Page, PageDefinition, PageRecordType } from './page.ts';
 import type { RecordWithParent, Route } from './routing.ts';
 import type { AstroComponent } from '../components';
 import type { TranslationMessages } from './translations.ts';
+import type { ComponentProps } from 'astro/types';
 
 export type LikeSiteLocale = string;
 export type LikeRecordLink = {
@@ -12,9 +13,21 @@ export type LikeRecordLink = {
 export type DastroTypes<
   TSiteLocale extends LikeSiteLocale = LikeSiteLocale,
   TRecordLinkFragment extends LikeRecordLink = LikeRecordLink,
+  TModuleComponents extends Record<string, AstroComponent> = Record<
+    string,
+    AstroComponent
+  >,
 > = {
   SiteLocale: TSiteLocale;
   RecordLinkFragment: TRecordLinkFragment;
+  ModuleKey: keyof TModuleComponents;
+  ModuleData: {
+    [K in keyof TModuleComponents]: 'data' extends keyof ComponentProps<
+      TModuleComponents[K]
+    >
+      ? ComponentProps<TModuleComponents[K]>['data']
+      : never;
+  }[keyof TModuleComponents];
 };
 
 export interface DastroConfig<T extends DastroTypes> {
@@ -51,4 +64,6 @@ export type ExportTypes<T extends DastroTypes> = {
   Route: Route<T>;
   RecordWithParent: RecordWithParent<T>;
   TranslationMessages: TranslationMessages<T>;
+  ModuleKey: T['ModuleKey'];
+  ModuleData: T['ModuleData'];
 };

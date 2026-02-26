@@ -6,7 +6,6 @@ import type { AstroGlobal } from 'astro';
 import { routing } from './routing.ts';
 import { caching, type CachingOptions } from './caching.ts';
 import { i18n } from './i18n.ts';
-import type { Module } from '../components/component.types.ts';
 
 export type PageRecordType<T extends DastroTypes> =
   T['RecordLinkFragment']['__typename'];
@@ -54,8 +53,8 @@ export interface Page<T extends DastroTypes> {
   title: string;
   _seoMetaTags: MetaTag[];
   _allTranslatedSlugLocales?: TranslatedSlugLocale<T>[] | null;
-  headerModule?: Module | null;
-  contentModules?: Module[];
+  headerModule?: Partial<T['ModuleData']> | null;
+  contentModules?: Partial<T['ModuleData']>[];
 }
 
 export interface MetaTag {
@@ -251,9 +250,35 @@ export async function renderErrorPage<T extends DastroTypes, R>(
   };
 }
 
-export function modulesOfPage<T extends DastroTypes>(page: Page<T>): Module[] {
-  return [
-    ...(page.headerModule ? [page.headerModule] : []),
-    ...(page.contentModules ?? []),
-  ];
+export function page<T extends DastroTypes>(_config: DastroConfig<T>) {
+  function modulesOfType<K extends T['ModuleKey']>(
+    modules: Partial<T['ModuleData']>[],
+    type: K,
+  ): Extract<T['ModuleData'], { __typename?: K }>[] {
+    return modules.filter(
+      (m): m is Extract<T['ModuleData'], { __typename?: K }> =>
+        m.__typename === type,
+    );
+  }
+
+  function usePageRecord(page: Page<T>) {
+    function modules(): T['ModuleData'][] {
+      return [
+        ...(page.headerModule ? [page.headerModule] : []),
+        ...(page.contentModules ?? []),
+      ];
+    }
+
+    return {
+      modules,
+      modulesOfType<K extends T['ModuleKey']>(type: K) {
+        return modulesOfType(modules(), type);
+      },
+    };
+  }
+
+  return {
+    usePageRecord,
+    modulesOfType,
+  };
 }
