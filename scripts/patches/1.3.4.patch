@@ -1,4 +1,4 @@
-Subject: [PATCH] chore(accordion): remove unused offsetHeight call
+Subject: [PATCH] add title attribute to parent queries in hierarchical pages
 ---
 Index: src/datocms/data/global/PageRouting.gql
 IDEA additional info:

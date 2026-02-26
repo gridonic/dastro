@@ -196,32 +196,33 @@ function printPatchInstructions(patchContent) {
     const filePath = fileMatch[1];
     console.log(chalk.bold.underline(`   File: ${filePath}`));
 
-    const hunks = file.split(/^@@ .+ @@.*$/m).slice(1);
-
-    for (const hunk of hunks) {
-      const lines = hunk.split('\n');
-      const removals = [];
-      const additions = [];
-
-      for (const line of lines) {
-        if (line.startsWith('-')) removals.push(line.slice(1));
-        else if (line.startsWith('+')) additions.push(line.slice(1));
-      }
-
-      if (removals.length > 0) {
-        console.log(chalk.red(`\n   Replace:`));
-        for (const line of removals) console.log(chalk.red(`   - ${line}`));
-      }
-
-      if (additions.length > 0) {
-        console.log(
-          chalk.green(`\n   ${removals.length > 0 ? 'With:' : 'Add:'}`),
-        );
-        for (const line of additions) console.log(chalk.green(`   + ${line}`));
-      }
-    }
-
-    console.log();
+    console.log(chalk.green(file));
+    // const hunks = file.split(/^@@ .+ @@.*$/m).slice(1);
+    //
+    // for (const hunk of hunks) {
+    //   const lines = hunk.split('\n');
+    //   const removals = [];
+    //   const additions = [];
+    //
+    //   for (const line of lines) {
+    //     if (line.startsWith('-')) removals.push(line.slice(1));
+    //     else if (line.startsWith('+')) additions.push(line.slice(1));
+    //   }
+    //
+    //   if (removals.length > 0) {
+    //     console.log(chalk.red(`\n   Replace:`));
+    //     for (const line of removals) console.log(chalk.red(`   - ${line}`));
+    //   }
+    //
+    //   if (additions.length > 0) {
+    //     console.log(
+    //       chalk.green(`\n   ${removals.length > 0 ? 'With:' : 'Add:'}`),
+    //     );
+    //     for (const line of additions) console.log(chalk.green(`   + ${line}`));
+    //   }
+    // }
+    //
+    // console.log();
   }
 }
 
