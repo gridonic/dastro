@@ -1,0 +1,50 @@
+diff --git a/src/config/modules.config.ts b/src/config/modules.config.ts
+index 6c64875..89034e8 100644
+--- a/src/config/modules.config.ts
++++ b/src/config/modules.config.ts
+@@ -17,7 +17,7 @@ import Styleguide from '@/components/styleguide/Styleguide.astro';
+ import HeaderText from '@/components/header-modules/HeaderText.astro';
+ import HeaderTextMedia from '@/components/header-modules/HeaderTextMedia.astro';
+ 
+-export const moduleComponents: Record<string, AstroComponent> = {
++export const moduleComponents = {
+   // Header
+   HeaderTextRecord: HeaderText,
+   HeaderTextMediumRecord: HeaderTextMedia,
+@@ -38,4 +38,4 @@ export const moduleComponents: Record<string, AstroComponent> = {
+   TeaserListRecord: TeaserList,
+   TeaserMultipleRecord: TeaserMultiple,
+   StyleguideRecord: Styleguide,
+-};
++} as const satisfies Record<string, AstroComponent>;
+diff --git a/src/env.d.ts b/src/env.d.ts
+index f8d5d78..51e1308 100644
+--- a/src/env.d.ts
++++ b/src/env.d.ts
+@@ -8,6 +8,7 @@ import type {
+   Page,
+ } from 'dastro';
+ import type { RecordLinkFragment } from '@generated/datocms.types';
++import type { moduleComponents } from '@/config/modules.config.ts';
+ 
+ declare global {
+   namespace App {
+@@ -21,11 +22,17 @@ declare global {
+ }
+ 
+ declare module 'dastro' {
+-  export type Types = DastroTypes<SiteLocale, RecordLinkFragment>;
++  export type Types = DastroTypes<
++    SiteLocale,
++    RecordLinkFragment,
++    typeof moduleComponents
++  >;
+ 
+   export type PageDefinition = ExportTypes<Types>['PageDefinition'];
+   export type Page = ExportTypes<Types>['Page'];
+   export type PageRecordType = ExportTypes<Types>['PageRecordType'];
+   export type Route = ExportTypes<Types>['Route'];
+   export type TranslationMessages = ExportTypes<Types>['TranslationMessages'];
++  export type ModuleKey = ExportTypes<Types>['ModuleKey'];
++  export type ModuleData = ExportTypes<Types>['ModuleData'];
+ }

@@ -33,15 +33,22 @@ async function runCommand() {
       execSync('npm ci', { stdio: 'inherit' });
       break;
     case 'upgrade':
-      const cmd = `npm install dastro@github:gridonic/dastro#${getLatestRemoteVersionTag()}`;
-      console.log(`🔄 Running command: ${cmd}`);
-      execSync(cmd, { stdio: 'inherit' });
-      console.log(
-        `\n✅ Upgraded to latest version: ${getLatestRemoteVersionTag()}`,
-      );
+      const currentVersion = getPackageVersion();
+      console.log(`ℹ️  Current version: v${currentVersion}`);
+
+      const latestTag = getLatestRemoteVersionTag();
+      console.log(`ℹ️  Latest version: ${latestTag}\n`);
+
+      const installCmd = `npm install dastro@github:gridonic/dastro#${latestTag}`;
+      console.log(`🔄 Running: ${installCmd}`);
+      execSync(installCmd, { stdio: 'inherit' });
+      console.log(`\n✅ Upgraded to ${latestTag}`);
 
       // Copy cursor rules from the installed dastro package
       copyCursorRules();
+
+      // Apply patches for versions between current and latest
+      applyPatches(currentVersion);
       break;
     case 'radar':
       const radarUrl = 'https://boilerplate-radar.gridonic.io';
@@ -176,6 +183,87 @@ function copyCursorRules() {
     console.log(
       '   You can manually copy them from node_modules/dastro/.cursor/rules/',
     );
+  }
+}
+
+function printPatchInstructions(patchContent) {
+  const files = patchContent.split(/^diff --git /m).filter(Boolean);
+
+  for (const file of files) {
+    const fileMatch = file.match(/^a\/(.+?) b\//);
+    if (!fileMatch) continue;
+
+    const filePath = fileMatch[1];
+    console.log(chalk.bold.underline(`   File: ${filePath}`));
+
+    const hunks = file.split(/^@@ .+ @@.*$/m).slice(1);
+
+    for (const hunk of hunks) {
+      const lines = hunk.split('\n');
+      const removals = [];
+      const additions = [];
+
+      for (const line of lines) {
+        if (line.startsWith('-')) removals.push(line.slice(1));
+        else if (line.startsWith('+')) additions.push(line.slice(1));
+      }
+
+      if (removals.length > 0) {
+        console.log(chalk.red(`\n   Replace:`));
+        for (const line of removals) console.log(chalk.red(`   - ${line}`));
+      }
+
+      if (additions.length > 0) {
+        console.log(
+          chalk.green(`\n   ${removals.length > 0 ? 'With:' : 'Add:'}`),
+        );
+        for (const line of additions) console.log(chalk.green(`   + ${line}`));
+      }
+    }
+
+    console.log();
+  }
+}
+
+function compareVersions(a, b) {
+  const partsA = a.split('.').map(Number);
+  const partsB = b.split('.').map(Number);
+  for (let i = 0; i < Math.max(partsA.length, partsB.length); i++) {
+    const numA = partsA[i] || 0;
+    const numB = partsB[i] || 0;
+    if (numA !== numB) return numA - numB;
+  }
+  return 0;
+}
+
+function applyPatches(previousVersion) {
+  const patchesDir = join(__dirname, 'patches');
+
+  if (!existsSync(patchesDir)) {
+    return;
+  }
+
+  const patches = readdirSync(patchesDir)
+    .filter((f) => f.endsWith('.patch'))
+    .map((f) => ({ file: f, version: f.replace('.patch', '') }))
+    .filter((p) => compareVersions(p.version, previousVersion) > 0)
+    .sort((a, b) => compareVersions(a.version, b.version));
+
+  if (patches.length === 0) {
+    console.log('\nℹ️  No patches to apply.');
+    return;
+  }
+
+  console.log(`\n📦 Found ${patches.length} patch(es) to apply:\n`);
+
+  for (const patch of patches) {
+    const patchPath = join(patchesDir, patch.file);
+    const patchContent = readFileSync(patchPath, 'utf8');
+    const subject =
+      patchContent.match(/^Subject: \[PATCH\] (.+)$/m)?.[1] || 'No description';
+
+    console.log(`📋 Patch v${patch.version}: ${subject}\n`);
+    printPatchInstructions(patchContent);
   }
 }
 
