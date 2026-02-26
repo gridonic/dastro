@@ -1,3 +1,8 @@
+### [1.3.4](https://github.com/gridonic/dastro/compare/v1.3.3...v1.3.4)
+
+- add breadcrumb list structured data entity
+- **UPDATE**: you should add title attributes to parent queries in hierarchical pages according to 1.3.4.patch
+
 ### [1.3.3](https://github.com/gridonic/dastro/compare/v1.3.2...v1.3.3)
 
 - add structured data utilities and schema-dts
