@@ -6,6 +6,7 @@ import type { AstroGlobal } from 'astro';
 import { routing } from './routing.ts';
 import { caching, type CachingOptions } from './caching.ts';
 import { i18n } from './i18n.ts';
+import type { Module } from '../components/component.types.ts';
 
 export type PageRecordType<T extends DastroTypes> =
   T['RecordLinkFragment']['__typename'];
@@ -53,6 +54,8 @@ export interface Page<T extends DastroTypes> {
   title: string;
   _seoMetaTags: MetaTag[];
   _allTranslatedSlugLocales?: TranslatedSlugLocale<T>[] | null;
+  headerModule?: Module | null;
+  contentModules?: Module[];
 }
 
 export interface MetaTag {
@@ -246,4 +249,11 @@ export async function renderErrorPage<T extends DastroTypes, R>(
     page,
     locale,
   };
+}
+
+export function modulesOfPage<T extends DastroTypes>(page: Page<T>): Module[] {
+  return [
+    ...(page.headerModule ? [page.headerModule] : []),
+    ...(page.contentModules ?? []),
+  ];
 }
