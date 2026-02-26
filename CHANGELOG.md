@@ -1,3 +1,8 @@
+### [1.3.3](https://github.com/gridonic/dastro/compare/v1.3.2...v1.3.3)
+
+- add structured data utilities and schema-dts
+- add support for type modules
+
 ### [1.3.2](https://github.com/gridonic/dastro/compare/v1.3.1...v1.3.2)
 
 - add downloadableAssetUrl helper
