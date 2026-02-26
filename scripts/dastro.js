@@ -269,7 +269,10 @@ function applyPatches(previousVersion) {
 
 function getPackageVersion() {
   const packageJson = JSON.parse(
-    readFileSync(join(__dirname, '..', 'package.json'), 'utf8'),
+    readFileSync(
+      join(process.cwd(), 'node_modules', 'dastro', 'package.json'),
+      'utf8',
+    ),
   );
   return packageJson.version;
 }
