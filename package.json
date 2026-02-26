@@ -65,6 +65,7 @@
     "lefthook": "^2.1.0",
     "lodash": "^4.17.23",
     "node-html-parser": "^7.0.2",
+    "schema-dts": "^1.1.5",
     "serialize-error": "^13.0.1",
     "typescript": "^5.9.3"
   },
