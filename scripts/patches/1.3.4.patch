@@ -1,0 +1,24 @@
+Subject: [PATCH] chore(accordion): remove unused offsetHeight call
+---
+Index: src/datocms/data/global/PageRouting.gql
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/datocms/data/global/PageRouting.gql b/src/datocms/data/global/PageRouting.gql
+--- a/src/datocms/data/global/PageRouting.gql	(revision 6743d5e87d66a46f470b9c37529e7b34a984e185)
++++ b/src/datocms/data/global/PageRouting.gql	(date 1772121028866)
+@@ -41,11 +41,13 @@
+     value
+   }
+   parent {
++    title
+     _allTranslatedSlugLocales {
+       locale
+       value
+     }
+     parent {
++      title
+       _allTranslatedSlugLocales {
+         locale
+         value

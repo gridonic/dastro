@@ -1,6 +1,8 @@
 import type {
+  BreadcrumbList,
   FAQPage,
   Graph,
+  ListItem,
   Organization,
   Thing,
   WebPage,
@@ -9,6 +11,7 @@ import type {
 import type { AstroContext } from '../astro.context.ts';
 import type { Page } from '../core/page.ts';
 import type { DastroTypes } from '../core/lib-types.ts';
+import type { RecordWithParent } from '../core/routing.ts';
 
 export function useStructuredData<T extends DastroTypes>(
   context: AstroContext<'locals'>,
@@ -27,12 +30,16 @@ export function useStructuredData<T extends DastroTypes>(
   const { config } = context.locals.dastro;
   const baseUrl = config.appBaseUrl.replace(/\/$/, '');
 
-  const absoluteHomeUrl = `${baseUrl}${homeUrl.replace(/\/$/, '')}`;
+  const absoluteHomeUrl = absoluteUrl(homeUrl);
 
   const pageUrl = resolveRecordUrl(page, context.locals.locale) ?? '';
-  const absolutePageUrl = `${baseUrl}${pageUrl.replace(/\/$/, '')}`;
+  const absolutePageUrl = absoluteUrl(pageUrl);
 
   const isHomePage = pageUrl === homeUrl;
+
+  function absoluteUrl(url: string) {
+    return `${baseUrl}${url.replace(/\/$/, '')}`;
+  }
 
   function homeId(name: string) {
     return `${absoluteHomeUrl}#${name}`;
@@ -85,6 +92,39 @@ export function useStructuredData<T extends DastroTypes>(
     };
   }
 
+  function breadcrumbListEntity(additionalProps?: {
+    breadCrumbs?: Partial<BreadcrumbList>;
+  }): BreadcrumbList {
+    function getBreadcrumbItemsRec(
+      record: { __typename: string; title?: string } & RecordWithParent<T>,
+    ): ListItem[] {
+      const parentItems = record.parent
+        ? getBreadcrumbItemsRec({
+            ...record.parent,
+            __typename: record.__typename,
+          })
+        : [];
+
+      return [
+        ...parentItems,
+        {
+          '@type': 'ListItem',
+          position: parentItems.length + 1,
+          item: absoluteUrl(
+            resolveRecordUrl(record, context.locals.locale) ?? '',
+          ),
+          name: record.title,
+        },
+      ];
+    }
+
+    return {
+      '@type': 'BreadcrumbList',
+      itemListElement: [...getBreadcrumbItemsRec(page)],
+      ...additionalProps,
+    };
+  }
+
   function faqEntity(
     items: { question: string; text: string }[],
     additionalProps?: {
@@ -130,8 +170,12 @@ export function useStructuredData<T extends DastroTypes>(
 
   function createPageGraph(additionalProps?: {
     webPage?: Partial<WebPage>;
+    breadCrumbs?: Partial<BreadcrumbList>;
   }): Graph {
-    return createGraph([webPageEntity(additionalProps)]);
+    return createGraph([
+      webPageEntity(additionalProps),
+      breadcrumbListEntity(additionalProps),
+    ]);
   }
 
   return {
