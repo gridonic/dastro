@@ -1,3 +1,7 @@
+### [1.3.5](https://github.com/gridonic/dastro/compare/v1.3.4...v1.3.5)
+
+- simplify file diff output and update patch
+
 ### [1.3.4](https://github.com/gridonic/dastro/compare/v1.3.3...v1.3.4)
 
 - add breadcrumb list structured data entity
