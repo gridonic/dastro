@@ -1,3 +1,7 @@
+### [1.3.6](https://github.com/gridonic/dastro/compare/v1.3.5...v1.3.6)
+
+- handle single-element breadcrumb lists gracefully
+
 ### [1.3.5](https://github.com/gridonic/dastro/compare/v1.3.4...v1.3.5)
 
 - simplify file diff output and update patch
