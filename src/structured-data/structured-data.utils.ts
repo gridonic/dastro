@@ -94,7 +94,7 @@ export function useStructuredData<T extends DastroTypes>(
 
   function breadcrumbListEntity(additionalProps?: {
     breadCrumbs?: Partial<BreadcrumbList>;
-  }): BreadcrumbList {
+  }): BreadcrumbList | undefined {
     function getBreadcrumbItemsRec(
       record: { __typename: string; title?: string } & RecordWithParent<T>,
     ): ListItem[] {
@@ -118,11 +118,15 @@ export function useStructuredData<T extends DastroTypes>(
       ];
     }
 
-    return {
-      '@type': 'BreadcrumbList',
-      itemListElement: [...getBreadcrumbItemsRec(page)],
-      ...additionalProps,
-    };
+    const breadcrumbItems = getBreadcrumbItemsRec(page);
+
+    return breadcrumbItems.length > 1
+      ? {
+          '@type': 'BreadcrumbList',
+          itemListElement: breadcrumbItems.slice(0, -1),
+          ...additionalProps?.breadCrumbs,
+        }
+      : undefined;
   }
 
   function faqEntity(
@@ -172,9 +176,11 @@ export function useStructuredData<T extends DastroTypes>(
     webPage?: Partial<WebPage>;
     breadCrumbs?: Partial<BreadcrumbList>;
   }): Graph {
+    const breadcrumbList = breadcrumbListEntity(additionalProps);
+
     return createGraph([
       webPageEntity(additionalProps),
-      breadcrumbListEntity(additionalProps),
+      ...(breadcrumbList ? [breadcrumbList] : []),
     ]);
   }
 
