@@ -55,6 +55,7 @@ export interface Page<T extends DastroTypes> {
   _allTranslatedSlugLocales?: TranslatedSlugLocale<T>[] | null;
   headerModule?: Partial<T['ModuleData']> | null;
   contentModules?: Partial<T['ModuleData']>[];
+  structuredDataMainEntity?: any;
 }
 
 export interface MetaTag {

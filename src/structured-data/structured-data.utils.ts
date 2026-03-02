@@ -88,6 +88,7 @@ export function useStructuredData<T extends DastroTypes>(
         '@type': 'WebSite',
         '@id': homeId('website'),
       },
+      mainEntity: page.structuredDataMainEntity || undefined,
       ...additionalProps?.webPage,
     };
   }
