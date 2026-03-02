@@ -1,3 +1,7 @@
+### [1.3.7](https://github.com/gridonic/dastro/compare/v1.3.6...v1.3.7)
+
+- allow a structured data main entity property on page
+
 ### [1.3.6](https://github.com/gridonic/dastro/compare/v1.3.5...v1.3.6)
 
 - handle single-element breadcrumb lists gracefully
