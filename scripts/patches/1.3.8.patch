@@ -1,49 +1,3 @@
-Subject: [PATCH] refactor: remove translated slugs from link records
----
-Index: src/config/globalDataStore.ts
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
-diff --git a/src/config/globalDataStore.ts b/src/config/globalDataStore.ts
---- a/src/config/globalDataStore.ts	(revision 9a40d7ae85efa90378e57fbd30c5c8cc4a7d48a2)
-+++ b/src/config/globalDataStore.ts	(date 1773660630732)
-@@ -3,7 +3,6 @@
-   type CustomerOnboardingFragment,
-   GetGlobalSettingsDocument,
-   type NavigationFragment,
--  type NavLinkFragment,
-   type SiteLocale,
-   type SiteSettingsFragment,
- } from '@generated/datocms.types.ts';
-@@ -55,27 +54,12 @@
-       customerOnboarding,
-       navigation: {
-         ...navigation,
--        navLinks: navLinksWithoutNonExisting(navigation.navLinks),
-         homeUrl: navigation.homePage
-           ? (resolveRecordUrl(navigation.homePage, locale) ?? '/')
-           : '/',
-       },
-     };
-   }
--  function navLinksWithoutNonExisting<
--    T extends NavLinkFragment & {
--      subtree?: NavLinkFragment[];
--    },
--  >(navLinks: T[]): T[] {
--    return navLinks
--      .filter((navLink) => navLink.link.translatedSlug !== null)
--      .map((navLink) => ({
--        ...navLink,
--        ...(navLink.subtree
--          ? { subtree: navLinksWithoutNonExisting(navLink.subtree) }
--          : undefined),
--      }));
--  }
- 
-   return stripStega({
-     ...(await loadGlobalSettings()),
 Index: src/components/content-modules/TeaserMultiple.astro
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
@@ -51,15 +5,15 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 ===================================================================
 diff --git a/src/components/content-modules/TeaserMultiple.astro b/src/components/content-modules/TeaserMultiple.astro
 --- a/src/components/content-modules/TeaserMultiple.astro	(revision 9a40d7ae85efa90378e57fbd30c5c8cc4a7d48a2)
-+++ b/src/components/content-modules/TeaserMultiple.astro	(date 1773660785526)
++++ b/src/components/content-modules/TeaserMultiple.astro	(revision 82ad941cf15403b3f540ca6fff73c86a9661fe6d)
 @@ -11,6 +11,8 @@
- 
+
  const { data } = Astro.props;
- 
+
 +const { slugFromRecord } = Astro.locals.dastro.routing();
 +
  ---
- 
+
  <div class="teaser-multiple ui-grid">
 @@ -42,8 +44,8 @@
                  record={teaser.link.linkOfType.recordLink}
@@ -71,23 +25,27 @@ diff --git a/src/components/content-modules/TeaserMultiple.astro b/src/component
                  <article class="article teaser-multiple-article">
                    {teaser.image && (
                      <ImageAsset
-Index: src/pages/404.astro
+Index: src/config/globalDataStore.ts
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
-diff --git a/src/pages/404.astro b/src/pages/404.astro
---- a/src/pages/404.astro	(revision 9a40d7ae85efa90378e57fbd30c5c8cc4a7d48a2)
-+++ b/src/pages/404.astro	(date 1773661055994)
-@@ -4,7 +4,7 @@
- import  { initGlobalDataStore } from '@/config/globalDataStore.ts';
- 
- const { page, locale, Component } = await renderErrorPage(
--  (globalStore) => globalStore.navigation.page404 ?? { __typename: 'PageRecord', translatedSlug: '404' },
-+  (globalStore) => globalStore.navigation.page404,
-   Astro,
-   dastroConfig,
-   initGlobalDataStore,
+diff --git a/src/config/globalDataStore.ts b/src/config/globalDataStore.ts
+--- a/src/config/globalDataStore.ts	(revision 9a40d7ae85efa90378e57fbd30c5c8cc4a7d48a2)
++++ b/src/config/globalDataStore.ts	(revision 82ad941cf15403b3f540ca6fff73c86a9661fe6d)
+@@ -68,7 +68,11 @@
+     },
+   >(navLinks: T[]): T[] {
+     return navLinks
+-      .filter((navLink) => navLink.link.translatedSlug !== null)
++      .filter((navLink) =>
++        navLink.link?._allTranslatedSlugLocales?.some(
++          (s) => s.locale === locale,
++        ),
++      )
+       .map((navLink) => ({
+         ...navLink,
+         ...(navLink.subtree
 Index: src/datocms/data/global/PageRouting.gql
 IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
@@ -95,7 +53,7 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 ===================================================================
 diff --git a/src/datocms/data/global/PageRouting.gql b/src/datocms/data/global/PageRouting.gql
 --- a/src/datocms/data/global/PageRouting.gql	(revision 9a40d7ae85efa90378e57fbd30c5c8cc4a7d48a2)
-+++ b/src/datocms/data/global/PageRouting.gql	(date 1773660737853)
++++ b/src/datocms/data/global/PageRouting.gql	(revision 82ad941cf15403b3f540ca6fff73c86a9661fe6d)
 @@ -35,7 +35,6 @@
    __typename
    id
@@ -112,3 +70,20 @@ diff --git a/src/datocms/data/global/PageRouting.gql b/src/datocms/data/global/P
    _allTranslatedSlugLocales {
      locale
      value
+Index: src/pages/404.astro
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/pages/404.astro b/src/pages/404.astro
+--- a/src/pages/404.astro	(revision 9a40d7ae85efa90378e57fbd30c5c8cc4a7d48a2)
++++ b/src/pages/404.astro	(revision 82ad941cf15403b3f540ca6fff73c86a9661fe6d)
+@@ -4,7 +4,7 @@
+ import  { initGlobalDataStore } from '@/config/globalDataStore.ts';
+
+ const { page, locale, Component } = await renderErrorPage(
+-  (globalStore) => globalStore.navigation.page404 ?? { __typename: 'PageRecord', translatedSlug: '404' },
++  (globalStore) => globalStore.navigation.page404,
+   Astro,
+   dastroConfig,
+   initGlobalDataStore,
