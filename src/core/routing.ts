@@ -209,6 +209,7 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
     getAllRoutes,
     pageDefinitionList,
     pageRecordTypes,
+    slugFromRecord,
     slugify,
   };
 }

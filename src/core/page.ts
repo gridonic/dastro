@@ -215,15 +215,19 @@ export async function renderPage<T extends DastroTypes>(
 export async function renderErrorPage<T extends DastroTypes, R>(
   getRecordLink: (
     globalStore: Awaited<ReturnType<InitGlobalDataStore<T, R>>>,
-  ) => {
-    __typename: T['RecordLinkFragment']['__typename'];
-    translatedSlug: string;
-  },
+  ) =>
+    | {
+        __typename: PageRecordType<T>;
+        _allTranslatedSlugLocales?: TranslatedSlugLocale<T>[] | null;
+      }
+    | null
+    | undefined,
   context: AstroGlobal,
   dastroConfig: DastroConfig<T>,
   initGlobalDataStore: InitGlobalDataStore<T, R>,
 ) {
   const { i18n } = dastroConfig;
+  const { slugFromRecord } = context.locals.dastro.routing();
 
   // Note: Locale and globalStore should already be set, as usually we rewrite to error pages.
   //  -> if not, use defaultLocale and initialize globalStore
@@ -233,9 +237,13 @@ export async function renderErrorPage<T extends DastroTypes, R>(
 
   const recordLink = getRecordLink(globalStore);
 
+  if (!recordLink) {
+    throw new Error('No record link defined for error page');
+  }
+
   const pageDefinition = dastroConfig.pageDefinitions[recordLink.__typename];
   const page = await pageDefinition.load(
-    recordLink.translatedSlug,
+    slugFromRecord(recordLink, locale),
     locale,
     context,
   );
