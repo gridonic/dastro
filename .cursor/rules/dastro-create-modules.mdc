@@ -114,6 +114,7 @@ The following types should be handled specially:
 - Links of type `LinkFragment` use the `<Link link={data.linkProperty} />`, where linkProperty is the attribute. Link should be imported from `@/components/link/Link.astro`
 - Links of type `RecordLinkFragment` use `<RecordLink record={data.linkProperty} />` , where linkProperty is the attribute. Link should be imported from `dastro/components`
 - Attributes that have responsiveImage and or the `MediaAsset` fragment on them use the `<MediaAsset data={data.assetProperty} aspectRatio={<w> / <h>}/>` component, where assetProperty is the attribute and <w> and <h> are the specified dimensions in the fragment. If we are in a Header module, `priority={true}` should also be specifed. MediaAsset should be imported from `dastro/components`
+  - Important: if priority={true} is specified for assets that are shown or hidden depending on the viewport (_hidden-vs, hidden-vl), then there must be a sizes attribute, and the width value should be 0 for the viewport that is not shown for that image, .e.g, sizes="(max-width: 899px) 0, 84w" for _hidden-vs 
 
 ---
 
