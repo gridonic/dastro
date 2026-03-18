@@ -7,6 +7,7 @@
     "astro:check": "astro check",
     "astro:check:watch": "astro check --watch --preserveWatchOutput",
     "test": "vitest run",
+    "test:mutate": "stryker run",
     "release": "node scripts/release"
   },
   "bin": {
@@ -70,6 +71,8 @@
     "typescript": "^5.9.3"
   },
   "devDependencies": {
+    "@stryker-mutator/core": "^9.6.0",
+    "@stryker-mutator/vitest-runner": "^9.6.0",
     "@types/lodash": "^4.17.24",
     "prettier": "^3.8.1",
     "prettier-plugin-astro": "^0.14.1",

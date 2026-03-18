@@ -26,5 +26,10 @@ pnpm-debug.log*
 # Local Netlify folder
 .netlify
 
+# Stryker
+reports/mutation/
+.stryker-cache/
+.stryker-tmp/
+
 # AI Agents
 /.claude/settings.local.json

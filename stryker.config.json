@@ -1,0 +1,11 @@
+{
+  "$schema": "https://raw.githubusercontent.com/stryker-mutator/stryker/master/packages/core/schema/stryker-schema.json",
+  "mutate": ["src/**/*.ts", "!src/**/*.test.ts", "!src/**/*.d.ts"],
+  "testRunner": "vitest",
+  "reporters": ["clear-text", "html", "progress"],
+  "concurrency": 8,
+  "cleanTempDir": "always",
+  "incremental": true,
+  "incrementalFile": ".stryker-cache/incremental.json",
+  "ignoreStatic": true
+}
