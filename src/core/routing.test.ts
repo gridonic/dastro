@@ -297,6 +297,28 @@ describe('resolveRecordUrl', () => {
     });
   });
 
+  describe('Non-PageRecord with home slug', () => {
+    test('should not apply home page special case for non-PageRecord types', () => {
+      const { resolveRecordUrl } = resolveRecordUrlTest();
+
+      const articleWithHomeSlug = buildTestPageRecord('test', {
+        type: 'ArticleRecord',
+        overrides: {
+          _allTranslatedSlugLocales: [
+            { locale: 'de', value: 'home' },
+            { locale: 'en', value: 'home' },
+            { locale: 'fr_CH', value: 'home' },
+          ],
+        },
+      });
+
+      // ArticleRecord with slug 'home' should get the full path with prefix, not '/'
+      expect(resolveRecordUrl(articleWithHomeSlug, defaultTestLocale)).toBe(
+        '/themen/home',
+      );
+    });
+  });
+
   describe('Given routing strategy is prefix-always', () => {
     test('should resolve home page for default locale to default locale prefix', () => {
       const { resolveRecordUrl, homeRecord } = resolveRecordUrlTest({
@@ -600,6 +622,20 @@ describe('pageRecordForUrl', () => {
   });
 
   describe('Edge cases', () => {
+    test('should handle URL with double trailing slash preserving slug structure', async () => {
+      const { pageRecordForUrl, astroContext } = pageRecordForUrlTest();
+
+      const result = await pageRecordForUrl(
+        astroContext,
+        '/en/topics/something//',
+      );
+
+      expect(result.locale).toBe('en');
+      expect(result.pathPrefix).toBe('topics');
+      expect(result.fullSlug).toBe('something/');
+      expect(result.slug).toBe('');
+    });
+
     test('should handle URL with trailing slash', async () => {
       const { pageRecordForUrl, astroContext } = pageRecordForUrlTest();
 
@@ -642,6 +678,31 @@ describe('pageRecordForUrl', () => {
       expect(result.pathPrefix).toBe('');
       expect(result.fullSlug).toBe('about-fr');
       expect(result.slug).toBe('about-fr');
+    });
+  });
+
+  describe('Default locale not in URL regex (prefix-except-default)', () => {
+    test('should treat default locale prefix as slug, not locale', async () => {
+      const { pageRecordForUrl, astroContext } = pageRecordForUrlTest();
+
+      // With prefix-except-default, 'de' is NOT in the locale regex
+      // So '/de/about-de' should parse 'de' as part of the slug path, not as locale
+      const result = await pageRecordForUrl(astroContext, '/de/about-de');
+
+      expect(result.locale).toBe(defaultTestLocale); // default locale from fallback
+      expect(result.fullSlug).toBe('de/about-de'); // 'de' is part of the slug, not stripped as locale
+      expect(result.slug).toBe('about-de');
+    });
+
+    test('should treat default locale as slug when it is the only path segment', async () => {
+      const { pageRecordForUrl, astroContext } = pageRecordForUrlTest();
+
+      const result = await pageRecordForUrl(astroContext, '/de');
+
+      // 'de' should NOT be matched as a locale prefix, it should be treated as slug
+      expect(result.locale).toBe(defaultTestLocale);
+      expect(result.fullSlug).toBe('de');
+      expect(result.slug).toBe('de');
     });
   });
 
