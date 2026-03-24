@@ -7,6 +7,13 @@ description: Mutation testing improvement cycle using Stryker. Run mutation test
 
 **Usage:** `/mutate` (auto-pick file) or `/mutate src/path/file.ts` (target specific file)
 
+## Tests
+
+### What is a good test
+
+You can look that up in the existing tdd skill. You can ignore the workflow there but just
+look up the content from test.md
+
 ## Workflow
 
 ### Step 1 — Run Stryker
@@ -70,3 +77,4 @@ Use 10-minute timeout. Report:
 - Previous score → new score
 - Number of mutants killed by the new tests
 - Any remaining survived mutants (briefly note what they test)
+- Brief summary of the tests you wrote or changed.
