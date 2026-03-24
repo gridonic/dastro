@@ -1,3 +1,7 @@
+### [1.3.9](https://github.com/gridonic/dastro/compare/v1.3.8...v1.3.9)
+
+- Show warnings about stega in attributes in visual editing mode
+
 ### [1.3.8](https://github.com/gridonic/dastro/compare/v1.3.7...v1.3.8)
 
 - never require translatedSlug anywhere as field on records anymore
