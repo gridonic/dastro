@@ -20,8 +20,8 @@ diff --git a/src/components/content-modules/TeaserMultiple.astro b/src/component
                  target={teaser.link.openLinkInNewWindow ? '_blank' : '_self'}
                  linkTitle={teaser.link.linkText ?? ''}
 -                id={`teaser-multiple-article-${index}-${teaser.link.linkOfType.recordLink.translatedSlug}`}
-               >
 +                id={`teaser-multiple-article-${index}-${slugFromRecord(teaser.link.linkOfType.recordLink, Astro.locals.locale)}`}
+               >
                  <article class="article teaser-multiple-article">
                    {teaser.image && (
                      <ImageAsset
