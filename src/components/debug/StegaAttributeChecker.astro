@@ -1,0 +1,58 @@
+---
+
+---
+
+<div class="stega-attribute-checker"></div>
+
+<script>
+  // @vercel/stega uses these invisible Unicode characters for encoding:
+  // U+200B, U+200C, U+200D, U+2060-U+2063, U+FEFF, U+1D173-U+1D17A
+  // The regex matches 4+ consecutive characters from this set.
+
+  const STEGA_PATTERN =
+    // eslint-disable-next-line no-misleading-character-class
+    /[\u200B\u200C\u200D\u2060-\u2063\uFEFF\u{1D173}-\u{1D17A}]{4,}/gu;
+
+  function cleanStega(value: string) {
+    return value.replace(STEGA_PATTERN, '');
+  }
+
+  function checkForStega() {
+    let count = 0;
+
+    // Auto-strip stega from attributes (stega in attributes is always a bug).
+    // Text content stega is left intact — it powers DatoCMS visual editing.
+    document.querySelectorAll('*').forEach((el) => {
+      for (const attr of el.attributes) {
+        if (STEGA_PATTERN.test(attr.value)) {
+          count++;
+          el.setAttribute(attr.name, cleanStega(attr.value));
+          console.warn(
+            `[stega] Stripped from <${el.tagName.toLowerCase()}> attribute "${attr.name}" — use clean() in the source`,
+            el,
+          );
+        }
+      }
+    });
+
+    // Check inline scripts and styles (cannot auto-fix, only warn)
+    document.querySelectorAll('script:not([src]), style').forEach((el) => {
+      if (STEGA_PATTERN.test(el.textContent ?? '')) {
+        count++;
+        console.warn(
+          `[stega] Encoded content in inline <${el.tagName.toLowerCase()}> — use clean() in the source`,
+          el,
+        );
+      }
+    });
+
+    if (count > 0) {
+      console.warn(
+        `[stega] Auto-fixed ${count} attribute(s) with stega-encoded content in the DOM. Fix in the source with clean() to avoid runtime patching.`,
+      );
+    }
+  }
+
+  checkForStega();
+  document.addEventListener('astro:page-load', checkForStega);
+</script>

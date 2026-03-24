@@ -1,0 +1,9 @@
+---
+import { ContentLink } from '@datocms/astro';
+import StegaAttributeChecker from '../debug/StegaAttributeChecker.astro';
+---
+
+<div class="dastro-content-link" data-dastro-content-link>
+  <ContentLink stripStega={true} />
+  <StegaAttributeChecker />
+</div>
