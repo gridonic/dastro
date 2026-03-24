@@ -1,4 +1,5 @@
 ---
+import { stripStega } from '@datocms/astro';
 import { type DastroTypes } from '../../core/lib-types.ts';
 import type { ClassValue } from '../component.types.ts';
 
@@ -28,13 +29,13 @@ const { resolveRecordUrl } = Astro.locals.dastro.routing();
 {
   record?.__typename && (
     <a
-      id={id}
+      id={stripStega(id)}
       class="link"
-      class:list={classNames}
+      class:list={stripStega(classNames)}
       data-astro-prefetch
       href={resolveRecordUrl(record, Astro.locals.locale)}
-      target={target}
-      title={linkTitle}
+      target={stripStega(target)}
+      title={stripStega(linkTitle)}
       data-datocms-content-link-boundary
       {...rest}
     >

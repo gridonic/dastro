@@ -28,7 +28,7 @@
           count++;
           el.setAttribute(attr.name, cleanStega(attr.value));
           console.warn(
-            `[stega] Stripped from <${el.tagName.toLowerCase()}> attribute "${attr.name}" — use clean() in the source`,
+            `[stega] Stripped from <${el.tagName.toLowerCase()}> attribute "${attr.name}" — use stripStega() in the source`,
             el,
           );
         }
@@ -40,7 +40,7 @@
       if (STEGA_PATTERN.test(el.textContent ?? '')) {
         count++;
         console.warn(
-          `[stega] Encoded content in inline <${el.tagName.toLowerCase()}> — use clean() in the source`,
+          `[stega] Encoded content in inline <${el.tagName.toLowerCase()}> — use stripStega() in the source`,
           el,
         );
       }
@@ -48,7 +48,7 @@
 
     if (count > 0) {
       console.warn(
-        `[stega] Auto-fixed ${count} attribute(s) with stega-encoded content in the DOM. Fix in the source with clean() to avoid runtime patching.`,
+        `[stega] Auto-fixed ${count} attribute(s) with stega-encoded content in the DOM. Fix in the source with stripStega() to avoid runtime patching.`,
       );
     }
   }
