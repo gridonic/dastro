@@ -1,3 +1,7 @@
+### [1.3.10](https://github.com/gridonic/dastro/compare/v1.3.9...v1.3.10)
+
+- strip stega from record link attrs
+
 ### [1.3.9](https://github.com/gridonic/dastro/compare/v1.3.8...v1.3.9)
 
 - Show warnings about stega in attributes in visual editing mode
