@@ -1,3 +1,7 @@
+### [1.3.11](https://github.com/gridonic/dastro/compare/v1.3.10...v1.3.11)
+
+- extend module data type for cms flexibility
+
 ### [1.3.10](https://github.com/gridonic/dastro/compare/v1.3.9...v1.3.10)
 
 - strip stega from record link attrs
