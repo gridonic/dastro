@@ -53,8 +53,9 @@ export interface Page<T extends DastroTypes> {
   title: string;
   _seoMetaTags: MetaTag[];
   _allTranslatedSlugLocales?: TranslatedSlugLocale<T>[] | null;
-  headerModule?: Partial<T['ModuleData']> | null;
-  contentModules?: Partial<T['ModuleData']>[];
+  // Note: Extend module data, allows to add module in cms before implementing them in code
+  headerModule?: Partial<T['ModuleData'] | { __typename: string & {} }> | null;
+  contentModules?: Partial<T['ModuleData'] | { __typename: string & {} }>[];
   structuredDataMainEntity?: any;
 }
 
