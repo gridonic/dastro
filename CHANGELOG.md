@@ -1,3 +1,8 @@
+### [1.3.13](https://github.com/gridonic/dastro/compare/v1.3.12...v1.3.13)
+
+- use contentLinkAttrs in RecordLink and update patch to use contentLinkAttrs more
+- update rules so it does also handle projects that wrap default structured text
+
 ### [1.3.12](https://github.com/gridonic/dastro/compare/v1.3.11...v1.3.12)
 
 - add contentLinkAttrs utility function
