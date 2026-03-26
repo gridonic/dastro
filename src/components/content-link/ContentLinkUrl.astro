@@ -1,5 +1,6 @@
 ---
 import type { ClassValue } from '../component.types.ts';
+import { contentLinkAttrs } from './content-link-attrs.ts';
 
 interface Props {
   url: string;
@@ -16,6 +17,6 @@ const {
 ---
 
 <!-- @see: https://github.com/datocms/astro-datocms/tree/main/src/ContentLink#data-datocms-content-link-url -->
-<TagName data-datocms-content-link-url={url} class:list={classNames} {...rest}>
+<TagName {...contentLinkAttrs({ url })} class:list={classNames} {...rest}>
   <slot />
 </TagName>

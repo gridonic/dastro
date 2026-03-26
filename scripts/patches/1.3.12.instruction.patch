@@ -1,0 +1,16 @@
+# This is a manual patch instruction
+Replace the ContentLinkXXX components with new components that use the contentLinkAttrs helper from dastro.
+
+## Example in ContentText
+Before:
+```astro
+<ContentLinkGroup class="text ui-richtext">
+    <DefaultStructuredText data={data.text} />
+  </ContentLinkGroup>
+```
+After:
+```astro
+<div class="text ui-richtext" {...contentLinkAttrs({ group: true })}>
+   <DefaultStructuredText data={data.text} />
+</div>
+```

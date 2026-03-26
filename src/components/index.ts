@@ -1,4 +1,5 @@
 export type { AstroComponent, ClassValue } from './component.types';
+export type { ContentLinkOptions } from './content-link/content-link-attrs.ts';
 
 import LayoutBase from './layout/LayoutBase.astro';
 
@@ -21,6 +22,7 @@ import ContentLinkUrl from './content-link/ContentLinkUrl.astro';
 import ContentLinkSource from './content-link/ContentLinkSource.astro';
 import ContentLinkGroup from './content-link/ContentLinkGroup.astro';
 import ContentLinkBoundary from './content-link/ContentLinkBoundary.astro';
+import { contentLinkAttrs } from './content-link/content-link-attrs.ts';
 
 export {
   LayoutBase,
@@ -38,4 +40,5 @@ export {
   ContentLinkGroup,
   ContentLinkBoundary,
   Modules,
+  contentLinkAttrs,
 };

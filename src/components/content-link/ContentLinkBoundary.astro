@@ -1,5 +1,6 @@
 ---
 import type { ClassValue } from '../component.types.ts';
+import { contentLinkAttrs } from './content-link-attrs.ts';
 
 interface Props {
   tagName?: keyof HTMLElementTagNameMap;
@@ -10,6 +11,6 @@ const { tagName: TagName = 'div', class: classNames, ...rest } = Astro.props;
 ---
 
 <!-- @see: https://github.com/datocms/astro-datocms/tree/main/src/ContentLink#data-datocms-content-link-boundary -->
-<TagName data-datocms-content-link-boundary class:list={classNames} {...rest}>
+<TagName {...contentLinkAttrs({ boundary: true })} class:list={classNames} {...rest}>
   <slot />
 </TagName>
