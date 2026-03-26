@@ -7,6 +7,7 @@
     "astro:check": "astro check",
     "astro:check:watch": "astro check --watch --preserveWatchOutput",
     "test": "vitest run",
+    "test:crap": "node scripts/crap.js",
     "test:mutate": "stryker run",
     "release": "node scripts/release"
   },
@@ -74,6 +75,7 @@
     "@stryker-mutator/core": "^9.6.0",
     "@stryker-mutator/vitest-runner": "^9.6.0",
     "@types/lodash": "^4.17.24",
+    "@vitest/coverage-v8": "^4.1.1",
     "prettier": "^3.8.1",
     "prettier-plugin-astro": "^0.14.1",
     "sass-embedded": "^1.97.3",

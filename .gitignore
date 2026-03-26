@@ -31,5 +31,8 @@ reports/mutation/
 .stryker-cache/
 .stryker-tmp/
 
+# Testing
+.test/
+
 # AI Agents
 /.claude/settings.local.json
