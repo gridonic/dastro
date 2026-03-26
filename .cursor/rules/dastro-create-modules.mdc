@@ -110,7 +110,7 @@ const { data } = Astro.props;
 The following types should be handled specially:
 
 - If there is an attribute of the record that contains a value of type like JsonField,
-  it is almost certainly a structured text, and therefore it should use a `<DefaultStructuredText data={data.textProperty} />`, where textProperty is the attribute. DefaultStructuredText should be imported from `dastro/components`
+  it is almost certainly a structured text, and therefore it should use a `<DefaultStructuredText data={data.textProperty} />`, where textProperty is the attribute. DefaultStructuredText should be imported from `dastro/components`. Note: Some projects may have a wrapper component for structured texts, in which case that component should be used instead (e.g., TextBlock)
 - Links of type `LinkFragment` use the `<Link link={data.linkProperty} />`, where linkProperty is the attribute. Link should be imported from `@/components/link/Link.astro`
 - Links of type `RecordLinkFragment` use `<RecordLink record={data.linkProperty} />` , where linkProperty is the attribute. Link should be imported from `dastro/components`
 - Attributes that have responsiveImage and or the `MediaAsset` fragment on them use the `<MediaAsset data={data.assetProperty} aspectRatio={<w> / <h>}/>` component, where assetProperty is the attribute and <w> and <h> are the specified dimensions in the fragment. If we are in a Header module, `priority={true}` should also be specifed. MediaAsset should be imported from `dastro/components`

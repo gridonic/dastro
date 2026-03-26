@@ -1,16 +1,45 @@
 # This is a manual patch instruction
-Replace the ContentLinkXXX components with new components that use the contentLinkAttrs helper from dastro.
 
-## Example in ContentText
+There are two separate cases to handle. Apply both independently.
+
+---
+
+## Case 1: A `ContentLinkGroup` or `ContentLink` component is already wrapping a `DefaultStructuredText`
+
+Replace the `ContentLinkXXX` component with a plain element and add the `contentLinkAttrs` helper.
+
 Before:
 ```astro
 <ContentLinkGroup class="text ui-richtext">
     <DefaultStructuredText data={data.text} />
-  </ContentLinkGroup>
+</ContentLinkGroup>
 ```
+
 After:
 ```astro
 <div class="text ui-richtext" {...contentLinkAttrs({ group: true })}>
-   <DefaultStructuredText data={data.text} />
+    <DefaultStructuredText data={data.text} />
 </div>
 ```
+
+---
+
+## Case 2: A `DefaultStructuredText` is wrapped in a plain element **without** any `ContentLinkXXX` component
+
+Add the `contentLinkAttrs` helper with `{ group: true }` to the existing parent element.
+
+Before:
+```astro
+<div class="text ui-richtext">
+    <DefaultStructuredText data={data.text} />
+</div>
+```
+
+After:
+```astro
+<div class="text ui-richtext" {...contentLinkAttrs({ group: true })}>
+    <DefaultStructuredText data={data.text} />
+</div>
+```
+
+
