@@ -1,3 +1,7 @@
+### [1.3.12](https://github.com/gridonic/dastro/compare/v1.3.11...v1.3.12)
+
+- add contentLinkAttrs utility function
+
 ### [1.3.11](https://github.com/gridonic/dastro/compare/v1.3.10...v1.3.11)
 
 - extend module data type for cms flexibility
