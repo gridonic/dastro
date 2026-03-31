@@ -3,32 +3,6 @@
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { execSync } from 'child_process';
-import { createInterface } from 'readline';
-
-// Create readline interface for user input
-const rl = createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
-
-// Helper function to get user input
-function askQuestion(question) {
-  return new Promise((resolve) => {
-    rl.question(question, (answer) => {
-      resolve(answer.trim());
-    });
-  });
-}
-
-// Helper function to get user input with default value
-function askQuestionWithDefault(question, defaultValue) {
-  return new Promise((resolve) => {
-    rl.question(`${question} (${defaultValue}): `, (answer) => {
-      const trimmedAnswer = answer.trim();
-      resolve(trimmedAnswer || defaultValue);
-    });
-  });
-}
 
 // Helper function to convert readable name to repository name
 function inferRepositoryName(readableName) {
@@ -57,7 +31,7 @@ function validateProjectName(name) {
   return null;
 }
 
-async function createProject() {
+async function createProject(rl) {
   try {
     console.log('🚀 Welcome to Dastro Project Creator!\n');
 
@@ -218,8 +192,25 @@ async function createProject() {
   } catch (error) {
     console.error('❌ Error creating project:', error.message);
     process.exit(1);
-  } finally {
-    rl.close();
+  }
+
+  // Helper function to get user input
+  function askQuestion(question) {
+    return new Promise((resolve) => {
+      rl.question(question, (answer) => {
+        resolve(answer.trim());
+      });
+    });
+  }
+
+  // Helper function to get user input with default value
+  function askQuestionWithDefault(question, defaultValue) {
+    return new Promise((resolve) => {
+      rl.question(`${question} (${defaultValue}): `, (answer) => {
+        const trimmedAnswer = answer.trim();
+        resolve(trimmedAnswer || defaultValue);
+      });
+    });
   }
 }
 

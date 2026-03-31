@@ -11,6 +11,7 @@ import {
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { execSync } from 'child_process';
+import { createInterface } from 'readline';
 import chalk from 'chalk';
 import { createProject } from './create.js';
 import { deploy } from './deploy.js';
@@ -21,10 +22,15 @@ const command = process.argv[2];
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+const rl = createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
 async function runCommand() {
   switch (command) {
     case 'create':
-      await createProject();
+      await createProject(rl);
       break;
     case 'link':
       execSync('npm link dastro', { stdio: 'inherit' });
@@ -63,7 +69,7 @@ async function runCommand() {
       }
       break;
     case 'deploy':
-      await deploy();
+      await deploy(rl);
       break;
     case 'info':
       console.log(`ℹ️ Installed version: v${getPackageVersion()}`);
@@ -130,6 +136,7 @@ async function runCommand() {
 runCommand()
   .catch(console.error)
   .finally(() => {
+    rl.close();
     process.exit(0);
   });
 

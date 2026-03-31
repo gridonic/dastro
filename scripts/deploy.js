@@ -2,27 +2,12 @@
 
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { execSync } from 'child_process';
-import { createInterface } from 'readline';
 import { join } from 'path';
 import chalk from 'chalk';
 
 const MAIN_BRANCH = 'main';
 const PRODUCTION_BRANCH = 'production';
 const CONFIRMATION_WORD = 'deploy-prod';
-
-function askQuestion(question) {
-  const rl = createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  return new Promise((resolve) => {
-    rl.question(question, (answer) => {
-      rl.close();
-      resolve(answer.trim());
-    });
-  });
-}
 
 function git(command) {
   return execSync(`git ${command}`, { encoding: 'utf8' }).trim();
@@ -40,7 +25,7 @@ function bumpVersion(version, type) {
   }
 }
 
-async function deploy() {
+async function deploy(rl) {
   console.log(`\n🚀 ${chalk.bold('Dastro Deploy to Production')}\n`);
 
   // 0. Verify this is a dastro project
@@ -75,7 +60,7 @@ async function deploy() {
 
   // 3. Fetch latest from remote
   console.log('🔄 Fetching from origin...');
-  execSync('git fetch origin', { stdio: 'inherit' });
+  execSync('git fetch origin', { stdio: ['ignore', 'inherit', 'inherit'] });
 
   // 4. Verify local main matches origin/main
   const localSha = git(`rev-parse ${MAIN_BRANCH}`);
@@ -152,9 +137,7 @@ async function deploy() {
     `   Type ${chalk.bold(CONFIRMATION_WORD)} to confirm: `,
   );
   if (answer !== CONFIRMATION_WORD) {
-    console.log(
-      '\n❌ Deploy cancelled. Version bump was already pushed to main.',
-    );
+    console.log('\n❌ Deploy cancelled. Confirmation word is not correct');
     process.exit(1);
   }
 
@@ -177,6 +160,14 @@ async function deploy() {
   console.log(
     `\n✅ ${chalk.green.bold(`Successfully deployed v${newVersion} to production!`)}`,
   );
+
+  function askQuestion(question) {
+    return new Promise((resolve) => {
+      rl.question(question, (answer) => {
+        resolve(answer.trim());
+      });
+    });
+  }
 }
 
 export { deploy };
