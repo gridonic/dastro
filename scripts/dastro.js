@@ -13,6 +13,7 @@ import { dirname, join } from 'path';
 import { execSync } from 'child_process';
 import chalk from 'chalk';
 import { createProject } from './create.js';
+import { deploy } from './deploy.js';
 
 const command = process.argv[2];
 
@@ -60,6 +61,9 @@ async function runCommand() {
           `⚠️ Could not open browser automatically. Please visit: ${radarUrl}`,
         );
       }
+      break;
+    case 'deploy':
+      await deploy();
       break;
     case 'info':
       console.log(`ℹ️ Installed version: v${getPackageVersion()}`);
@@ -117,6 +121,7 @@ async function runCommand() {
         '  upgrade - upgrade to the latest version of the dastro package',
       );
       console.log('  radar - open the boilerplate radar in your browser');
+      console.log('  deploy - deploy main branch to production');
       console.log('  info - show current and latest version information');
       break;
   }
