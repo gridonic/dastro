@@ -1,3 +1,7 @@
+### [1.3.14](https://github.com/gridonic/dastro/compare/v1.3.13...v1.3.14)
+
+- add deploy command
+
 ### [1.3.13](https://github.com/gridonic/dastro/compare/v1.3.12...v1.3.13)
 
 - use contentLinkAttrs in RecordLink and update patch to use contentLinkAttrs more
