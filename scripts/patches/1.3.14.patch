@@ -1,0 +1,31 @@
+Subject: [PATCH] chore(readme): add deployment instructions
+---
+Index: README.md
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/README.md b/README.md
+--- a/README.md	(revision 3eddd6eb6a3ce80ffbbb339e466484a1e2c7b7b3)
++++ b/README.md	(revision a53b9d48e6d5856ad1d951c673b4e4bd8acfb2bb)
+@@ -67,6 +67,20 @@
+ npm run preview
+ ```
+
++## Deployment
++
++### Preview / Stage
++
++Push the `main` branch to trigger a netlify branch deploy. Your project will be available
++at https://main--project-name.netlify.app
++
++### Production
++
++Run the following command: `npx github:gridonic/dastro deploy`
++
++This will bump the project version in `package.json`, merge `main` into `production` and push it, which will
++a production deployment on netlify.
++
+ ## Upgrading
+ To upgrade to the latest version of Dastro, simply start the upgrade wizard and follow the steps as prompted.
+
