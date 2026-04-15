@@ -1,0 +1,95 @@
+# Opt-in local cache for global data and error pages
+
+This patch adds in-memory caching (5 min TTL, bypassed in draft mode and custom DatoCMS environments) to `initGlobalDataStore` and optionally to error pages.
+
+Two files need updating in the consuming project.
+
+---
+
+## 1. `src/config/globalDataStore.ts`
+
+In `initGlobalDataStore`, wrap the data-loading logic with `withCache` from the dastro caching context.
+
+### Before
+
+The function directly calls the data-loading logic and returns the result:
+
+```ts
+export async function initGlobalDataStore(
+  locale: SiteLocale,
+  context: AstroContext<'locals' | 'cookies'>,
+): Promise<AppGlobalDataStore> {
+  const { datoFetch } = context.locals.dastro.datocms();
+  const { resolveRecordUrl } = context.locals.dastro.routing();
+
+  // ... data loading logic ...
+
+  return { siteSettings, globalContent, customerOnboarding, navigation };
+}
+```
+
+### After
+
+1. Extract all data-loading logic into a separate `loadGlobalSettings` function.
+2. In `initGlobalDataStore`, get `withCache` from `context.locals.dastro.caching()` and wrap the loader call.
+
+```ts
+export async function initGlobalDataStore(
+  locale: SiteLocale,
+  context: AstroContext<'locals' | 'cookies'>,
+): Promise<AppGlobalDataStore> {
+  const { withCache } = context.locals.dastro.caching();
+
+  return withCache(`global-data:${locale}`, context, () =>
+    loadGlobalSettings(context, locale),
+  );
+}
+
+async function loadGlobalSettings(
+  context: AstroContext<'locals' | 'cookies'>,
+  locale: SiteLocale,
+): Promise<AppGlobalDataStore> {
+  const { datoFetch } = context.locals.dastro.datocms();
+  const { resolveRecordUrl } = context.locals.dastro.routing();
+
+  // ... existing data loading logic, unchanged ...
+}
+```
+
+Key points:
+- The cache key must include the locale: `global-data:${locale}`
+- `context` is passed as the second argument so `withCache` can check draft mode / environment
+- Any nested helper functions (e.g. nav link filtering) can stay inside `loadGlobalSettings`
+
+---
+
+## 2. Error pages (e.g. `src/pages/404.astro`)
+
+`renderErrorPage` now accepts an optional `cacheKey` in its options parameter. When provided, the page data is cached under `${cacheKey}:${locale}`.
+
+### Before
+
+```ts
+const { page, locale, Component } = await renderErrorPage(
+  (globalStore) => globalStore.navigation.page404,
+  Astro,
+  dastroConfig,
+  initGlobalDataStore,
+);
+```
+
+### After
+
+Add `{ cacheKey: 'error-page:404' }` as the fifth argument:
+
+```ts
+const { page, locale, Component } = await renderErrorPage(
+  (globalStore) => globalStore.navigation.page404,
+  Astro,
+  dastroConfig,
+  initGlobalDataStore,
+  { cacheKey: 'error-page:404' },
+);
+```
+
+For other error pages, use a distinct cache key (e.g. `error-page:500`).

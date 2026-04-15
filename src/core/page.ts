@@ -226,9 +226,11 @@ export async function renderErrorPage<T extends DastroTypes, R>(
   context: AstroGlobal,
   dastroConfig: DastroConfig<T>,
   initGlobalDataStore: InitGlobalDataStore<T, R>,
+  options: { cacheKey?: string } = {},
 ) {
   const { i18n } = dastroConfig;
   const { slugFromRecord } = context.locals.dastro.routing();
+  const { withCache } = caching(dastroConfig);
 
   // Note: Locale and globalStore should already be set, as usually we rewrite to error pages.
   //  -> if not, use defaultLocale and initialize globalStore
@@ -243,11 +245,17 @@ export async function renderErrorPage<T extends DastroTypes, R>(
   }
 
   const pageDefinition = dastroConfig.pageDefinitions[recordLink.__typename];
-  const page = await pageDefinition.load(
-    slugFromRecord(recordLink, locale),
-    locale,
-    context,
-  );
+
+  const loadPage = () =>
+    pageDefinition.load(
+      slugFromRecord(recordLink, locale),
+      locale,
+      context,
+    );
+
+  const page = options.cacheKey
+    ? await withCache(`${options.cacheKey}:${locale}`, context, loadPage)
+    : await loadPage();
 
   context.locals.locale = locale;
   context.locals.globalStore = globalStore;

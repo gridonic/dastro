@@ -1,7 +1,7 @@
 import merge from 'deepmerge';
 import { type AstroContext, draftMode, environmentSwitch } from 'dastro';
 import type { DastroConfig, DastroTypes } from './lib-types.ts';
-import { useCache } from '../cache/local-cache.ts';
+import { contextAwareCacheWrapper } from '../cache/with-cache.ts';
 
 export interface CachingOptions {
   provider?: { type: 'nocache' } | ({ type: 'netlify' } & NetlifyCacheOptions);
@@ -151,7 +151,7 @@ export function caching<T extends DastroTypes>(config: DastroConfig<T>) {
 
   return {
     setCachingHeaders,
-    useLocalCache: useCache,
+    withCache: contextAwareCacheWrapper(config),
   };
 
   // export function augmentResponseHeadersWithCacheTags(

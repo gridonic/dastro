@@ -32,6 +32,8 @@ function get<T>(
     return entry.promise as Promise<T>;
   }
 
+  console.log(`[local-cache] MISS "${key}" — calling loader`);
+
   const promise = loader()
     .then((result) => {
       localCache.set(key, {
