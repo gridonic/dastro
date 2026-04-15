@@ -1,3 +1,7 @@
+### [1.3.15](https://github.com/gridonic/dastro/compare/v1.3.14...v1.3.15)
+
+- add in memory caching utitilies for usage in global data and error pages
+
 ### [1.3.14](https://github.com/gridonic/dastro/compare/v1.3.13...v1.3.14)
 
 - add deploy command
