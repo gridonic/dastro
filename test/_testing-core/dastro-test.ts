@@ -29,6 +29,7 @@ export function dastroTest(
     dev: {
       debugViewEnabled: false,
       preventSearchIndexing: false,
+      cachingEnabled: false,
     },
     api: {
       secretApiToken: 'gridonic-dato',

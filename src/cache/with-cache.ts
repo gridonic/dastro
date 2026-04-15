@@ -19,7 +19,11 @@ export function contextAwareCacheWrapper<T extends DastroTypes>(
     const { isDraftModeEnabled } = draftMode(config);
     const { usesDefaultDatoEnvironment } = environmentSwitch(config);
 
-    if (isDraftModeEnabled(context) || !usesDefaultDatoEnvironment(context)) {
+    if (
+      (config.environment === 'local' && !config.dev.cachingEnabled) ||
+      isDraftModeEnabled(context) ||
+      !usesDefaultDatoEnvironment(context)
+    ) {
       return loader();
     }
 

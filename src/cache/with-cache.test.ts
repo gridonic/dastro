@@ -15,7 +15,9 @@ const mockDraftMode = vi.mocked(draftMode);
 const mockEnvironmentSwitch = vi.mocked(environmentSwitch);
 
 // Minimal config stub — only used as an opaque token passed to mocked functions
-const config = {} as any;
+const config = { environment: 'production', dev: { cachingEnabled: false } } as any;
+const localConfig = { environment: 'local', dev: { cachingEnabled: false } } as any;
+const localCachingEnabledConfig = { environment: 'local', dev: { cachingEnabled: true } } as any;
 
 function setupMocks({
   isDraft = false,
@@ -145,6 +147,34 @@ describe('contextAwareCacheWrapper', () => {
     expect(loader).toHaveBeenCalledOnce();
 
     vi.useRealTimers();
+  });
+
+  it('should bypass cache in local development', async () => {
+    setupMocks();
+    const withCache = contextAwareCacheWrapper(localConfig);
+    const loader = vi
+      .fn()
+      .mockResolvedValueOnce('first')
+      .mockResolvedValueOnce('second');
+
+    const first = await withCache('key', context, loader);
+    const second = await withCache('key', context, loader);
+
+    expect(first).toBe('first');
+    expect(second).toBe('second');
+    expect(loader).toHaveBeenCalledTimes(2);
+  });
+
+  it('should cache in local development when cachingEnabled is true', async () => {
+    setupMocks();
+    const withCache = contextAwareCacheWrapper(localCachingEnabledConfig);
+    const loader = vi.fn().mockResolvedValue('data');
+
+    await withCache('key', context, loader);
+    const result = await withCache('key', context, loader);
+
+    expect(result).toBe('data');
+    expect(loader).toHaveBeenCalledOnce();
   });
 
   it('should not pollute cache when bypassed', async () => {

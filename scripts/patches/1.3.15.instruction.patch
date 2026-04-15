@@ -93,3 +93,40 @@ const { page, locale, Component } = await renderErrorPage(
 ```
 
 For other error pages, use a distinct cache key (e.g. `error-page:500`).
+
+---
+
+## 3. `.env.example`
+
+Add the new environment variable:
+
+```
+DEVELOPMENT_CACHING_ENABLED=false
+```
+
+---
+
+## 4. Dastro config (`src/config/dastro.config.ts`)
+
+Add `cachingEnabled` to the `dev` section:
+
+### Before
+
+```ts
+dev: {
+  debugViewEnabled: DEVELOPMENT_DEBUG_VIEW_ENABLED,
+  preventSearchIndexing: DEVELOPMENT_PREVENT_SEARCH_INDEXING,
+},
+```
+
+### After
+
+```ts
+dev: {
+  debugViewEnabled: DEVELOPMENT_DEBUG_VIEW_ENABLED,
+  preventSearchIndexing: DEVELOPMENT_PREVENT_SEARCH_INDEXING,
+  cachingEnabled: DEVELOPMENT_CACHING_ENABLED,
+},
+```
+
+Remember to import `DEVELOPMENT_CACHING_ENABLED` from `astro:env/server`.

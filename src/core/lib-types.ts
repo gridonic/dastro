@@ -52,6 +52,7 @@ export interface DastroConfig<T extends DastroTypes> {
   dev: {
     debugViewEnabled: boolean;
     preventSearchIndexing: boolean;
+    cachingEnabled: boolean;
   };
   pageDefinitions: Record<PageRecordType<T>, PageDefinition<T>>;
   moduleComponents: Record<string, AstroComponent>;

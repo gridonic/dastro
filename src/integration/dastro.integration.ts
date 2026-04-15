@@ -136,6 +136,11 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
                 context: 'server',
                 default: false,
               }),
+              DEVELOPMENT_CACHING_ENABLED: envField.boolean({
+                access: 'public',
+                context: 'server',
+                default: false,
+              }),
             },
           },
 
