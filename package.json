@@ -41,7 +41,7 @@
   "license": "ISC",
   "description": "",
   "peerDependencies": {
-    "astro": "^5.18.0"
+    "astro": "^5.18.1"
   },
   "dependencies": {
     "@astrojs/alpinejs": "^0.4.9",
