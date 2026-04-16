@@ -1,3 +1,8 @@
+### [1.3.16](https://github.com/gridonic/dastro/compare/v1.3.15...v1.3.16)
+
+- update security patch of astro
+- enhance URL handling with query params and hash support
+
 ### [1.3.15](https://github.com/gridonic/dastro/compare/v1.3.14...v1.3.15)
 
 - add in memory caching utitilies for usage in global data and error pages
