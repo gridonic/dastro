@@ -3,6 +3,10 @@ import { stripStega } from '@datocms/astro';
 import { type DastroTypes } from '../../core/lib-types.ts';
 import type { ClassValue } from '../component.types.ts';
 import { contentLinkAttrs } from '../content-link/content-link-attrs.ts';
+import {
+  withUrlExtras,
+  type QueryParamsInput,
+} from '../../util/route.util.ts';
 
 export interface Props<T extends DastroTypes = DastroTypes> {
   // "record" is passed in when using inside StructuredText
@@ -11,6 +15,8 @@ export interface Props<T extends DastroTypes = DastroTypes> {
   target?: string;
   linkTitle?: string;
   class?: ClassValue;
+  query?: QueryParamsInput;
+  hash?: string;
 
   [key: string]: unknown;
 }
@@ -21,10 +27,16 @@ const {
   target = '_self',
   class: classNames,
   linkTitle = '',
+  query,
+  hash,
   ...rest
 } = Astro.props;
 
 const { resolveRecordUrl } = Astro.locals.dastro.routing();
+
+const resolvedUrl = resolveRecordUrl(record, Astro.locals.locale);
+const href =
+  resolvedUrl !== null ? withUrlExtras(resolvedUrl, { query, hash }) : null;
 ---
 
 {
@@ -34,7 +46,7 @@ const { resolveRecordUrl } = Astro.locals.dastro.routing();
       class="link"
       class:list={stripStega(classNames)}
       data-astro-prefetch
-      href={resolveRecordUrl(record, Astro.locals.locale)}
+      href={href}
       target={stripStega(target)}
       title={stripStega(linkTitle)}
       {...contentLinkAttrs({ boundary: true })}
