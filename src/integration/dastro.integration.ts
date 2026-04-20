@@ -166,7 +166,6 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
             css: {
               preprocessorOptions: {
                 scss: {
-                  api: 'modern-compiler',
                   additionalData: '@use "src/sass/globals.scss" as *;',
                   loadPaths: ['.'],
                 },
