@@ -46,6 +46,7 @@
   "dependencies": {
     "@astrojs/alpinejs": "^0.5.0",
     "@astrojs/check": "^0.9.8",
+    "@astrojs/compiler-rs": "^0.1.8",
     "@astrojs/netlify": "^7.0.7",
     "@astrojs/node": "^10.0.5",
     "@datocms/astro": "^0.6.12",
