@@ -3,7 +3,8 @@ type Entry<T> = {
   expires: number;
 };
 
-const DEFAULT_TTL = 5 * 60 * 1000;
+// Default: One minute
+const DEFAULT_TTL = 60 * 1000;
 
 const localCache = new Map<string, Entry<unknown>>();
 
