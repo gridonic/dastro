@@ -1,3 +1,7 @@
+### [1.3.17](https://github.com/gridonic/dastro/compare/v1.3.16...v1.3.17)
+
+- Set local cache default to 1 minute. Idea: short by default, increase if necessary
+
 ### [1.3.16](https://github.com/gridonic/dastro/compare/v1.3.15...v1.3.16)
 
 - update security patch of astro
