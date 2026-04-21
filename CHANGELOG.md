@@ -1,3 +1,7 @@
+### [2.0.0](https://github.com/gridonic/dastro/compare/v1.3.17...v2.0.0)
+
+- **Upgrade to Astro v6**
+
 ### [1.3.17](https://github.com/gridonic/dastro/compare/v1.3.16...v1.3.17)
 
 - Set local cache default to 1 minute. Idea: short by default, increase if necessary
