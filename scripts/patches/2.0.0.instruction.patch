@@ -16,7 +16,21 @@ If still on v1, install the latest:
 npm i -S schema-dts@^2.0.0
 ```
 
-## 3. Move `fonts` out of `experimental` in `astro.config.ts`
+## 3. Bump `@netlify/functions` to at least v5 and install @netlify/blobs
+
+If still on v5, install the latest:
+
+```sh
+npm i -S @netlify/functions@^5.2.0
+```
+
+If not installed yet, install netlify blobs
+
+```sh
+npm i -S @netlify/blobs
+```
+
+## 4. Move `fonts` out of `experimental` in `astro.config.ts`
 
 Astro 6 promotes fonts to stable. Un-nest the `fonts` array:
 
@@ -31,6 +45,6 @@ Astro 6 promotes fonts to stable. Un-nest the `fonts` array:
 +  ],
 ```
 
-## 4. Astro 6 migration
+## 5. Astro 6 migration
 
 Follow the official upgrade guide for any other changes required in your own project code: https://docs.astro.build/en/guides/upgrade-to/v6/
