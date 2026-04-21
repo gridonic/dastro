@@ -46,7 +46,33 @@ async function runCommand() {
       const latestTag = getLatestRemoteVersionTag();
       console.log(`ℹ️  Latest version: ${latestTag}\n`);
 
-      const installCmd = `npm install dastro@github:gridonic/dastro#${latestTag}`;
+      // Detect major peer-dependency bumps (e.g. Astro 5 → 6). If any, install
+      // them together with dastro in a single `npm install` so npm can resolve
+      // the new peer ranges instead of failing on stale ones.
+      const peerBumps = await detectMajorPeerBumps(latestTag);
+      if (peerBumps.length > 0) {
+        console.log(
+          chalk.yellow('⚠️  Major peer-dependency bump(s) detected:'),
+        );
+        for (const b of peerBumps) {
+          console.log(
+            chalk.yellow(`   ${b.name}: ${b.currentRange} → ${b.newRange}`),
+          );
+        }
+        console.log(
+          chalk.yellow(
+            '   Installing these together with dastro so peer ranges resolve.\n',
+          ),
+        );
+      }
+
+      const packagesToInstall = [
+        `dastro@github:gridonic/dastro#${latestTag}`,
+        ...peerBumps.map((b) => `${b.name}@${b.newRange}`),
+      ];
+      const installCmd = `npm install ${packagesToInstall
+        .map((p) => `"${p}"`)
+        .join(' ')}`;
       console.log(`🔄 Running: ${installCmd}`);
       execSync(installCmd, { stdio: 'inherit' });
       console.log(`\n✅ Upgraded to ${latestTag}`);
@@ -278,6 +304,76 @@ function applyPatches(previousVersion) {
     console.log(`📋 Patch v${patch.version}: ${subject}\n`);
     printPatchInstructions(patchContent);
   }
+}
+
+async function detectMajorPeerBumps(latestTag) {
+  let currentPeers, newPeers;
+  try {
+    currentPeers = getCurrentDastroPeerDeps();
+    newPeers = await fetchRemoteDastroPeerDeps(latestTag);
+  } catch (err) {
+    console.log(
+      chalk.yellow(
+        `⚠️  Could not inspect peer dependencies automatically: ${err.message}`,
+      ),
+    );
+    return [];
+  }
+
+  let consumerPkg;
+  try {
+    consumerPkg = JSON.parse(
+      readFileSync(join(process.cwd(), 'package.json'), 'utf8'),
+    );
+  } catch {
+    return [];
+  }
+  const consumerDeps = {
+    ...consumerPkg.dependencies,
+    ...consumerPkg.devDependencies,
+  };
+
+  const bumps = [];
+  for (const [name, newRange] of Object.entries(newPeers)) {
+    if (!consumerDeps[name]) continue;
+    const currentRange = currentPeers[name];
+    if (!currentRange) continue;
+    const currentMajor = majorFromRange(currentRange);
+    const newMajor = majorFromRange(newRange);
+    if (
+      currentMajor !== null &&
+      newMajor !== null &&
+      newMajor > currentMajor
+    ) {
+      bumps.push({ name, currentRange, newRange });
+    }
+  }
+  return bumps;
+}
+
+function getCurrentDastroPeerDeps() {
+  const pkg = JSON.parse(
+    readFileSync(
+      join(process.cwd(), 'node_modules', 'dastro', 'package.json'),
+      'utf8',
+    ),
+  );
+  return pkg.peerDependencies || {};
+}
+
+async function fetchRemoteDastroPeerDeps(tag) {
+  const url = `https://raw.githubusercontent.com/gridonic/dastro/${tag}/package.json`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch ${url}: ${res.status}`);
+  }
+  const pkg = await res.json();
+  return pkg.peerDependencies || {};
+}
+
+function majorFromRange(range) {
+  const match = String(range).match(/\d+/);
+  return match ? Number(match[0]) : null;
 }
 
 function getPackageVersion() {
