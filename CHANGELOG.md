@@ -1,3 +1,7 @@
+### [2.0.1](https://github.com/gridonic/dastro/compare/v2.0.0...v2.0.1)
+
+- update upgrader: detect and handle major peer-dependency bumps during dastro upgrades
+
 ### [2.0.0](https://github.com/gridonic/dastro/compare/v1.3.17...v2.0.0)
 
 - **Upgrade to Astro v6**
