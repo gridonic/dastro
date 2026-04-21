@@ -1,0 +1,36 @@
+# Dastro 2.0 — manual patch
+
+Dastro 2.0 upgrades to Astro 6.
+
+## 1. Update local dependencies
+
+```sh
+npm update --save
+```
+
+## 2. Bump `schema-dts` to v2
+
+If still on v1, install the latest:
+
+```sh
+npm i -S schema-dts@^2.0.0
+```
+
+## 3. Move `fonts` out of `experimental` in `astro.config.ts`
+
+Astro 6 promotes fonts to stable. Un-nest the `fonts` array:
+
+```diff
+-  experimental: {
+-    fonts: [
+-      { /* ... */ },
+-    ],
+-  },
++  fonts: [
++    { /* ... */ },
++  ],
+```
+
+## 4. Astro 6 migration
+
+Follow the official upgrade guide for any other changes required in your own project code: https://docs.astro.build/en/guides/upgrade-to/v6/
