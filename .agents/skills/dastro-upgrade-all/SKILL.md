@@ -16,11 +16,11 @@ Batch-upgrade all Gridonic boilerplate projects tracked by the [Boilerplate Rada
 Use WebFetch on `https://boilerplate-radar.gridonic.io/api/radar.json`.
 
 Parse `repositories` array. Each entry has:
-- `name`, `html_url`, `dastroVersion` (string|null), `archived` (bool)
+- `name`, `html_url`, `dastroVersion` (string|null), `archived` (bool), `additionalInfo.ignored` (bool)
 
 ### 2. Filter & report
 
-- **Skip** archived repos and repos where `dastroVersion` is `null`.
+- **Skip** archived repos, ignored reops and repos where `dastroVersion` is `null`.
 - Print summary table: repo name, current dastroVersion, GitHub URL.
 - Ask user to confirm before proceeding.
 
