@@ -1,3 +1,7 @@
+### [2.0.2](https://github.com/gridonic/dastro/compare/v2.0.1...v2.0.2)
+
+- Improve upgrade mechanism and add skill for batch upgrading projects
+
 ### [2.0.1](https://github.com/gridonic/dastro/compare/v2.0.0...v2.0.1)
 
 - update upgrader: detect and handle major peer-dependency bumps during dastro upgrades
