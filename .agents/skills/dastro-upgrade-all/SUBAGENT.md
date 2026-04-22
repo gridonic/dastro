@@ -15,12 +15,17 @@ mkdir -p /tmp/boilerplate-upgrade
 cd /tmp/boilerplate-upgrade
 gh repo clone gridonic/{REPO} -- --depth=50
 cd {REPO}
-git checkout -b feat/dastro-{TARGET_VERSION}
+git checkout -b upgrade/dastro-{TARGET_VERSION}
 ```
 
-### Step 2 — Install & upgrade
+**Branch name** must be `upgrade/dastro-<version>` (not `feat/...`). Netlify auto-deploys `feat/*` branches on push; `upgrade/*` branches only deploy via the PR preview, which is what we want.
+
+### Step 2 — Prepare env, install & upgrade
+
+Copy `.env.example` to `.env` **before** `npm install`. Several repos run GraphQL codegen during `postinstall` / build, which needs DatoCMS credentials from `.env` to succeed. The example values are enough for the upgrade flow and build verification.
 
 ```bash
+[ -f .env.example ] && cp .env.example .env
 npm install
 npx github:gridonic/dastro upgrade
 ```
@@ -84,7 +89,7 @@ If the build fails:
 ### Step 5 — Push & create PR
 
 ```bash
-git push -u origin feat/dastro-{TARGET_VERSION}
+git push -u origin upgrade/dastro-{TARGET_VERSION}
 ```
 
 Create a PR:
@@ -123,7 +128,7 @@ Return a structured report:
 REPO: {REPO}
 FROM: {CURRENT_VERSION}
 TO: {TARGET_VERSION}
-BRANCH: feat/dastro-{TARGET_VERSION}
+BRANCH: upgrade/dastro-{TARGET_VERSION}
 PR: <PR URL>
 PATCHES_APPLIED: <list>
 PATCHES_SKIPPED: <list with reasons>

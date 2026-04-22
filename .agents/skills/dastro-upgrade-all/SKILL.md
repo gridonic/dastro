@@ -32,9 +32,19 @@ Fetch latest dastro version:
 git ls-remote --tags https://github.com/gridonic/dastro.git | grep -oP 'v\K[\d.]+' | sort -V | tail -1
 ```
 
-This is needed for the branch name `feat/dastro-<version>`.
+This is needed for the branch name `upgrade/dastro-<version>`.
 
-### 4. Spawn one subagent per repo
+### 4. Clean workspace
+
+Before spawning subagents, wipe any leftover clones from a previous run:
+
+```bash
+rm -rf /tmp/boilerplate-upgrade
+```
+
+Do **not** clean up at the end — if a subagent fails, the local clone is the only artifact available to diagnose the failure. Fresh state is guaranteed on the next run instead.
+
+### 5. Spawn one subagent per repo
 
 Launch a **general-purpose Agent** per project. Pass it:
 - The repo name and GitHub URL
@@ -44,7 +54,7 @@ Launch a **general-purpose Agent** per project. Pass it:
 
 Run repos in parallel where practical (batch of 3-5 at a time).
 
-### 5. Collect reports & summarize
+### 6. Collect reports & summarize
 
 Each subagent returns a structured report. Aggregate into a final summary table:
 
