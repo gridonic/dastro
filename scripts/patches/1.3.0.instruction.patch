@@ -1,0 +1,93 @@
+# Add DATO_CMS_BASE_EDITING_URL and `datocms.baseEditingUrl`
+
+Dastro 1.3.0 introduces visual editing support via DatoCMS content links. `DastroConfig.datocms.baseEditingUrl` is now a **required** field.
+
+Three files need updating in the consuming project.
+
+---
+
+## 1. `.env.example` (and any real `.env`)
+
+Add the new environment variable:
+
+```
+DATO_CMS_BASE_EDITING_URL=https://<your-project>.admin.datocms.com
+```
+
+Replace `<your-project>` with your DatoCMS project slug (the subdomain shown when logged in at `*.admin.datocms.com`).
+
+---
+
+## 2. `src/config/dastro.config.ts`
+
+Import the new env var and wire it into the `datocms` section.
+
+### Before
+
+```ts
+import {
+  ALLOW_DATO_ENVIRONMENT_SWITCH,
+  DATO_CMS_ENVIRONMENT,
+  DATO_CMS_TOKEN,
+  SIGNED_COOKIE_JWT_SECRET,
+  SECRET_API_TOKEN,
+  DEVELOPMENT_PREVENT_SEARCH_INDEXING,
+  DEVELOPMENT_DEBUG_VIEW_ENABLED,
+  APP_BASE_URL,
+} from 'astro:env/server';
+
+// ...
+
+const dastroConfig: DastroConfig<Types> = {
+  // ...
+  datocms: {
+    token: DATO_CMS_TOKEN,
+    environment: DATO_CMS_ENVIRONMENT,
+    allowEnvironmentSwitch: ALLOW_DATO_ENVIRONMENT_SWITCH,
+  },
+  // ...
+};
+```
+
+### After
+
+```ts
+import {
+  ALLOW_DATO_ENVIRONMENT_SWITCH,
+  DATO_CMS_ENVIRONMENT,
+  DATO_CMS_TOKEN,
+  DATO_CMS_BASE_EDITING_URL,
+  SIGNED_COOKIE_JWT_SECRET,
+  SECRET_API_TOKEN,
+  DEVELOPMENT_PREVENT_SEARCH_INDEXING,
+  DEVELOPMENT_DEBUG_VIEW_ENABLED,
+  APP_BASE_URL,
+} from 'astro:env/server';
+
+// ...
+
+const dastroConfig: DastroConfig<Types> = {
+  // ...
+  datocms: {
+    token: DATO_CMS_TOKEN,
+    environment: DATO_CMS_ENVIRONMENT,
+    allowEnvironmentSwitch: ALLOW_DATO_ENVIRONMENT_SWITCH,
+    baseEditingUrl: DATO_CMS_BASE_EDITING_URL,
+  },
+  // ...
+};
+```
+
+The `DATO_CMS_BASE_EDITING_URL` env field is declared by the dastro integration itself, so no changes to `astro.config.ts` are needed.
+
+---
+
+## 3. Netlify / CI
+
+Set `DATO_CMS_BASE_EDITING_URL` in every deploy environment (Netlify UI, GitHub Actions secrets, etc.) before deploying — the schema is required and the build will fail otherwise.
+
+---
+
+## Reference
+
+Example migration in the astro-boilerplate: https://github.com/gridonic/astro-boilerplate/commit/e79be9c89f756b48f7e40b3a0284ef2ed22cf045
