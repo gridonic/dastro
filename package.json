@@ -34,7 +34,8 @@
     "config",
     "src",
     "scripts",
-    ".cursor"
+    ".cursor",
+    ".node-version"
   ],
   "type": "module",
   "author": "",
