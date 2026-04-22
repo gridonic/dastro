@@ -46,15 +46,14 @@ async function runCommand() {
       const latestTag = getLatestRemoteVersionTag();
       console.log(`ℹ️  Latest version: ${latestTag}\n`);
 
-      // Detect major peer-dependency bumps (e.g. Astro 5 → 6). If any, install
-      // them together with dastro in a single `npm install` so npm can resolve
-      // the new peer ranges instead of failing on stale ones.
-      const peerBumps = await detectMajorPeerBumps(latestTag);
-      if (peerBumps.length > 0) {
-        console.log(
-          chalk.yellow('⚠️  Major peer-dependency bump(s) detected:'),
-        );
-        for (const b of peerBumps) {
+      // Detect major dependency bumps in dastro's peers *and* its own deps
+      // (e.g. Astro 5 → 6, astro-embed 0.9 → 0.13). If the consumer also
+      // declares these directly, install them together with dastro in a single
+      // `npm install` so npm can resolve the new ranges instead of failing.
+      const depBumps = await detectMajorBumps(latestTag);
+      if (depBumps.length > 0) {
+        console.log(chalk.yellow('⚠️  Major dependency bump(s) detected:'));
+        for (const b of depBumps) {
           console.log(
             chalk.yellow(`   ${b.name}: ${b.currentRange} → ${b.newRange}`),
           );
@@ -68,7 +67,7 @@ async function runCommand() {
 
       const packagesToInstall = [
         `dastro@github:gridonic/dastro#${latestTag}`,
-        ...peerBumps.map((b) => `${b.name}@${b.newRange}`),
+        ...depBumps.map((b) => `${b.name}@${b.newRange}`),
       ];
       const installCmd = `npm install ${packagesToInstall
         .map((p) => `"${p}"`)
@@ -284,7 +283,17 @@ function applyPatches(previousVersion) {
 
   const patches = readdirSync(patchesDir)
     .filter((f) => f.endsWith('.patch'))
-    .map((f) => ({ file: f, version: f.replace('.patch', '') }))
+    .map((f) => {
+      const isInstruction = f.endsWith('.instruction.patch');
+      return {
+        file: f,
+        version: f.replace(
+          isInstruction ? '.instruction.patch' : '.patch',
+          '',
+        ),
+        isInstruction,
+      };
+    })
     .filter((p) => compareVersions(p.version, previousVersion) > 0)
     .sort((a, b) => compareVersions(a.version, b.version));
 
@@ -298,23 +307,33 @@ function applyPatches(previousVersion) {
   for (const patch of patches) {
     const patchPath = join(patchesDir, patch.file);
     const patchContent = readFileSync(patchPath, 'utf8');
-    const subject =
-      patchContent.match(/^Subject: \[PATCH\] (.+)$/m)?.[1] || 'No description';
+    const subject = patch.isInstruction
+      ? patchContent.split('\n')[0].replace(/^#\s*/, '').trim() ||
+        'Manual instructions'
+      : patchContent.match(/^Subject: \[PATCH\] (.+)$/m)?.[1] ||
+        'No description';
 
-    console.log(`📋 Patch v${patch.version}: ${subject}\n`);
-    printPatchInstructions(patchContent);
+    console.log(
+      `📋 ${patch.isInstruction ? 'Instructions' : 'Patch'} v${patch.version}: ${subject}\n`,
+    );
+    if (patch.isInstruction) {
+      console.log(patchContent.trim());
+      console.log();
+    } else {
+      printPatchInstructions(patchContent);
+    }
   }
 }
 
-async function detectMajorPeerBumps(latestTag) {
-  let currentPeers, newPeers;
+async function detectMajorBumps(latestTag) {
+  let currentDeps, newDeps;
   try {
-    currentPeers = getCurrentDastroPeerDeps();
-    newPeers = await fetchRemoteDastroPeerDeps(latestTag);
+    currentDeps = getCurrentDastroDeps();
+    newDeps = await fetchRemoteDastroDeps(latestTag);
   } catch (err) {
     console.log(
       chalk.yellow(
-        `⚠️  Could not inspect peer dependencies automatically: ${err.message}`,
+        `⚠️  Could not inspect dastro dependencies automatically: ${err.message}`,
       ),
     );
     return [];
@@ -334,46 +353,51 @@ async function detectMajorPeerBumps(latestTag) {
   };
 
   const bumps = [];
-  for (const [name, newRange] of Object.entries(newPeers)) {
+  for (const [name, newRange] of Object.entries(newDeps)) {
     if (!consumerDeps[name]) continue;
-    const currentRange = currentPeers[name];
+    const currentRange = currentDeps[name];
     if (!currentRange) continue;
-    const currentMajor = majorFromRange(currentRange);
-    const newMajor = majorFromRange(newRange);
-    if (
-      currentMajor !== null &&
-      newMajor !== null &&
-      newMajor > currentMajor
-    ) {
+    if (isMajorBump(currentRange, newRange)) {
       bumps.push({ name, currentRange, newRange });
     }
   }
   return bumps;
 }
 
-function getCurrentDastroPeerDeps() {
+function getCurrentDastroDeps() {
   const pkg = JSON.parse(
     readFileSync(
       join(process.cwd(), 'node_modules', 'dastro', 'package.json'),
       'utf8',
     ),
   );
-  return pkg.peerDependencies || {};
+  return { ...pkg.peerDependencies, ...pkg.dependencies };
 }
 
-async function fetchRemoteDastroPeerDeps(tag) {
+async function fetchRemoteDastroDeps(tag) {
   const url = `https://raw.githubusercontent.com/gridonic/dastro/${tag}/package.json`;
   const res = await fetch(url);
   if (!res.ok) {
     throw new Error(`Failed to fetch ${url}: ${res.status}`);
   }
   const pkg = await res.json();
-  return pkg.peerDependencies || {};
+  return { ...pkg.peerDependencies, ...pkg.dependencies };
 }
 
-function majorFromRange(range) {
-  const match = String(range).match(/\d+/);
-  return match ? Number(match[0]) : null;
+// Extracts [major, minor] from a range. For 0.x versions, the minor is the
+// breaking segment per semver convention, so `^0.9` → `^0.13` is a major bump.
+function parseRange(range) {
+  const match = String(range).match(/(\d+)(?:\.(\d+))?/);
+  if (!match) return null;
+  return { major: Number(match[1]), minor: Number(match[2] ?? 0) };
+}
+
+function isMajorBump(currentRange, newRange) {
+  const current = parseRange(currentRange);
+  const next = parseRange(newRange);
+  if (!current || !next) return false;
+  if (current.major === 0 && next.major === 0) return next.minor > current.minor;
+  return next.major > current.major;
 }
 
 function getPackageVersion() {
