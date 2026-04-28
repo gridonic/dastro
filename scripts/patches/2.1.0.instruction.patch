@@ -1,0 +1,40 @@
+# Dastro 2.1 — manual patch
+
+## 1. Update `src/middleware.ts` to dynamically import the dastro config
+
+In Astro 6 / Vite 7, a static `import dastroConfig from '@/config/dastro.config'`
+in middleware gets snapshotted into the middleware's evaluation closure on first
+request and is **never refreshed** by HMR. Editing components imported through
+`dastroConfig.moduleComponents` (e.g. anything under `src/components/content-modules/`
+or `src/components/header-modules/`) silently keeps serving the stale version
+in dev — the dev server appears to reload, but the rendered HTML doesn't change
+until you fully restart `npm run dev`.
+
+Switch the static import to a dynamic `await import(...)` inside the middleware
+so the runner re-resolves it per request and picks up invalidated modules:
+
+```diff
+ import { defineMiddleware } from 'astro:middleware';
+-import dastroConfig from '@/config/dastro.config';
+ import { buildDastroContext } from 'dastro';
+
+ export const onRequest = defineMiddleware(async (context, next) => {
+   // sets dastro context on local context so the dastro library has access to it
+-  context.locals.dastro = buildDastroContext(dastroConfig);
++  // Dynamic import (not static) so dev HMR picks up changes to dastroConfig
++  // and its transitive imports (moduleComponents, etc). Static imports get
++  // snapshotted in the middleware's closure and never refresh.
++  context.locals.dastro = buildDastroContext(
++    (await import('@/config/dastro.config')).default,
++  );
+
+   return next();
+ });
+```
+
+### Production performance
+
+Negligible. After the first request, the dynamic import is just a registry
+lookup on an already-loaded module (microseconds). The bundler may split
+`dastro.config.ts` into its own chunk; the chunk loads once on the first
+request and is cached for the rest of the process lifetime.
