@@ -1,3 +1,7 @@
+### [2.1.1](https://github.com/gridonic/dastro/compare/v2.1.0...v2.1.1)
+
+- update dependencies
+
 ### [2.1.0](https://github.com/gridonic/dastro/compare/v2.0.2...v2.1.0)
 
 - add 2.1.0 instruction patch to fix stale module issues in dev
