@@ -42,40 +42,40 @@
   "license": "ISC",
   "description": "",
   "peerDependencies": {
-    "astro": "^6.1.8"
+    "astro": "^6.1.9"
   },
   "dependencies": {
     "@astrojs/alpinejs": "^0.5.0",
     "@astrojs/check": "^0.9.8",
-    "@astrojs/compiler-rs": "^0.1.8",
-    "@astrojs/netlify": "^7.0.7",
-    "@astrojs/node": "^10.0.5",
+    "@astrojs/compiler-rs": "^0.1.10",
+    "@astrojs/netlify": "^7.0.8",
+    "@astrojs/node": "^10.0.6",
     "@datocms/astro": "^0.6.12",
     "@datocms/cda-client": "^0.2.10",
-    "@datocms/cma-client": "^5.3.0",
-    "@datocms/cma-client-node": "^5.3.0",
-    "@graphql-codegen/cli": "^6.1.2",
-    "@graphql-codegen/typed-document-node": "^6.1.6",
-    "@graphql-codegen/typescript": "^5.0.8",
-    "@graphql-codegen/typescript-operations": "^5.0.8",
+    "@datocms/cma-client": "^5.4.9",
+    "@datocms/cma-client-node": "^5.4.9",
+    "@graphql-codegen/cli": "^6.3.1",
+    "@graphql-codegen/typed-document-node": "^6.1.8",
+    "@graphql-codegen/typescript": "^5.0.10",
+    "@graphql-codegen/typescript-operations": "^5.1.0",
     "@graphql-typed-document-node/core": "^3.2.0",
     "@netlify/functions": "^5.1.2",
     "@types/jsonwebtoken": "^9.0.10",
     "astro-embed": "^0.13.0",
     "chalk": "^5.6.2",
     "jsonwebtoken": "^9.0.3",
-    "lefthook": "^2.1.1",
-    "lodash": "^4.17.23",
-    "node-html-parser": "^7.0.2",
+    "lefthook": "^2.1.6",
+    "lodash": "^4.18.1",
+    "node-html-parser": "^7.1.0",
     "schema-dts": "^2.0.0",
     "serialize-error": "^13.0.1",
     "typescript": "^5.9.3"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.24",
-    "prettier": "^3.8.1",
+    "prettier": "^3.8.3",
     "prettier-plugin-astro": "^0.14.1",
-    "sass-embedded": "^1.97.3",
-    "vitest": "^4.0.18"
+    "sass-embedded": "^1.99.0",
+    "vitest": "^4.1.5"
   }
 }
