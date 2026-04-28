@@ -1,3 +1,9 @@
+### [2.1.0](https://github.com/gridonic/dastro/compare/v2.0.2...v2.1.0)
+
+- add 2.1.0 instruction patch to fix stale module issues in dev
+- update dependencies
+- add `.node-version` to package files
+
 ### [2.0.2](https://github.com/gridonic/dastro/compare/v2.0.1...v2.0.2)
 
 - Improve upgrade mechanism and add skill for batch upgrading projects
