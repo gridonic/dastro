@@ -42,11 +42,11 @@
   "license": "ISC",
   "description": "",
   "peerDependencies": {
-    "astro": "^6.1.9"
+    "astro": "^6.1.10"
   },
   "dependencies": {
     "@astrojs/alpinejs": "^0.5.0",
-    "@astrojs/check": "^0.9.8",
+    "@astrojs/check": "^0.9.9",
     "@astrojs/compiler-rs": "^0.1.10",
     "@astrojs/netlify": "^7.0.8",
     "@astrojs/node": "^10.0.6",
