@@ -2,7 +2,17 @@
 
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
-import { execSync } from 'child_process';
+import { execSync, execFileSync } from 'child_process';
+import { isNetlifyCliInstalled, setupNetlifySite } from './netlify.js';
+
+function isGhAuthenticated() {
+  try {
+    execSync('gh auth status', { stdio: 'pipe' });
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 // Helper function to convert readable name to repository name
 function inferRepositoryName(readableName) {
@@ -34,6 +44,18 @@ function validateProjectName(name) {
 async function createProject(rl) {
   try {
     console.log('🚀 Welcome to Dastro Project Creator!\n');
+
+    // Pre-flight checks
+    console.log('🔎 Running pre-flight checks...');
+    const ghAvailable = isGhAuthenticated();
+    const netlifyAvailable = isNetlifyCliInstalled();
+    console.log(
+      `   ${ghAvailable ? '✅' : '⚠️ '} GitHub CLI authenticated${ghAvailable ? '' : ' — GitHub repo + Netlify steps will be skipped'}`,
+    );
+    console.log(
+      `   ${netlifyAvailable ? '✅' : '⚠️ '} Netlify CLI installed${netlifyAvailable ? '' : ' — Netlify step will be skipped'}`,
+    );
+    console.log();
 
     // Get readable name from user
     const readableName = await askQuestion(
@@ -165,7 +187,7 @@ async function createProject(rl) {
 
     // Initialize git repository
     console.log('🔧 Initializing git repository...');
-    execSync('git init', {
+    execSync('git init -b main', {
       stdio: 'inherit',
       cwd: projectPath,
     });
@@ -177,9 +199,104 @@ async function createProject(rl) {
       stdio: 'inherit',
       cwd: projectPath,
     });
+    execSync('git branch production', {
+      stdio: 'inherit',
+      cwd: projectPath,
+    });
+
+    // Optionally create GitHub remote repository
+    let ghOrg = null;
+    let ghRepoCreated = false;
+    let ghDeclined = false;
+    if (ghAvailable) {
+      console.log('\n🐙 GitHub');
+      const wantsGh = await askYesNo(
+        'Create a private GitHub remote repository?',
+        true,
+      );
+      if (wantsGh) {
+        ghOrg = await askQuestionWithDefault('GitHub organization', 'gridonic');
+        try {
+          console.log(
+            `\n🐙 Creating private GitHub repo ${ghOrg}/${projectName}...`,
+          );
+          execFileSync(
+            'gh',
+            [
+              'repo',
+              'create',
+              `${ghOrg}/${projectName}`,
+              '--private',
+              '--source',
+              '.',
+              '--remote',
+              'origin',
+            ],
+            { cwd: projectPath, stdio: 'inherit' },
+          );
+          execSync('git push -u origin main', {
+            stdio: 'inherit',
+            cwd: projectPath,
+          });
+          execSync('git push origin production', {
+            stdio: 'inherit',
+            cwd: projectPath,
+          });
+          ghRepoCreated = true;
+          console.log('✅ GitHub repo created and pushed');
+        } catch (error) {
+          console.log(`⚠️  GitHub repo creation failed: ${error.message}`);
+          console.log('   Continuing without remote setup.');
+        }
+      } else {
+        ghDeclined = true;
+      }
+    }
+
+    // Optionally deploy to Netlify
+    let netlifyResult = null;
+    let netlifyDeclined = false;
+    if (netlifyAvailable && ghRepoCreated) {
+      console.log('\n🌐 Netlify');
+      const wantsNetlify = await askYesNo(
+        'Deploy this project to Netlify?',
+        true,
+      );
+      if (wantsNetlify) {
+        const netlifySiteName = await askQuestionWithDefault(
+          'Netlify site name (must be globally unique on netlify.app)',
+          projectName,
+        );
+        const datocmsCmaToken = await askQuestionWithDefault(
+          'DatoCMS CMA token (admin token). Leave blank to set later in Netlify UI',
+          '',
+        );
+        try {
+          netlifyResult = await setupNetlifySite({
+            projectPath,
+            projectName,
+            siteName: netlifySiteName,
+            org: ghOrg,
+            datocmsToken: datocmsToken.trim(),
+            datocmsCmaToken: datocmsCmaToken.trim(),
+          });
+        } catch (error) {
+          console.log(`⚠️  Netlify setup failed: ${error.message}`);
+          console.log('   You can set it up manually later.');
+        }
+      } else {
+        netlifyDeclined = true;
+      }
+    }
 
     console.log('\n✅ Project created successfully!');
     console.log(`\n📁 Project location: ${projectPath}`);
+    if (ghRepoCreated) {
+      console.log(`🐙 GitHub: https://github.com/${ghOrg}/${projectName}`);
+    }
+    if (netlifyResult) {
+      console.log(`🌐 Netlify: ${netlifyResult.siteUrl}`);
+    }
     console.log('\n🚀 Run the project:');
     console.log(`   cd ${projectName}`);
     console.log('   npm run dev');
@@ -189,6 +306,35 @@ async function createProject(rl) {
     console.log(
       '   🤖 Run the dastro-init-project.mdc rule to remove unnecessary prototype code',
     );
+
+    // Manual fallback instructions for missing tools and partial failures
+    const manualSteps = [];
+    if (!ghAvailable) {
+      manualSteps.push(
+        '   • Authenticate with `gh auth login`, then create a private GitHub repo and push `main` + `production` branches',
+      );
+    } else if (!ghRepoCreated && !ghDeclined) {
+      manualSteps.push(
+        '   • Create the GitHub repo manually and push `main` + `production` branches',
+      );
+    }
+    if (!netlifyAvailable) {
+      manualSteps.push(
+        '   • Install Netlify CLI (`npm i -g netlify-cli`), then create a site linked to the GitHub repo and configure env vars / branch deploys per the boilerplate docs',
+      );
+    } else if (ghRepoCreated && !netlifyResult && !netlifyDeclined) {
+      manualSteps.push(
+        '   • Set up the Netlify site manually (see the Dastro README "Netlify" section)',
+      );
+    } else if (netlifyResult?.skippedEnvVars?.length) {
+      manualSteps.push(
+        `   • Set the following env vars in Netlify UI: ${netlifyResult.skippedEnvVars.join(', ')}`,
+      );
+    }
+    if (manualSteps.length > 0) {
+      console.log('\n📝 Manual follow-up:');
+      manualSteps.forEach((s) => console.log(s));
+    }
   } catch (error) {
     console.error('❌ Error creating project:', error.message);
     process.exit(1);
@@ -209,6 +355,18 @@ async function createProject(rl) {
       rl.question(`${question} (${defaultValue}): `, (answer) => {
         const trimmedAnswer = answer.trim();
         resolve(trimmedAnswer || defaultValue);
+      });
+    });
+  }
+
+  // Helper function for yes/no prompts
+  function askYesNo(question, defaultYes = true) {
+    const hint = defaultYes ? 'Y/n' : 'y/N';
+    return new Promise((resolve) => {
+      rl.question(`${question} [${hint}]: `, (answer) => {
+        const trimmed = answer.trim().toLowerCase();
+        if (trimmed === '') resolve(defaultYes);
+        else resolve(trimmed.startsWith('y'));
       });
     });
   }
