@@ -4,6 +4,7 @@ import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { execSync, execFileSync } from 'child_process';
 import { isNetlifyCliInstalled, setupNetlifySite } from './netlify.js';
+import { configureDatoCmsPlugins } from './dato-config.js';
 
 function isGhAuthenticated() {
   try {
@@ -86,6 +87,10 @@ async function createProject(rl) {
     console.log('\n🔑 DatoCMS Configuration');
     const datocmsToken = await askQuestionWithDefault(
       'Enter your DatoCMS Content Delivery API token ("Read-only API token"). Leave blank to use boilerplate token',
+      '',
+    );
+    const datocmsCmaToken = await askQuestionWithDefault(
+      'Enter your DatoCMS CMA token (admin token). Leave blank to set later in Netlify UI',
       '',
     );
 
@@ -204,6 +209,35 @@ async function createProject(rl) {
       cwd: projectPath,
     });
 
+    // Optionally configure DatoCMS plugin URLs (preview + SEO readability)
+    let netlifySiteName = null;
+    let datoConfigDeclined = false;
+    let datoConfigResult = null;
+    if (datocmsCmaToken.trim()) {
+      console.log('\n🔌 DatoCMS plugin configuration');
+      const wantsDatoConfig = await askYesNo(
+        'Configure DatoCMS preview & SEO readability plugins now?',
+        true,
+      );
+      if (wantsDatoConfig) {
+        netlifySiteName = await askQuestionWithDefault(
+          'Netlify site name (must be globally unique on netlify.app)',
+          projectName,
+        );
+        try {
+          datoConfigResult = await configureDatoCmsPlugins({
+            cmaToken: datocmsCmaToken.trim(),
+            netlifySiteName,
+          });
+        } catch (error) {
+          console.log(`⚠️  DatoCMS plugin config failed: ${error.message}`);
+          console.log('   You can configure plugins manually in DatoCMS UI.');
+        }
+      } else {
+        datoConfigDeclined = true;
+      }
+    }
+
     // Optionally create GitHub remote repository
     let ghOrg = null;
     let ghRepoCreated = false;
@@ -263,14 +297,12 @@ async function createProject(rl) {
         true,
       );
       if (wantsNetlify) {
-        const netlifySiteName = await askQuestionWithDefault(
-          'Netlify site name (must be globally unique on netlify.app)',
-          projectName,
-        );
-        const datocmsCmaToken = await askQuestionWithDefault(
-          'DatoCMS CMA token (admin token). Leave blank to set later in Netlify UI',
-          '',
-        );
+        if (!netlifySiteName) {
+          netlifySiteName = await askQuestionWithDefault(
+            'Netlify site name (must be globally unique on netlify.app)',
+            projectName,
+          );
+        }
         try {
           netlifyResult = await setupNetlifySite({
             projectPath,
@@ -329,6 +361,19 @@ async function createProject(rl) {
     } else if (netlifyResult?.skippedEnvVars?.length) {
       manualSteps.push(
         `   • Set the following env vars in Netlify UI: ${netlifyResult.skippedEnvVars.join(', ')}`,
+      );
+    }
+    if (!datocmsCmaToken.trim()) {
+      manualSteps.push(
+        '   • Update the DatoCMS web-previews & SEO readability plugin URLs to point to your Netlify site',
+      );
+    } else if (!datoConfigResult && !datoConfigDeclined) {
+      manualSteps.push(
+        '   • Update the DatoCMS web-previews & SEO readability plugin URLs manually (config attempt failed)',
+      );
+    } else if (datoConfigResult?.skipped?.length) {
+      manualSteps.push(
+        `   • Install + configure these DatoCMS plugins: ${datoConfigResult.skipped.join(', ')}`,
       );
     }
     if (manualSteps.length > 0) {
