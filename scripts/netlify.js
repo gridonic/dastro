@@ -150,6 +150,50 @@ export async function setupNetlifySite({
     );
   }
 
+  console.log('🔔 Setting up deploy notifications...');
+  const notificationEmail = 'julien+netlify@gridonic.ch';
+  const googleChatBridgeUrl =
+    'https://gridonic-netlify-google-chat-bridge.netlify.app/google-chat-notification';
+  // Netlify event semantics: deploy_building = starts, deploy_created = succeeds,
+  // deploy_failed = fails. (No `deploy_succeeded` — when a deploy succeeds, the
+  // `deploy` resource transitions to created.)
+  const hooksToCreate = [
+    // GitHub App: commit status / checks / PR review comment × 3 events
+    ...[
+      'github_app_commit_status',
+      'github_app_checks',
+      'github_app_review_comment',
+    ].flatMap((type) =>
+      ['deploy_building', 'deploy_created', 'deploy_failed'].map((event) => ({
+        type,
+        event,
+        data: {},
+      })),
+    ),
+    // Email notifications on success and failure
+    { type: 'email', event: 'deploy_created', data: { email: notificationEmail } },
+    { type: 'email', event: 'deploy_failed', data: { email: notificationEmail } },
+    // Google Chat bridge webhook
+    { type: 'url', event: 'deploy_created', data: { url: googleChatBridgeUrl } },
+    { type: 'url', event: 'deploy_failed', data: { url: googleChatBridgeUrl } },
+  ];
+  for (const { type, event, data } of hooksToCreate) {
+    try {
+      netlifyApi(
+        'createHookBySiteId',
+        {
+          site_id: siteId,
+          body: { type, event, data },
+        },
+        projectPath,
+      );
+    } catch (error) {
+      console.log(
+        `   ⚠️  Could not create ${type}/${event}: ${error.message.split('\n')[0]}`,
+      );
+    }
+  }
+
   console.log('🚀 Triggering initial deploys for production and main...');
   for (const branch of ['production', 'main']) {
     try {
