@@ -106,6 +106,7 @@ export async function setupNetlifySite({
   const datoEditingUrl = `https://${projectName}.admin.datocms.com`;
 
   const commonEnv = {
+    APP_BASE_URL: stageUrl,
     DATO_CMS_BASE_EDITING_URL: datoEditingUrl,
     DATO_CMS_GRAPHQL_HOST: 'https://graphql.datocms.com',
     DATO_CMS_TOKEN: datocmsToken || '',
@@ -116,6 +117,7 @@ export async function setupNetlifySite({
     ALLOW_DATO_ENVIRONMENT_SWITCH: 'false',
     DEVELOPMENT_DEBUG_VIEW_ENABLED: 'true',
     DEVELOPMENT_PREVENT_SEARCH_INDEXING: 'true',
+    NETLIFY_BACKUP_KEEP_AT_LEAST_DAYS: '0',
   };
 
   const productionOverrides = {
