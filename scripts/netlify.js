@@ -48,7 +48,9 @@ export async function setupNetlifySite({
   const repoSlug = `${org}/${projectName}`;
   const jwtSecret = generateJwtSecret();
 
-  console.log(`\n🌐 Creating Netlify site "${siteName}" linked to ${repoSlug}...`);
+  console.log(
+    `\n🌐 Creating Netlify site "${siteName}" linked to ${repoSlug}...`,
+  );
   const site = netlifyApi(
     'createSite',
     {
@@ -119,7 +121,7 @@ export async function setupNetlifySite({
   const productionOverrides = {
     APP_BASE_URL: productionUrl,
     ENVIRONMENT: 'production',
-    NETLIFY_BACKUP_KEEP_AT_LEAST_DAYS: '2',
+    NETLIFY_BACKUP_KEEP_AT_LEAST_DAYS: '1',
   };
 
   const stageOverrides = {
@@ -171,10 +173,22 @@ export async function setupNetlifySite({
       })),
     ),
     // Email notifications on success and failure
-    { type: 'email', event: 'deploy_created', data: { email: notificationEmail } },
-    { type: 'email', event: 'deploy_failed', data: { email: notificationEmail } },
+    {
+      type: 'email',
+      event: 'deploy_created',
+      data: { email: notificationEmail },
+    },
+    {
+      type: 'email',
+      event: 'deploy_failed',
+      data: { email: notificationEmail },
+    },
     // Google Chat bridge webhook
-    { type: 'url', event: 'deploy_created', data: { url: googleChatBridgeUrl } },
+    {
+      type: 'url',
+      event: 'deploy_created',
+      data: { url: googleChatBridgeUrl },
+    },
     { type: 'url', event: 'deploy_failed', data: { url: googleChatBridgeUrl } },
   ];
   for (const { type, event, data } of hooksToCreate) {
