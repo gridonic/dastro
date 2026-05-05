@@ -1,17 +1,19 @@
 ---
-import type {ClassValue, VideoAssetData} from "../component.types";
+import type { ClassValue, VideoAssetData } from '../component.types';
 
 interface Props {
   data: VideoAssetData;
   class?: ClassValue;
   aspectRatio?: number;
   videoResolution?: 'low' | 'medium' | 'high';
+  posterMaxWidth?: number;
 }
 
 const {
   data,
   videoResolution,
   aspectRatio,
+  posterMaxWidth = 800,
   class: classNames,
   ...rest
 } = Astro.props;
@@ -28,6 +30,22 @@ function getVideoUrl(): string | null {
     default:
       return data.video?.urlHighRes ?? null;
   }
+}
+
+function getPosterUrl(): string | undefined {
+  if (!video?.thumbnailUrl) {
+    return undefined;
+  }
+
+  const width = video.width
+    ? Math.min(video.width, posterMaxWidth)
+    : posterMaxWidth;
+
+  const url = new URL(video.thumbnailUrl.replace(/\.jpg(\?|$)/, '.webp$1'));
+  url.searchParams.set('time', '0');
+  url.searchParams.set('width', String(width));
+
+  return url.toString();
 }
 ---
 
@@ -47,7 +65,7 @@ function getVideoUrl(): string | null {
         muted
         loop
         playsinline
-        poster={video.thumbnailUrl}
+        poster={getPosterUrl()}
       >
         <source src={getVideoUrl()} type="video/mp4" />
         Video is not supported
@@ -78,6 +96,9 @@ function getVideoUrl(): string | null {
 
 <style lang="scss">
   .video-asset {
+    width: 100%;
+    height: 100%;
+
     > .video {
       display: block;
       object-fit: cover;
@@ -91,9 +112,6 @@ function getVideoUrl(): string | null {
       --controls: none;
       --media-object-fit: cover;
       --media-object-position: center;
-    }
-
-    > .video {
     }
   }
 </style>
