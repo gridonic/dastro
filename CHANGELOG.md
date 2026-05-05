@@ -1,3 +1,9 @@
+### [2.1.2](https://github.com/gridonic/dastro/compare/v2.1.1...v2.1.2)
+
+- extend create command
+- update dependencies to latest versions
+- dd dynamic poster URL generation and style improvements for VideoAsset, allows setting max poster width
+
 ### [2.1.1](https://github.com/gridonic/dastro/compare/v2.1.0...v2.1.1)
 
 - update dependencies
