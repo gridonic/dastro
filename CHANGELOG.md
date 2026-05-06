@@ -1,3 +1,7 @@
+### [2.1.3](https://github.com/gridonic/dastro/compare/v2.1.2...v2.1.3)
+
+- i18n: refine alternate link generation for multi-locale pages
+
 ### [2.1.2](https://github.com/gridonic/dastro/compare/v2.1.1...v2.1.2)
 
 - extend create command
