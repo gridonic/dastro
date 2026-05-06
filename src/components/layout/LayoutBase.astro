@@ -25,7 +25,7 @@ const { page, locale, bodyClass, faviconMetaTags } = Astro.props;
 
 const { routing, config, i18n, draftMode } = Astro.locals.dastro;
 const { resolveRecordUrl } = routing();
-const { normalizedIsoLocale, locales } = i18n();
+const { normalizedIsoLocale } = i18n();
 const { getExecutedDraftQueries } = draftMode();
 
 const debugViewEnabled = config.dev.debugViewEnabled;
@@ -36,10 +36,9 @@ const isPageExcludedFromIndexing = !!page._seoMetaTags.find(
 );
 
 function i18nLinkTags(): MetaTag[] {
-  // for single-locale apps, we do not need to specify alternatives
-  if (locales.length <= 1) {
-    return [];
-  }
+  const pageLocales = (page._allTranslatedSlugLocales ?? [])
+    .map((l) => l.locale)
+    .filter((l) => !!l) as DastroTypes['SiteLocale'][];
 
   const baseUrl = config.appBaseUrl.replace(/\/$/, '');
   const urlInCurrentLocale = resolveRecordUrl(page, locale) ?? '/';
@@ -56,14 +55,16 @@ function i18nLinkTags(): MetaTag[] {
       tag: 'link',
       attributes: { rel: 'canonical', href: `${baseUrl}${urlInCurrentLocale}` },
     },
-    ...locales.map((l) => ({
-      tag: 'link',
-      attributes: {
-        rel: 'alternate',
-        hreflang: normalizedIsoLocale(l) ?? l,
-        href: `${baseUrl}${resolveRecordUrl(page, l) ?? ''}`,
-      },
-    })),
+    ...(pageLocales.length > 1
+      ? pageLocales.map((l) => ({
+          tag: 'link',
+          attributes: {
+            rel: 'alternate',
+            hreflang: normalizedIsoLocale(l) ?? l,
+            href: `${baseUrl}${resolveRecordUrl(page, l) ?? ''}`,
+          },
+        }))
+      : []),
   ];
 }
 
