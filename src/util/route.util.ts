@@ -1,5 +1,7 @@
+import { stripStega } from '@datocms/content-link';
+
 export function slugify(str: string): string {
-  return str
+  return stripStega(str)
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
