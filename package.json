@@ -1,6 +1,6 @@
 {
   "name": "dastro",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "sideEffects": false,
   "scripts": {
     "dev": "npm run astro:check:watch",

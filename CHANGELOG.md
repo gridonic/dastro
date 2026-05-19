@@ -1,3 +1,7 @@
+### [2.1.5](https://github.com/gridonic/dastro/compare/v2.1.4...v2.1.5)
+
+- update dependencies to latest versions
+
 ### [2.1.4](https://github.com/gridonic/dastro/compare/v2.1.3...v2.1.4)
 
 - fix(graphql-integration): regenerate types directly on .gql change instead of restarting the server
