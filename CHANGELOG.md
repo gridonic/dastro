@@ -1,3 +1,8 @@
+### [2.1.4](https://github.com/gridonic/dastro/compare/v2.1.3...v2.1.4)
+
+- fix(graphql-integration): regenerate types directly on .gql change instead of restarting the server
+- feat(util): integrate `stripStega` for enhanced slug sanitization
+
 ### [2.1.3](https://github.com/gridonic/dastro/compare/v2.1.2...v2.1.3)
 
 - i18n: refine alternate link generation for multi-locale pages
