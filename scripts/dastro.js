@@ -46,14 +46,28 @@ async function runCommand() {
       const latestTag = getLatestRemoteVersionTag();
       console.log(`ℹ️  Latest version: ${latestTag}\n`);
 
-      // Detect major dependency bumps in dastro's peers *and* its own deps
-      // (e.g. Astro 5 → 6, astro-embed 0.9 → 0.13). If the consumer also
-      // declares these directly, install them together with dastro in a single
-      // `npm install` so npm can resolve the new ranges instead of failing.
-      const depBumps = await detectMajorBumps(latestTag);
-      if (depBumps.length > 0) {
+      // Resolve deps to (re)install alongside dastro:
+      //  - peerDependencies the consumer declares are *always* pinned to
+      //    dastro's new range so they stay in lockstep with the boilerplate.
+      //  - non-peer dependencies are included only on a major bump (e.g.
+      //    astro-embed 0.9 → 0.13) so npm can resolve the new ranges in a
+      //    single install instead of failing on a mismatched hoist.
+      const { peerAlignments, majorBumps } =
+        await getUpgradeAlignments(latestTag);
+
+      if (peerAlignments.length > 0) {
+        console.log(chalk.cyan('ℹ️  Aligning peer dependencies with dastro:'));
+        for (const a of peerAlignments) {
+          console.log(
+            chalk.cyan(`   ${a.name}: ${a.currentRange} → ${a.newRange}`),
+          );
+        }
+        console.log();
+      }
+
+      if (majorBumps.length > 0) {
         console.log(chalk.yellow('⚠️  Major dependency bump(s) detected:'));
-        for (const b of depBumps) {
+        for (const b of majorBumps) {
           console.log(
             chalk.yellow(`   ${b.name}: ${b.currentRange} → ${b.newRange}`),
           );
@@ -67,7 +81,8 @@ async function runCommand() {
 
       const packagesToInstall = [
         `dastro@github:gridonic/dastro#${latestTag}`,
-        ...depBumps.map((b) => `${b.name}@${b.newRange}`),
+        ...peerAlignments.map((a) => `${a.name}@${a.newRange}`),
+        ...majorBumps.map((b) => `${b.name}@${b.newRange}`),
       ];
       const installCmd = `npm install ${packagesToInstall
         .map((p) => `"${p}"`)
@@ -287,10 +302,7 @@ function applyPatches(previousVersion) {
       const isInstruction = f.endsWith('.instruction.patch');
       return {
         file: f,
-        version: f.replace(
-          isInstruction ? '.instruction.patch' : '.patch',
-          '',
-        ),
+        version: f.replace(isInstruction ? '.instruction.patch' : '.patch', ''),
         isInstruction,
       };
     })
@@ -325,18 +337,20 @@ function applyPatches(previousVersion) {
   }
 }
 
-async function detectMajorBumps(latestTag) {
-  let currentDeps, newDeps;
+async function getUpgradeAlignments(latestTag) {
+  const empty = { peerAlignments: [], majorBumps: [] };
+
+  let newPkg, currentPkg;
   try {
-    currentDeps = getCurrentDastroDeps();
-    newDeps = await fetchRemoteDastroDeps(latestTag);
+    newPkg = await fetchRemoteDastroPackage(latestTag);
+    currentPkg = getCurrentDastroPackage();
   } catch (err) {
     console.log(
       chalk.yellow(
         `⚠️  Could not inspect dastro dependencies automatically: ${err.message}`,
       ),
     );
-    return [];
+    return empty;
   }
 
   let consumerPkg;
@@ -345,43 +359,60 @@ async function detectMajorBumps(latestTag) {
       readFileSync(join(process.cwd(), 'package.json'), 'utf8'),
     );
   } catch {
-    return [];
+    return empty;
   }
   const consumerDeps = {
     ...consumerPkg.dependencies,
     ...consumerPkg.devDependencies,
   };
 
-  const bumps = [];
+  const newPeers = newPkg.peerDependencies || {};
+  const newDeps = newPkg.dependencies || {};
+  const currentDeps = {
+    ...currentPkg.peerDependencies,
+    ...currentPkg.dependencies,
+  };
+
+  const peerAlignments = [];
+  for (const [name, newRange] of Object.entries(newPeers)) {
+    if (!consumerDeps[name]) continue;
+    peerAlignments.push({
+      name,
+      currentRange: consumerDeps[name],
+      newRange,
+    });
+  }
+
+  const majorBumps = [];
   for (const [name, newRange] of Object.entries(newDeps)) {
     if (!consumerDeps[name]) continue;
+    if (peerAlignments.some((a) => a.name === name)) continue;
     const currentRange = currentDeps[name];
     if (!currentRange) continue;
     if (isMajorBump(currentRange, newRange)) {
-      bumps.push({ name, currentRange, newRange });
+      majorBumps.push({ name, currentRange, newRange });
     }
   }
-  return bumps;
+
+  return { peerAlignments, majorBumps };
 }
 
-function getCurrentDastroDeps() {
-  const pkg = JSON.parse(
+function getCurrentDastroPackage() {
+  return JSON.parse(
     readFileSync(
       join(process.cwd(), 'node_modules', 'dastro', 'package.json'),
       'utf8',
     ),
   );
-  return { ...pkg.peerDependencies, ...pkg.dependencies };
 }
 
-async function fetchRemoteDastroDeps(tag) {
+async function fetchRemoteDastroPackage(tag) {
   const url = `https://raw.githubusercontent.com/gridonic/dastro/${tag}/package.json`;
   const res = await fetch(url);
   if (!res.ok) {
     throw new Error(`Failed to fetch ${url}: ${res.status}`);
   }
-  const pkg = await res.json();
-  return { ...pkg.peerDependencies, ...pkg.dependencies };
+  return res.json();
 }
 
 // Extracts [major, minor] from a range. For 0.x versions, the minor is the
@@ -396,7 +427,8 @@ function isMajorBump(currentRange, newRange) {
   const current = parseRange(currentRange);
   const next = parseRange(newRange);
   if (!current || !next) return false;
-  if (current.major === 0 && next.major === 0) return next.minor > current.minor;
+  if (current.major === 0 && next.major === 0)
+    return next.minor > current.minor;
   return next.major > current.major;
 }
 
