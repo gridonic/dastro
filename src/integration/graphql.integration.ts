@@ -1,10 +1,52 @@
-import type { AstroIntegration } from 'astro';
+import type { AstroIntegration, AstroIntegrationLogger } from 'astro';
 import type { Types } from '@graphql-codegen/plugin-helpers';
 import 'dotenv/config'; // Need to import env variables for graphql cli
 import { generate, loadCodegenConfig } from '@graphql-codegen/cli';
 import chalk from 'chalk';
 
+const REGEN_DEBOUNCE_MS = 200;
+
 export default function graphqlIntegration(): AstroIntegration {
+  let generatorConfigs: Record<string, Types.Config> = {};
+  let debounceTimer: NodeJS.Timeout | undefined;
+
+  async function loadGraphqlSchemaConfigs(): Promise<
+    Record<string, Types.Config>
+  > {
+    // hacky, need to extend the type of the config, as it does not contain projects
+    const { config } = await loadCodegenConfig({
+      configFilePath: 'graphql.config.yml',
+    });
+    if ('projects' in config) {
+      return config.projects as Record<string, Types.Config>;
+    }
+
+    return { default: config };
+  }
+
+  async function generateAndWriteTypesFile(generatorConfig: Types.Config) {
+    return generate({ ...generatorConfig, silent: true }, true);
+  }
+
+  async function regenerateAll(
+    logger: AstroIntegrationLogger,
+    onError: (e: any) => void,
+  ) {
+    for (const [name, config] of Object.entries(generatorConfigs)) {
+      logger.info(
+        `Generate Typescript types from graphql for ${chalk.bold.green(name)}`,
+      );
+
+      try {
+        await generateAndWriteTypesFile(config);
+      } catch (e: any) {
+        onError(e);
+      }
+
+      logger.info(`${chalk.bold.green(name)} type generation complete`);
+    }
+  }
+
   return {
     name: 'graphql',
     hooks: {
@@ -19,55 +61,30 @@ export default function graphqlIntegration(): AstroIntegration {
           new URL('./integration/graphql.integration.ts', config.root),
         );
 
-        // When graphql config changes, the server must be reloaded
+        // When graphql config changes, the server must be reloaded so projects/plugins/outputs are re-evaluated
         addWatchFile(new URL('./graphql.config.yml', config.root));
 
-        const generatorConfigs = await loadGraphqlSchemaConfigs();
+        generatorConfigs = await loadGraphqlSchemaConfigs();
 
-        for (const [name, config] of Object.entries(generatorConfigs)) {
-          logger.info(
-            `Generate Typescript types from graphql for ${chalk.bold.green(name)}`,
-          );
-
-          try {
-            await generateAndWriteTypesFile(config);
-          } catch (e: any) {
-            if (command === 'sync') {
-              throw e;
-            } else {
-              logger.error(e);
-            }
+        await regenerateAll(logger, (e) => {
+          if (command === 'sync') {
+            throw e;
+          } else {
+            logger.error(e);
           }
-
-          logger.info(`${chalk.bold.green(name)} type generation complete`);
-        }
-
-        async function loadGraphqlSchemaConfigs(): Promise<
-          Record<string, Types.Config>
-        > {
-          // hacky, need to extend the type of the config, as it does not contain projects
-          const { config } = await loadCodegenConfig({
-            configFilePath: 'graphql.config.yml',
-          });
-          if ('projects' in config) {
-            return config.projects as Record<string, Types.Config>;
-          }
-
-          return { default: config };
-        }
-
-        async function generateAndWriteTypesFile(
-          generatorConfig: Types.Config,
-        ) {
-          return generate({ ...generatorConfig, silent: true }, true);
-        }
+        });
       },
-      'astro:server:setup': async ({ server }) => {
-        server.watcher.on('all', (_, path) => {
-          // When a graphql file is changed, reload the server so the types will be regenerated
-          if (path.endsWith('.gql')) {
-            server.restart();
+      'astro:server:setup': ({ server, logger }) => {
+        server.watcher.on('all', (event, path) => {
+          if (!path.endsWith('.gql')) return;
+          if (event !== 'change' && event !== 'add' && event !== 'unlink') {
+            return;
           }
+
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(() => {
+            regenerateAll(logger, (e) => logger.error(e));
+          }, REGEN_DEBOUNCE_MS);
         });
       },
     },
