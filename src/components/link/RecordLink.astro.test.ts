@@ -28,7 +28,7 @@ test('record link appends query params to href', async () => {
     },
   });
 
-  expect(result).toContain('href="/some-item-de?page=first&#38;search=test"');
+  expect(result).toContain('href="/some-item-de?page=first&amp;search=test"');
 });
 
 test('record link appends a hash fragment to href', async () => {
