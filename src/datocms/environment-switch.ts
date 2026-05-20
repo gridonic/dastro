@@ -64,7 +64,7 @@ export function environmentSwitch<T extends DastroTypes>(
 
   async function testEnvironmentExists(environment: string): Promise<boolean> {
     try {
-      await executeQuery('{siteInfo {id} }', {
+      await executeQuery('query { _site { globalSeo { siteName } } }', {
         token: config.datocms.token,
         environment,
       });
