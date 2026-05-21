@@ -39,6 +39,7 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
         updateConfig,
         addMiddleware,
         logger,
+        command,
       }) => {
         logger.info(
           chalk.bgGreen(` Using dastro ${chalk.bold(`v${pgk.version}`)} `),
@@ -62,6 +63,22 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
           output: 'server',
 
           site: process.env.APP_BASE_URL,
+
+          /*
+           * Dev only: Astro's dev server blocks cross-origin subresource
+           * requests (Sec-Fetch-Site: cross-site) unless the request origin's
+           * host is allowlisted here. The DatoCMS plugin iframe runs from
+           * plugins-cdn.datocms.com and must reach the /api/cms/* endpoints
+           * for local previews. Scoped to `dev` because `allowedDomains` also
+           * governs forwarded-host validation at runtime in production.
+           */
+          ...(command === 'dev'
+            ? {
+                security: {
+                  allowedDomains: [{ hostname: 'plugins-cdn.datocms.com' }],
+                },
+              }
+            : {}),
 
           integrations: [graphqlIntegration()],
 
@@ -158,9 +175,25 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
                         process.env.LOCAL_DEVELOPMENT_PATH_CERT_KEY,
                     }
                   : undefined,
-              headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': '*',
+              /*
+               * Vite 6+ restricts the dev server's CORS to localhost origins
+               * by default (security hardening). The DatoCMS plugins ("Web
+               * Previews", "SEO/readability analysis") run inside an iframe
+               * served from plugins-cdn.datocms.com and perform a cross-origin
+               * request — with a CORS preflight — to our /api/cms/* endpoints.
+               * Vite's built-in cors middleware answers the OPTIONS preflight
+               * before our route handlers run, so the DatoCMS origin must be
+               * allowlisted here for local previews to work. Setting
+               * `server.headers` does not help: the preflight is short-circuited
+               * by that middleware before the headers are applied.
+               */
+              cors: {
+                origin: [
+                  // Vite's default: any localhost / 127.0.0.1 / [::1] origin
+                  /^https?:\/\/(?:(?:[^:]+\.)?localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/,
+                  // DatoCMS plugin iframe (Web Previews, SEO analysis, …)
+                  'https://plugins-cdn.datocms.com',
+                ],
               },
             },
             css: {
