@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 
 import { execSync, execFileSync } from 'child_process';
+import { existsSync, readFileSync } from 'fs';
+import { join } from 'path';
 import { randomBytes } from 'crypto';
+import { isDone as isGithubDone } from './github.js';
 
 export function isNetlifyCliInstalled() {
   try {
@@ -9,6 +12,74 @@ export function isNetlifyCliInstalled() {
     return true;
   } catch {
     return false;
+  }
+}
+
+// A site is already linked when `netlify link` has written a site id into
+// .netlify/state.json — `createSite` is not idempotent, so this guards re-runs.
+export function isDone(projectPath) {
+  const p = join(projectPath, '.netlify', 'state.json');
+  if (!existsSync(p)) return false;
+  try {
+    return !!JSON.parse(readFileSync(p, 'utf8')).siteId;
+  } catch {
+    return false;
+  }
+}
+
+export async function step(projectPath, ctx) {
+  if (!isNetlifyCliInstalled()) {
+    console.log('⚠️  Netlify CLI not installed — skipping Netlify setup');
+    ctx.note(
+      'Install Netlify CLI (`npm i -g netlify-cli`), then create a site linked to the GitHub repo and configure env vars / branch deploys per the boilerplate docs',
+    );
+    return { skipped: true, reason: 'netlify-cli-missing' };
+  }
+  if (isDone(projectPath)) {
+    console.log('✅ Netlify site already linked — skipping');
+    return { skipped: true, reason: 'already-linked' };
+  }
+  if (!isGithubDone(projectPath)) {
+    console.log(
+      '⚠️  No GitHub remote found — create the GitHub repo before Netlify setup',
+    );
+    ctx.note(
+      'Set up the Netlify site manually once the GitHub repo exists (see the Dastro README "Netlify" section)',
+    );
+    return { skipped: true, reason: 'no-github-remote' };
+  }
+
+  const { slug, ghOrg, netlifySiteName, datoToken, cmaToken } =
+    await ctx.resolve([
+      'slug',
+      'ghOrg',
+      'netlifySiteName',
+      'datoToken',
+      'cmaToken',
+    ]);
+  ctx.persist({ netlifySiteName });
+
+  try {
+    const result = await setupNetlifySite({
+      projectPath,
+      projectName: slug,
+      siteName: netlifySiteName,
+      org: ghOrg,
+      datocmsToken: (datoToken || '').trim(),
+      datocmsCmaToken: (cmaToken || '').trim(),
+    });
+    if (result.skippedEnvVars?.length) {
+      ctx.note(
+        `Set the following env vars in Netlify UI: ${result.skippedEnvVars.join(', ')}`,
+      );
+    }
+    return { created: true, ...result };
+  } catch (error) {
+    console.log(`⚠️  Netlify setup failed: ${error.message}`);
+    ctx.note(
+      'Set up the Netlify site manually (see the Dastro README "Netlify" section)',
+    );
+    return { failed: true };
   }
 }
 

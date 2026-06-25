@@ -13,7 +13,11 @@ import { dirname, join } from 'path';
 import { execSync } from 'child_process';
 import { createInterface } from 'readline';
 import chalk from 'chalk';
-import { createProject } from './create.js';
+import { createProject, runStandaloneStep } from './create.js';
+import * as github from './steps/github.js';
+import * as netlify from './steps/netlify.js';
+import * as datoConfig from './steps/dato-config.js';
+import * as datoSeed from './steps/dato-seed.js';
 import { deploy } from './deploy.js';
 
 const command = process.argv[2];
@@ -29,9 +33,24 @@ const rl = createInterface({
 
 async function runCommand() {
   switch (command) {
-    case 'create':
-      await createProject(rl);
+    case 'create': {
+      // `create <step>` runs a single scaffolding step against the current
+      // project; `create [name]` (anything else, or nothing) runs the full
+      // orchestrator. Step names take precedence over project names.
+      const steps = {
+        github,
+        netlify,
+        'dato-config': datoConfig,
+        'dato-seed': datoSeed,
+      };
+      const sub = process.argv[3];
+      if (sub && steps[sub]) {
+        await runStandaloneStep(rl, steps[sub]);
+      } else {
+        await createProject(rl, sub);
+      }
       break;
+    }
     case 'link':
       execSync('npm link dastro', { stdio: 'inherit' });
       break;
@@ -160,7 +179,15 @@ async function runCommand() {
       console.log('Usage: dastro <command>\n');
       console.log('Commands:');
       console.log('  help - show this help message');
-      console.log('  create - create a new dastro project');
+      console.log(
+        '  create [name] - create a new dastro project (or resume an unfinished one)',
+      );
+      console.log('  create github - create the GitHub remote repo');
+      console.log('  create netlify - create & configure the Netlify site');
+      console.log(
+        '  create dato-config - configure DatoCMS preview & SEO plugins',
+      );
+      console.log('  create dato-seed - seed baseline DatoCMS records');
       console.log('  link - link the local dastro package');
       console.log('  unlink - unlink the local dastro package');
       console.log(

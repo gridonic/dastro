@@ -5,6 +5,40 @@ import { buildClient } from '@datocms/cma-client-node';
 const WEB_PREVIEWS_PACKAGE = 'datocms-plugin-web-previews';
 const SEO_READABILITY_PACKAGE = 'datocms-plugin-seo-readability-analysis';
 
+// Re-PUTs deterministic plugin URLs derived from the Netlify site name, so it
+// is always safe to re-run — no completion guard needed.
+export async function step(projectPath, ctx, { prompt = false } = {}) {
+  const cmaToken = (
+    prompt ? await ctx.resolve('cmaToken') : ctx.peek('cmaToken') || ''
+  ).trim();
+  if (!cmaToken) {
+    console.log('⚠️  No DatoCMS CMA token — skipping plugin configuration');
+    ctx.note(
+      'Update the DatoCMS web-previews & SEO readability plugin URLs to point to your Netlify site',
+    );
+    return { skipped: true, reason: 'no-cma-token' };
+  }
+
+  const netlifySiteName = await ctx.resolve('netlifySiteName');
+  ctx.persist({ netlifySiteName });
+
+  try {
+    const result = await configureDatoCmsPlugins({ cmaToken, netlifySiteName });
+    if (result.skipped?.length) {
+      ctx.note(
+        `Install + configure these DatoCMS plugins: ${result.skipped.join(', ')}`,
+      );
+    }
+    return result;
+  } catch (error) {
+    console.log(`⚠️  DatoCMS plugin config failed: ${error.message}`);
+    ctx.note(
+      'Update the DatoCMS web-previews & SEO readability plugin URLs manually (config attempt failed)',
+    );
+    return { failed: true };
+  }
+}
+
 export async function configureDatoCmsPlugins({ cmaToken, netlifySiteName }) {
   const client = buildClient({ apiToken: cmaToken });
   const plugins = await client.plugins.list();

@@ -1,462 +1,249 @@
 #!/usr/bin/env node
 
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { existsSync } from 'fs';
 import { join } from 'path';
-import { execSync, execFileSync } from 'child_process';
-import { isNetlifyCliInstalled, setupNetlifySite } from './netlify.js';
-import { configureDatoCmsPlugins } from './dato-config.js';
-import { seedDatoCmsData } from './dato-data.js';
+import { createContext, isDastroProject } from './context.js';
+import * as scaffold from './steps/scaffold.js';
+import * as github from './steps/github.js';
+import * as netlify from './steps/netlify.js';
+import * as datoConfig from './steps/dato-config.js';
+import * as datoSeed from './steps/dato-seed.js';
 
-function isGhAuthenticated() {
-  try {
-    execSync('gh auth status', { stdio: 'pipe' });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-// Helper function to convert readable name to repository name
+// Convert a readable name into a repository/slug candidate.
 function inferRepositoryName(readableName) {
   return readableName
     .toLowerCase()
-    .replace(/[^a-zA-Z0-9\s-]/g, '') // Remove special characters except spaces and hyphens
-    .replace(/\s+/g, '-') // Replace spaces with hyphens
-    .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
-    .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+    .replace(/[^a-zA-Z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
 }
 
-// Helper function to validate the project name
 function validateProjectName(name) {
   if (!name) {
     return 'Project name cannot be empty';
   }
-
   if (!/^[a-zA-Z0-9-_]+$/.test(name)) {
     return 'Project name can only contain letters, numbers, hyphens, and underscores';
   }
-
   if (existsSync(name)) {
     return `Directory '${name}' already exists`;
   }
-
   return null;
 }
 
-async function createProject(rl) {
+/**
+ * Runs a single step within the `create` orchestrator. When a `gate` prompt is
+ * given, the user is asked to confirm the (optional) phase — unless the step
+ * already self-detects completion, in which case the prompt is skipped and the
+ * step no-ops. The same wrapper backs standalone subcommands, which pass no
+ * gate (they never ask yes/no, only prompt for missing inputs).
+ */
+async function runStep(mod, { projectPath, ctx, gate = null }) {
+  if (gate) {
+    const done = mod.isDone ? await mod.isDone(projectPath) : false;
+    if (!done) {
+      const wants = await ctx.askYesNo(gate, true);
+      if (!wants) return { declined: true };
+    }
+  }
+  return mod.step(projectPath, ctx, { prompt: !gate });
+}
+
+function printPreflight() {
+  console.log('🔎 Running pre-flight checks...');
+  const ghAvailable = github.isGhAuthenticated();
+  const netlifyAvailable = netlify.isNetlifyCliInstalled();
+  console.log(
+    `   ${ghAvailable ? '✅' : '⚠️ '} GitHub CLI authenticated${
+      ghAvailable ? '' : ' — GitHub repo + Netlify steps will be skipped'
+    }`,
+  );
+  console.log(
+    `   ${netlifyAvailable ? '✅' : '⚠️ '} Netlify CLI installed${
+      netlifyAvailable ? '' : ' — Netlify step will be skipped'
+    }`,
+  );
+  console.log();
+}
+
+// Gather the up-front inputs a fresh scaffold needs and seed a context for the
+// project-to-be at <cwd>/<slug>.
+async function setupFreshContext(rl, nameArg) {
+  console.log('🚀 Welcome to Dastro Project Creator!\n');
+  printPreflight();
+
+  const ctxPrompt = createContext(process.cwd(), rl);
+  const readableName = await ctxPrompt.ask(
+    "Enter a readable name for your project (e.g., 'Gridonic Website'): ",
+  );
+
+  const inferredRepoName = inferRepositoryName(readableName);
+  console.log(`\n📝 Inferred repository name: ${inferredRepoName}`);
+
+  let slug = nameArg;
+  let validationError = slug ? validateProjectName(slug) : 'prompt';
+  while (validationError) {
+    if (validationError !== 'prompt') console.log(`❌ ${validationError}\n`);
+    slug = await ctxPrompt.askWithDefault('Repository name', inferredRepoName);
+    validationError = validateProjectName(slug);
+  }
+
+  console.log('\n🔑 DatoCMS Configuration');
+  const datoToken = await ctxPrompt.askWithDefault(
+    'Enter your DatoCMS Content Delivery API token ("Read-only API token"). Leave blank to use boilerplate token',
+    '',
+  );
+  const cmaToken = await ctxPrompt.askWithDefault(
+    'Enter your DatoCMS CMA token (admin token). Leave blank to set later in Netlify UI',
+    '',
+  );
+
+  const projectPath = join(process.cwd(), slug);
+  const ctx = createContext(projectPath, rl, {
+    readableName,
+    slug,
+    datoToken,
+    cmaToken,
+  });
+  return { projectPath, ctx, fresh: true };
+}
+
+async function setupResumeContext(rl) {
+  console.log('🔁 Resuming dastro project setup...\n');
+  printPreflight();
+  const projectPath = process.cwd();
+  return { projectPath, ctx: createContext(projectPath, rl), fresh: false };
+}
+
+/**
+ * `create [name]` orchestrator. Fresh mode when a name is given or the cwd is
+ * not a dastro project; resume mode when run with no name inside an existing
+ * (possibly half-built) dastro project. Every step is idempotent, so resume
+ * simply re-runs all of them and the completed ones no-op.
+ */
+async function createProject(rl, nameArg) {
   try {
-    console.log('🚀 Welcome to Dastro Project Creator!\n');
+    const fresh = !!nameArg || !isDastroProject(process.cwd());
+    const { projectPath, ctx } = fresh
+      ? await setupFreshContext(rl, nameArg)
+      : await setupResumeContext(rl);
 
-    // Pre-flight checks
-    console.log('🔎 Running pre-flight checks...');
-    const ghAvailable = isGhAuthenticated();
-    const netlifyAvailable = isNetlifyCliInstalled();
-    console.log(
-      `   ${ghAvailable ? '✅' : '⚠️ '} GitHub CLI authenticated${ghAvailable ? '' : ' — GitHub repo + Netlify steps will be skipped'}`,
-    );
-    console.log(
-      `   ${netlifyAvailable ? '✅' : '⚠️ '} Netlify CLI installed${netlifyAvailable ? '' : ' — Netlify step will be skipped'}`,
-    );
-    console.log();
+    const results = {};
 
-    // Get readable name from user
-    const readableName = await askQuestion(
-      "Enter a readable name for your project (e.g., 'Gridonic Website'): ",
-    );
+    // 1. Scaffold (required — hard-fails the whole run on error)
+    results.scaffold = await scaffold.step(projectPath, ctx);
+    if (fresh) ctx.persist({ readableName: await ctx.resolve('readableName') });
 
-    // Infer repository name from readable name
-    const inferredRepoName = inferRepositoryName(readableName);
-    console.log(`\n📝 Inferred repository name: ${inferredRepoName}`);
-
-    // Get final repository name from user (with default)
-    let projectName;
-    let validationError;
-
-    do {
-      projectName = await askQuestionWithDefault(
-        'Repository name',
-        inferredRepoName,
-      );
-      validationError = validateProjectName(projectName);
-
-      if (validationError) {
-        console.log(`❌ ${validationError}\n`);
-      }
-    } while (validationError);
-
-    // Get DatoCMS token from user
-    console.log('\n🔑 DatoCMS Configuration');
-    const datocmsToken = await askQuestionWithDefault(
-      'Enter your DatoCMS Content Delivery API token ("Read-only API token"). Leave blank to use boilerplate token',
-      '',
-    );
-    const datocmsCmaToken = await askQuestionWithDefault(
-      'Enter your DatoCMS CMA token (admin token). Leave blank to set later in Netlify UI',
-      '',
-    );
-
-    console.log(`\n📁 Creating project: ${projectName}\n`);
-
-    // Clone the repository template
-    console.log('📥 Cloning repository template...');
-    const templateRepo = 'git@github.com:gridonic/astro-boilerplate.git';
-
-    execSync(`git clone ${templateRepo} ${projectName}`, {
-      stdio: 'inherit',
-      cwd: process.cwd(),
-    });
-
-    // Remove the.git directory to start fresh
-    console.log('🧹 Cleaning up repository...');
-    execSync(`rm -rf ${projectName}/.git`, { stdio: 'inherit' });
-
-    // Navigate to the project directory
-    const projectPath = join(process.cwd(), projectName);
-
-    // Update IntelliJ project name
-    console.log('🔧 Updating IntelliJ project configuration...');
-    const ideaPath = join(projectPath, '.idea');
-    if (existsSync(ideaPath)) {
-      // Update .idea/.name file
-      const ideaNamePath = join(ideaPath, '.name');
-      if (existsSync(ideaNamePath)) {
-        writeFileSync(ideaNamePath, readableName);
-      }
-
-      // Update .idea/modules.xml
-      const modulesXmlPath = join(ideaPath, 'modules.xml');
-      if (existsSync(modulesXmlPath)) {
-        let modulesXml = readFileSync(modulesXmlPath, 'utf8');
-        // Replace the old project name with the new one in the filepath and fileurl
-        modulesXml = modulesXml.replace(/Astro Boilerplate/g, readableName);
-        writeFileSync(modulesXmlPath, modulesXml);
-      }
-
-      // Rename the .iml file
-      const oldImlPath = join(ideaPath, 'Astro Boilerplate.iml');
-      const newImlPath = join(ideaPath, `${readableName}.iml`);
-      if (existsSync(oldImlPath)) {
-        execSync(`mv "${oldImlPath}" "${newImlPath}"`, { stdio: 'inherit' });
-      }
-    }
-
-    // Update package.json with a new project name
-    console.log('📝 Updating package.json...');
-    const packageJsonPath = join(projectPath, 'package.json');
-    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
-    packageJson.name = projectName;
-    writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
-
-    // Update .env.example with DatoCMS token if provided
-    if (datocmsToken.trim()) {
-      console.log('📝 Updating DatoCMS token in .env.example...');
-      const envExamplePath = join(projectPath, '.env.example');
-      if (existsSync(envExamplePath)) {
-        let envContent = readFileSync(envExamplePath, 'utf8');
-        envContent = envContent.replace(
-          /DATO_CMS_TOKEN=.*/,
-          `DATO_CMS_TOKEN=${datocmsToken}`,
-        );
-        writeFileSync(envExamplePath, envContent);
-      }
-    }
-
-    // Update DATO_CMS_BASE_EDITING_URL with the project name
-    console.log('📝 Updating DATO_CMS_BASE_EDITING_URL in .env.example...');
-    const envExamplePathForUrl = join(projectPath, '.env.example');
-    if (existsSync(envExamplePathForUrl)) {
-      let envContent2 = readFileSync(envExamplePathForUrl, 'utf8');
-      envContent2 = envContent2.replace(
-        /DATO_CMS_BASE_EDITING_URL=.*/,
-        `DATO_CMS_BASE_EDITING_URL=https://${projectName}.admin.datocms.com`,
-      );
-      writeFileSync(envExamplePathForUrl, envContent2);
-    }
-
-    // Copy .env.example to .env
-    console.log('📋 Setting up environment file...');
-    const envExamplePath = join(projectPath, '.env.example');
-    const envPath = join(projectPath, '.env');
-    if (existsSync(envExamplePath)) {
-      execSync(`cp "${envExamplePath}" "${envPath}"`, {
-        stdio: 'inherit',
-        cwd: projectPath,
-      });
-    }
-
-    // Install dependencies
-    console.log('📦 Installing dependencies...');
-    execSync('npm install', {
-      stdio: 'inherit',
-      cwd: projectPath,
-    });
-
-    // Initialize git repository
-    console.log('🔧 Initializing git repository...');
-    execSync('git init -b main', {
-      stdio: 'inherit',
-      cwd: projectPath,
-    });
-    execSync('git add .', {
-      stdio: 'inherit',
-      cwd: projectPath,
-    });
-    execSync('git commit -m "Initial commit"', {
-      stdio: 'inherit',
-      cwd: projectPath,
-    });
-    execSync('git branch production', {
-      stdio: 'inherit',
-      cwd: projectPath,
-    });
-
-    // Optionally configure DatoCMS plugin URLs (preview + SEO readability)
-    let netlifySiteName = null;
-    let datoConfigDeclined = false;
-    let datoConfigResult = null;
-    if (datocmsCmaToken.trim()) {
+    // 2. DatoCMS plugin configuration (optional, needs the CMA token)
+    if (ctx.has('cmaToken')) {
       console.log('\n🔌 DatoCMS plugin configuration');
-      const wantsDatoConfig = await askYesNo(
-        'Configure DatoCMS preview & SEO readability plugins now?',
-        true,
-      );
-      if (wantsDatoConfig) {
-        netlifySiteName = await askQuestionWithDefault(
-          'Netlify site name (must be globally unique on netlify.app)',
-          projectName,
-        );
-        try {
-          datoConfigResult = await configureDatoCmsPlugins({
-            cmaToken: datocmsCmaToken.trim(),
-            netlifySiteName,
-          });
-        } catch (error) {
-          console.log(`⚠️  DatoCMS plugin config failed: ${error.message}`);
-          console.log('   You can configure plugins manually in DatoCMS UI.');
-        }
-      } else {
-        datoConfigDeclined = true;
-      }
+      results.datoConfig = await runStep(datoConfig, {
+        projectPath,
+        ctx,
+        gate: 'Configure DatoCMS preview & SEO readability plugins now?',
+      });
+    } else {
+      results.datoConfig = await datoConfig.step(projectPath, ctx);
     }
 
-    // Optionally create GitHub remote repository
-    let ghOrg = null;
-    let ghRepoCreated = false;
-    let ghDeclined = false;
-    if (ghAvailable) {
+    // 3. GitHub remote (optional, needs gh auth)
+    if (github.isGhAuthenticated()) {
       console.log('\n🐙 GitHub');
-      const wantsGh = await askYesNo(
-        'Create a private GitHub remote repository?',
-        true,
-      );
-      if (wantsGh) {
-        ghOrg = await askQuestionWithDefault('GitHub organization', 'gridonic');
-        try {
-          console.log(
-            `\n🐙 Creating private GitHub repo ${ghOrg}/${projectName}...`,
-          );
-          execFileSync(
-            'gh',
-            [
-              'repo',
-              'create',
-              `${ghOrg}/${projectName}`,
-              '--private',
-              '--source',
-              '.',
-              '--remote',
-              'origin',
-            ],
-            { cwd: projectPath, stdio: 'inherit' },
-          );
-          execSync('git push -u origin main', {
-            stdio: 'inherit',
-            cwd: projectPath,
-          });
-          execSync('git push origin production', {
-            stdio: 'inherit',
-            cwd: projectPath,
-          });
-          ghRepoCreated = true;
-          console.log('✅ GitHub repo created and pushed');
-        } catch (error) {
-          console.log(`⚠️  GitHub repo creation failed: ${error.message}`);
-          console.log('   Continuing without remote setup.');
-        }
-      } else {
-        ghDeclined = true;
-      }
+      results.github = await runStep(github, {
+        projectPath,
+        ctx,
+        gate: 'Create a private GitHub remote repository?',
+      });
+    } else {
+      results.github = await github.step(projectPath, ctx);
     }
 
-    // Optionally deploy to Netlify
-    let netlifyResult = null;
-    let netlifyDeclined = false;
-    if (netlifyAvailable && ghRepoCreated) {
+    // 4. Netlify (optional, needs the Netlify CLI and a GitHub remote)
+    if (netlify.isNetlifyCliInstalled() && github.isDone(projectPath)) {
       console.log('\n🌐 Netlify');
-      const wantsNetlify = await askYesNo(
-        'Deploy this project to Netlify?',
-        true,
-      );
-      if (wantsNetlify) {
-        if (!netlifySiteName) {
-          netlifySiteName = await askQuestionWithDefault(
-            'Netlify site name (must be globally unique on netlify.app)',
-            projectName,
-          );
-        }
-        try {
-          netlifyResult = await setupNetlifySite({
-            projectPath,
-            projectName,
-            siteName: netlifySiteName,
-            org: ghOrg,
-            datocmsToken: datocmsToken.trim(),
-            datocmsCmaToken: datocmsCmaToken.trim(),
-          });
-        } catch (error) {
-          console.log(`⚠️  Netlify setup failed: ${error.message}`);
-          console.log('   You can set it up manually later.');
-        }
-      } else {
-        netlifyDeclined = true;
-      }
+      results.netlify = await runStep(netlify, {
+        projectPath,
+        ctx,
+        gate: 'Deploy this project to Netlify?',
+      });
+    } else {
+      results.netlify = await netlify.step(projectPath, ctx);
     }
 
-    // Optionally seed baseline DatoCMS content (home & 404 pages, navigation,
-    // global content, customer onboarding) — mirrors the boilerplate project.
-    let datoSeedResult = null;
-    let datoSeedDeclined = false;
-    if (datocmsCmaToken.trim()) {
+    // 5. Seed baseline DatoCMS content (optional, needs the CMA token)
+    if (ctx.has('cmaToken')) {
       console.log('\n🌱 DatoCMS content');
-      const wantsSeed = await askYesNo(
-        'Seed baseline DatoCMS records (home & 404 pages, navigation, global content)?',
-        true,
-      );
-      if (wantsSeed) {
-        try {
-          datoSeedResult = await seedDatoCmsData({
-            cmaToken: datocmsCmaToken.trim(),
-            projectName: readableName,
-          });
-          const createdList = datoSeedResult.created.length
-            ? datoSeedResult.created.join(', ')
-            : 'none (records already present)';
-          console.log(`   ✅ Seeded DatoCMS records: ${createdList}`);
-        } catch (error) {
-          console.log(`⚠️  DatoCMS seeding failed: ${error.message}`);
-          console.log(
-            '   You can create the baseline records manually in DatoCMS.',
-          );
-        }
-      } else {
-        datoSeedDeclined = true;
-      }
+      results.datoSeed = await runStep(datoSeed, {
+        projectPath,
+        ctx,
+        gate: 'Seed baseline DatoCMS records (home & 404 pages, navigation, global content)?',
+      });
+    } else {
+      results.datoSeed = await datoSeed.step(projectPath, ctx);
     }
 
-    console.log('\n✅ Project created successfully!');
-    console.log(`\n📁 Project location: ${projectPath}`);
-    if (ghRepoCreated) {
-      console.log(`🐙 GitHub: https://github.com/${ghOrg}/${projectName}`);
-    }
-    if (netlifyResult) {
-      console.log(`🌐 Netlify: ${netlifyResult.siteUrl}`);
-    }
-    console.log('\n🚀 Run the project:');
-    console.log(`   cd ${projectName}`);
-    console.log('   npm run dev');
-    console.log('\n📚 Documentation: https://github.com/gridonic/dastro');
-
-    console.log('\n🚀 Next steps:');
-    console.log(
-      '   🤖 Run the dastro-init-project.mdc rule to remove unnecessary prototype code',
-    );
-
-    // Manual fallback instructions for missing tools and partial failures
-    const manualSteps = [];
-    if (!ghAvailable) {
-      manualSteps.push(
-        '   • Authenticate with `gh auth login`, then create a private GitHub repo and push `main` + `production` branches',
-      );
-    } else if (!ghRepoCreated && !ghDeclined) {
-      manualSteps.push(
-        '   • Create the GitHub repo manually and push `main` + `production` branches',
-      );
-    }
-    if (!netlifyAvailable) {
-      manualSteps.push(
-        '   • Install Netlify CLI (`npm i -g netlify-cli`), then create a site linked to the GitHub repo and configure env vars / branch deploys per the boilerplate docs',
-      );
-    } else if (ghRepoCreated && !netlifyResult && !netlifyDeclined) {
-      manualSteps.push(
-        '   • Set up the Netlify site manually (see the Dastro README "Netlify" section)',
-      );
-    } else if (netlifyResult?.skippedEnvVars?.length) {
-      manualSteps.push(
-        `   • Set the following env vars in Netlify UI: ${netlifyResult.skippedEnvVars.join(', ')}`,
-      );
-    }
-    if (!datocmsCmaToken.trim()) {
-      manualSteps.push(
-        '   • Update the DatoCMS web-previews & SEO readability plugin URLs to point to your Netlify site',
-      );
-    } else if (!datoConfigResult && !datoConfigDeclined) {
-      manualSteps.push(
-        '   • Update the DatoCMS web-previews & SEO readability plugin URLs manually (config attempt failed)',
-      );
-    } else if (datoConfigResult?.skipped?.length) {
-      manualSteps.push(
-        `   • Install + configure these DatoCMS plugins: ${datoConfigResult.skipped.join(', ')}`,
-      );
-    }
-    if (!datocmsCmaToken.trim()) {
-      manualSteps.push(
-        '   • Seed baseline DatoCMS records (home & 404 pages, navigation, global content) manually',
-      );
-    } else if (!datoSeedResult && !datoSeedDeclined) {
-      manualSteps.push(
-        '   • Seed baseline DatoCMS records manually (seeding attempt failed)',
-      );
-    }
-    if (manualSteps.length > 0) {
-      console.log('\n📝 Manual follow-up:');
-      manualSteps.forEach((s) => console.log(s));
-    }
+    await printSummary(ctx, projectPath, results, fresh);
   } catch (error) {
     console.error('❌ Error creating project:', error.message);
     process.exit(1);
   }
+}
 
-  // Helper function to get user input
-  function askQuestion(question) {
-    return new Promise((resolve) => {
-      rl.question(question, (answer) => {
-        resolve(answer.trim());
-      });
-    });
+async function printSummary(ctx, projectPath, results, fresh) {
+  const slug = await ctx.resolve('slug');
+
+  console.log('\n✅ Project setup complete!');
+  console.log(`\n📁 Project location: ${projectPath}`);
+  if (github.isDone(projectPath)) {
+    const ghOrg = await ctx.resolve('ghOrg');
+    console.log(`🐙 GitHub: https://github.com/${ghOrg}/${slug}`);
+  }
+  if (results.netlify?.siteUrl) {
+    console.log(`🌐 Netlify: ${results.netlify.siteUrl}`);
   }
 
-  // Helper function to get user input with default value
-  function askQuestionWithDefault(question, defaultValue) {
-    return new Promise((resolve) => {
-      rl.question(`${question} (${defaultValue}): `, (answer) => {
-        const trimmedAnswer = answer.trim();
-        resolve(trimmedAnswer || defaultValue);
-      });
-    });
-  }
+  console.log('\n🚀 Run the project:');
+  if (fresh) console.log(`   cd ${slug}`);
+  console.log('   npm run dev');
+  console.log('\n📚 Documentation: https://github.com/gridonic/dastro');
 
-  // Helper function for yes/no prompts
-  function askYesNo(question, defaultYes = true) {
-    const hint = defaultYes ? 'Y/n' : 'y/N';
-    return new Promise((resolve) => {
-      rl.question(`${question} [${hint}]: `, (answer) => {
-        const trimmed = answer.trim().toLowerCase();
-        if (trimmed === '') resolve(defaultYes);
-        else resolve(trimmed.startsWith('y'));
-      });
-    });
+  console.log('\n🚀 Next steps:');
+  console.log(
+    '   🤖 Run the dastro-init-project.mdc rule to remove unnecessary prototype code',
+  );
+
+  if (ctx.notes.length > 0) {
+    console.log('\n📝 Manual follow-up:');
+    ctx.notes.forEach((note) => console.log(`   • ${note}`));
   }
 }
 
-// Export the function for use in dastro.js
-export { createProject };
+/**
+ * Runs one step as a standalone subcommand against the current working
+ * directory. No yes/no gate — the step prompts only for inputs it cannot
+ * derive from disk/state.
+ */
+async function runStandaloneStep(rl, mod) {
+  const projectPath = process.cwd();
+  if (!isDastroProject(projectPath)) {
+    console.log(
+      '❌ This does not look like a dastro project. Run the command from the project root.',
+    );
+    process.exit(1);
+  }
+
+  const ctx = createContext(projectPath, rl);
+  try {
+    await runStep(mod, { projectPath, ctx });
+    if (ctx.notes.length > 0) {
+      console.log('\n📝 Manual follow-up:');
+      ctx.notes.forEach((note) => console.log(`   • ${note}`));
+    }
+  } catch (error) {
+    console.error('❌ Error:', error.message);
+    process.exit(1);
+  }
+}
+
+export { createProject, runStandaloneStep };

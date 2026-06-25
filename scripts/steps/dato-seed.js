@@ -2,6 +2,39 @@
 
 import { buildClient, buildBlockRecord } from '@datocms/cma-client-node';
 
+// Idempotent: `seedDatoCmsData` checks for existing records and only creates
+// what is missing, so it is always safe to re-run — no completion guard needed.
+export async function step(projectPath, ctx, { prompt = false } = {}) {
+  const cmaToken = (
+    prompt ? await ctx.resolve('cmaToken') : ctx.peek('cmaToken') || ''
+  ).trim();
+  if (!cmaToken) {
+    console.log('⚠️  No DatoCMS CMA token — skipping seeding');
+    ctx.note(
+      'Seed baseline DatoCMS records (home & 404 pages, navigation, global content) manually',
+    );
+    return { skipped: true, reason: 'no-cma-token' };
+  }
+
+  const readableName = await ctx.resolve('readableName');
+
+  try {
+    const result = await seedDatoCmsData({
+      cmaToken,
+      projectName: readableName,
+    });
+    const createdList = result.created.length
+      ? result.created.join(', ')
+      : 'none (records already present)';
+    console.log(`   ✅ Seeded DatoCMS records: ${createdList}`);
+    return result;
+  } catch (error) {
+    console.log(`⚠️  DatoCMS seeding failed: ${error.message}`);
+    ctx.note('Seed baseline DatoCMS records manually (seeding attempt failed)');
+    return { failed: true };
+  }
+}
+
 // Empty Structured Text (DAST) value — a single empty paragraph.
 const EMPTY_DAST = {
   schema: 'dast',
@@ -88,8 +121,8 @@ export async function seedDatoCmsData({ cmaToken, projectName }) {
       title: localize({ de: 'Home', en: 'Home' }),
       translated_slug: localize({ de: 'home', en: 'home' }),
       header_module: localize({
-        de: headerModule(`Wir sind ${name}`),
-        en: headerModule(`We are ${name}`),
+        de: headerModule(`Willkommen bei ${name}`),
+        en: headerModule(`Welcome to ${name}`),
       }),
     });
     created.push('Home page');
