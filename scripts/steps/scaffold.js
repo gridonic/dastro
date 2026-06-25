@@ -26,6 +26,8 @@ export async function step(projectPath, ctx) {
     'slug',
     'datoToken',
   ]);
+  // CMA token is sensitive: it goes into .env only, never .env.example.
+  const cmaToken = ctx.peek('cmaToken') || '';
 
   console.log(`\n📁 Creating project: ${slug}\n`);
 
@@ -90,6 +92,21 @@ export async function step(projectPath, ctx) {
   const envPath = join(projectPath, '.env');
   if (existsSync(envExamplePath)) {
     execSync(`cp "${envExamplePath}" "${envPath}"`, { stdio: 'inherit' });
+  }
+
+  // Write the CMA token into .env only (never .env.example), if provided.
+  if (cmaToken.trim() && existsSync(envPath)) {
+    console.log('📝 Setting DATO_CMS_CMA_TOKEN in .env...');
+    let envContent = readFileSync(envPath, 'utf8');
+    if (/^DATO_CMS_CMA_TOKEN=.*/m.test(envContent)) {
+      envContent = envContent.replace(
+        /^DATO_CMS_CMA_TOKEN=.*/m,
+        `DATO_CMS_CMA_TOKEN=${cmaToken}`,
+      );
+    } else {
+      envContent = `${envContent.replace(/\n*$/, '\n')}DATO_CMS_CMA_TOKEN=${cmaToken}\n`;
+    }
+    writeFileSync(envPath, envContent);
   }
 
   // Ensure the .dastro CLI state directory is gitignored before committing.
