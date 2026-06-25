@@ -5,6 +5,7 @@ import { join } from 'path';
 import { execSync, execFileSync } from 'child_process';
 import { isNetlifyCliInstalled, setupNetlifySite } from './netlify.js';
 import { configureDatoCmsPlugins } from './dato-config.js';
+import { seedDatoCmsData } from './dato-data.js';
 
 function isGhAuthenticated() {
   try {
@@ -321,6 +322,37 @@ async function createProject(rl) {
       }
     }
 
+    // Optionally seed baseline DatoCMS content (home & 404 pages, navigation,
+    // global content, customer onboarding) — mirrors the boilerplate project.
+    let datoSeedResult = null;
+    let datoSeedDeclined = false;
+    if (datocmsCmaToken.trim()) {
+      console.log('\n🌱 DatoCMS content');
+      const wantsSeed = await askYesNo(
+        'Seed baseline DatoCMS records (home & 404 pages, navigation, global content)?',
+        true,
+      );
+      if (wantsSeed) {
+        try {
+          datoSeedResult = await seedDatoCmsData({
+            cmaToken: datocmsCmaToken.trim(),
+            projectName: readableName,
+          });
+          const createdList = datoSeedResult.created.length
+            ? datoSeedResult.created.join(', ')
+            : 'none (records already present)';
+          console.log(`   ✅ Seeded DatoCMS records: ${createdList}`);
+        } catch (error) {
+          console.log(`⚠️  DatoCMS seeding failed: ${error.message}`);
+          console.log(
+            '   You can create the baseline records manually in DatoCMS.',
+          );
+        }
+      } else {
+        datoSeedDeclined = true;
+      }
+    }
+
     console.log('\n✅ Project created successfully!');
     console.log(`\n📁 Project location: ${projectPath}`);
     if (ghRepoCreated) {
@@ -374,6 +406,15 @@ async function createProject(rl) {
     } else if (datoConfigResult?.skipped?.length) {
       manualSteps.push(
         `   • Install + configure these DatoCMS plugins: ${datoConfigResult.skipped.join(', ')}`,
+      );
+    }
+    if (!datocmsCmaToken.trim()) {
+      manualSteps.push(
+        '   • Seed baseline DatoCMS records (home & 404 pages, navigation, global content) manually',
+      );
+    } else if (!datoSeedResult && !datoSeedDeclined) {
+      manualSteps.push(
+        '   • Seed baseline DatoCMS records manually (seeding attempt failed)',
       );
     }
     if (manualSteps.length > 0) {
