@@ -2,6 +2,7 @@
 
 import {
   readFileSync,
+  writeFileSync,
   lstatSync,
   existsSync,
   mkdirSync,
@@ -110,8 +111,9 @@ async function runCommand() {
       execSync(installCmd, { stdio: 'inherit' });
       console.log(`\n✅ Upgraded to ${latestTag}`);
 
-      // Copy cursor rules from the installed dastro package
+      // Copy cursor rules and sync AGENTS.md from the installed dastro package
       copyCursorRules();
+      syncAgentsMd();
 
       // Apply patches for versions between current and latest
       applyPatches(currentVersion);
@@ -206,6 +208,79 @@ runCommand()
     rl.close();
     process.exit(0);
   });
+
+const AGENTS_MANAGED_START = '<!-- @dastro:managed -->';
+const AGENTS_MANAGED_END = '<!-- @dastro:managed:end -->';
+
+function syncAgentsMd() {
+  try {
+    console.log('\n📋 Syncing AGENTS.md from dastro package...');
+
+    const dastroPackagePath = join(process.cwd(), 'node_modules', 'dastro');
+    const sourceFile = join(dastroPackagePath, 'AGENTS.md');
+    const targetFile = join(process.cwd(), 'AGENTS.md');
+
+    if (!existsSync(sourceFile)) {
+      console.log('ℹ️  No AGENTS.md found in dastro package, skipping...');
+      return;
+    }
+
+    const sourceContent = readFileSync(sourceFile, 'utf8');
+
+    if (!existsSync(targetFile)) {
+      copyFileSync(sourceFile, targetFile);
+      console.log('📄 Created AGENTS.md');
+      return;
+    }
+
+    const targetContent = readFileSync(targetFile, 'utf8');
+
+    if (
+      !targetContent.includes(AGENTS_MANAGED_START) ||
+      !targetContent.includes(AGENTS_MANAGED_END)
+    ) {
+      console.log(
+        'ℹ️  AGENTS.md exists but has no @dastro:managed section — skipping sync',
+      );
+      console.log(
+        '   Add <!-- @dastro:managed --> markers to enable automatic updates',
+      );
+      return;
+    }
+
+    if (
+      !sourceContent.includes(AGENTS_MANAGED_START) ||
+      !sourceContent.includes(AGENTS_MANAGED_END)
+    ) {
+      console.log(
+        '⚠️  Dastro AGENTS.md is missing @dastro:managed markers, skipping...',
+      );
+      return;
+    }
+
+    const sourceStart = sourceContent.indexOf(AGENTS_MANAGED_START);
+    const sourceEnd =
+      sourceContent.indexOf(AGENTS_MANAGED_END) + AGENTS_MANAGED_END.length;
+    const managedBlock = sourceContent.slice(sourceStart, sourceEnd);
+
+    const targetStart = targetContent.indexOf(AGENTS_MANAGED_START);
+    const targetEnd =
+      targetContent.indexOf(AGENTS_MANAGED_END) + AGENTS_MANAGED_END.length;
+
+    writeFileSync(
+      targetFile,
+      targetContent.slice(0, targetStart) +
+        managedBlock +
+        targetContent.slice(targetEnd),
+    );
+    console.log('📄 Updated @dastro:managed section in AGENTS.md');
+  } catch (error) {
+    console.log(`\n⚠️  Warning: Could not sync AGENTS.md: ${error.message}`);
+    console.log(
+      '   You can manually copy it from node_modules/dastro/AGENTS.md',
+    );
+  }
+}
 
 function copyCursorRules() {
   try {
