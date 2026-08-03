@@ -62,6 +62,10 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
         updateConfig({
           output: 'server',
 
+          // Astro 7 changed the default to 'jsx', which strips whitespace
+          // between inline elements and breaks text spacing in rendered HTML.
+          compressHTML: true,
+
           site: process.env.APP_BASE_URL,
 
           /*
