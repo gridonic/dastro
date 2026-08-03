@@ -1,3 +1,11 @@
+### [3.0.0](https://github.com/gridonic/dastro/compare/v2.1.5...v3.0.0)
+
+- BREAKING: Upgrade to Astro 7 (peer dependency now astro ^7.0.0)
+- Major updates: @astrojs/netlify 8, @astrojs/node 11, @astrojs/alpinejs 1, @astrojs/compiler-rs 0.3, chalk 6, node-html-parser 9
+- Set compressHTML: true (Astro 7 changed the default to 'jsx')
+- Fix VideoPlayer radial gradient sass deprecation warning
+- Minor/patch updates for remaining dependencies (graphql-codegen kept at current majors)
+
 ### [2.1.5](https://github.com/gridonic/dastro/compare/v2.1.4...v2.1.5)
 
 - update dependencies to latest versions
