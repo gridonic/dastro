@@ -1,3 +1,9 @@
+### [3.1.0](https://github.com/gridonic/dastro/compare/v3.0.0...v3.1.0)
+
+- remove obsolete dastro-upgrade-all skill and associated docs, it is moved to our skills repo
+- sync consumer docs and add 3.1.0 agent instructions
+- update dependencies
+
 ### [3.0.0](https://github.com/gridonic/dastro/compare/v2.1.5...v3.0.0)
 
 - BREAKING: Upgrade to Astro 7 (peer dependency now astro ^7.0.0)
