@@ -25,11 +25,9 @@ const key = module.__typename
     .slice(0, -7)}
 >
   {Component && <Component data={module} />}
-  {
-    !Component && module.__typename && (
-      <mark class="mark">No Component registered for {module?.__typename}</mark>
-    )
-  }
+  {!Component && module.__typename && (
+    <mark class="mark">No Component registered for {module?.__typename}</mark>
+  )}
 </section>
 
 <style lang="scss">

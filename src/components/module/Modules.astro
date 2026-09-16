@@ -1,6 +1,6 @@
 ---
 import ModuleComponent from './Module.astro';
-import type { Module} from "../component.types";
+import type { Module } from '../component.types';
 
 interface Props {
   modules: Module[];
@@ -14,4 +14,6 @@ function componentForModule(module: Module) {
 }
 ---
 
-{modules.map((m) => <ModuleComponent module={m} Component={componentForModule(m)} />)}
+{modules.map((m) => (
+  <ModuleComponent module={m} Component={componentForModule(m)} />
+))}

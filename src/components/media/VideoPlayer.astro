@@ -58,115 +58,109 @@ const { data, class: classNames } = Astro.props;
 </script>
 
 <div class="video-player" class:list={classNames} data-video-player>
-  {
-    data.video.__typename === 'VideoInlineRecord' && (
-      <div class="videowrapper">
-        <video
-          class="video"
-          width={data.video.videoAsset.video.width}
-          height={data.video.videoAsset.video.height}
-          {...(data.video.showControls ? { controls: true } : {})}
-          {...(data.video.autoplay ? { autoplay: true } : {})}
-          {...(data.video.loop ? { loop: true } : {})}
-          {...(data.video.muted ? { muted: true } : {})}
-          {...(data.video.autoplay ? { playsinline: true } : {})}
-          poster={
+  {data.video.__typename === 'VideoInlineRecord' && (
+    <div class="videowrapper">
+      <video
+        class="video"
+        width={data.video.videoAsset.video.width}
+        height={data.video.videoAsset.video.height}
+        {...(data.video.showControls ? { controls: true } : {})}
+        {...(data.video.autoplay ? { autoplay: true } : {})}
+        {...(data.video.loop ? { loop: true } : {})}
+        {...(data.video.muted ? { muted: true } : {})}
+        {...(data.video.autoplay ? { playsinline: true } : {})}
+        poster={
+          data.posterImage
+            ? `${data.posterImage.url}?&w=${data.video.videoAsset.video.width}&h=${data.video.videoAsset.video.height}&fit=crop`
+            : (data.video.videoAsset.video as any).thumbnailUrl
+              ? (data.video.videoAsset.video as any).thumbnailUrl
+              : undefined
+        }
+      >
+        <source src={data.video.videoAsset.video.mp4Url} type="video/mp4" />
+        Your browser does not support HTML5 video.
+      </video>
+
+      {!data.video.autoplay && (
+        <div
+          class="placeholder"
+          style={
             data.posterImage
-              ? `${data.posterImage.url}?&w=${data.video.videoAsset.video.width}&h=${data.video.videoAsset.video.height}&fit=crop`
+              ? `background-image: url(${data.posterImage?.url}?&w=${data.video.videoAsset.video.width}&h=${data.video.videoAsset.video.height}&fit=crop); aspect-ratio: ${data.video.videoAsset.video.width} / ${data.video.videoAsset.video.height}`
               : (data.video.videoAsset.video as any).thumbnailUrl
-                ? (data.video.videoAsset.video as any).thumbnailUrl
-                : undefined
+                ? `background-image: url(${(data.video.videoAsset.video as any).thumbnailUrl}); aspect-ratio: ${data.video.videoAsset.video.width} / ${data.video.videoAsset.video.height}`
+                : `aspect-ratio: ${data.video.videoAsset.video.width} / ${data.video.videoAsset.video.height}; background-color: var(--base-color-brand, gray);`
           }
         >
-          <source src={data.video.videoAsset.video.mp4Url} type="video/mp4" />
-          Your browser does not support HTML5 video.
-        </video>
-
-        {!data.video.autoplay && (
-          <div
-            class="placeholder"
-            style={
-              data.posterImage
-                ? `background-image: url(${data.posterImage?.url}?&w=${data.video.videoAsset.video.width}&h=${data.video.videoAsset.video.height}&fit=crop); aspect-ratio: ${data.video.videoAsset.video.width} / ${data.video.videoAsset.video.height}`
-                : (data.video.videoAsset.video as any).thumbnailUrl
-                  ? `background-image: url(${(data.video.videoAsset.video as any).thumbnailUrl}); aspect-ratio: ${data.video.videoAsset.video.width} / ${data.video.videoAsset.video.height}`
-                  : `aspect-ratio: ${data.video.videoAsset.video.width} / ${data.video.videoAsset.video.height}; background-color: var(--base-color-brand, gray);`
-            }
-          >
-            <button class="button" type="button">
-              <span class="ui-hide-visually">Play</span>
-              <span class="icon" aria-hidden="true">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="104"
-                  height="76"
-                  viewBox="0 0 104 76"
-                  fill="none"
-                >
-                  <g clip-path="url(#clip0_3929_2196)">
-                    <rect
-                      width="104"
-                      height="76"
-                      rx="16"
-                      fill="white"
-                      fill-opacity="0.01"
-                    />
-                    <rect
-                      x="5.25"
-                      y="5.25"
-                      width="93.5"
-                      height="65.5"
-                      rx="14.75"
-                      stroke="white"
-                      stroke-width="2.5"
-                    />
-                    <path
-                      d="M42.25 22.6338C42.2502 22.0429 42.9021 21.6839 43.4014 22L67.6631 37.3662C68.128 37.6607 68.128 38.3393 67.6631 38.6338L43.4014 54C42.9021 54.3161 42.2502 53.9571 42.25 53.3662V22.6338Z"
-                      stroke="white"
-                      stroke-width="2.5"
-                    />
-                  </g>
-                  <defs>
-                    <clipPath id="clip0_3929_2196">
-                      <rect width="104" height="76" fill="white" />
-                    </clipPath>
-                  </defs>
-                </svg>
-              </span>
-            </button>
-          </div>
-        )}
-      </div>
-    )
-  }
-  {
-    data.video.__typename === 'VideoExternalRecord' &&
-      data.video.videoReference.provider === 'youtube' && (
-        <YouTube
-          id={data.video.videoReference.providerUid}
-          poster={
-            data.posterImage
-              ? `${data.posterImage.url}?&w=1920&h=1080&fit=crop`
-              : undefined
-          }
-          posterQuality="max"
-        />
-      )
-  }
-  {
-    data.video.__typename === 'VideoExternalRecord' &&
-      data.video.videoReference.provider === 'vimeo' && (
-        <Vimeo
-          id={data.video.videoReference.providerUid}
-          poster={
-            data.posterImage
-              ? `${data.posterImage.url}?&w=1920&h=1080&fit=crop`
-              : undefined
-          }
-          posterQuality="max"
-        />
-      )
-  }
+          <button class="button" type="button">
+            <span class="ui-hide-visually">Play</span>
+            <span class="icon" aria-hidden="true">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="104"
+                height="76"
+                viewBox="0 0 104 76"
+                fill="none"
+              >
+                <g clip-path="url(#clip0_3929_2196)">
+                  <rect
+                    width="104"
+                    height="76"
+                    rx="16"
+                    fill="white"
+                    fill-opacity="0.01"
+                  />
+                  <rect
+                    x="5.25"
+                    y="5.25"
+                    width="93.5"
+                    height="65.5"
+                    rx="14.75"
+                    stroke="white"
+                    stroke-width="2.5"
+                  />
+                  <path
+                    d="M42.25 22.6338C42.2502 22.0429 42.9021 21.6839 43.4014 22L67.6631 37.3662C68.128 37.6607 68.128 38.3393 67.6631 38.6338L43.4014 54C42.9021 54.3161 42.2502 53.9571 42.25 53.3662V22.6338Z"
+                    stroke="white"
+                    stroke-width="2.5"
+                  />
+                </g>
+                <defs>
+                  <clipPath id="clip0_3929_2196">
+                    <rect width="104" height="76" fill="white" />
+                  </clipPath>
+                </defs>
+              </svg>
+            </span>
+          </button>
+        </div>
+      )}
+    </div>
+  )}
+  {data.video.__typename === 'VideoExternalRecord' &&
+    data.video.videoReference.provider === 'youtube' && (
+      <YouTube
+        id={data.video.videoReference.providerUid}
+        poster={
+          data.posterImage
+            ? `${data.posterImage.url}?&w=1920&h=1080&fit=crop`
+            : undefined
+        }
+        posterQuality="max"
+      />
+    )}
+  {data.video.__typename === 'VideoExternalRecord' &&
+    data.video.videoReference.provider === 'vimeo' && (
+      <Vimeo
+        id={data.video.videoReference.providerUid}
+        poster={
+          data.posterImage
+            ? `${data.posterImage.url}?&w=1920&h=1080&fit=crop`
+            : undefined
+        }
+        posterQuality="max"
+      />
+    )}
 </div>
 
 <style lang="scss">

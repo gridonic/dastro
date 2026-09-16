@@ -11,6 +11,10 @@ const { tagName: TagName = 'div', class: classNames, ...rest } = Astro.props;
 ---
 
 <!-- @see: https://github.com/datocms/astro-datocms/tree/main/src/ContentLink#data-datocms-content-link-boundary -->
-<TagName {...contentLinkAttrs({ boundary: true })} class:list={classNames} {...rest}>
+<TagName
+  {...contentLinkAttrs({ boundary: true })}
+  class:list={classNames}
+  {...rest}
+>
   <slot />
 </TagName>

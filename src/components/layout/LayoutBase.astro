@@ -100,38 +100,34 @@ const executedDraftQueries = getExecutedDraftQueries(Astro);
         ]}
       />
     </slot>
-    {
-      isSearchIndexingPrevented(config) && !isPageExcludedFromIndexing && (
-        <meta
-          id="development-indexing-turned-off"
-          name="robots"
-          content="noindex"
-        />
-      )
-    }
+    {isSearchIndexingPrevented(config) && !isPageExcludedFromIndexing && (
+      <meta
+        id="development-indexing-turned-off"
+        name="robots"
+        content="noindex"
+      />
+    )}
     <slot name="head:after" />
   </head>
   <body class:list={bodyClass}>
     <slot name="body:before" />
-    <slot name="body:skip-links">
-      <!--<SkipLinks />-->
-    </slot>
+    <slot name="body:skip-links"><!--<SkipLinks />--></slot>
     <slot name="body" />
-    {
-      debugViewEnabled && (
-        <slot name="body:debug-view">
-          <DebugGridContainer>
-            <AutoDebugGrid />
-          </DebugGridContainer>
-          <DebugView />
-        </slot>
-      )
-    }
+    {debugViewEnabled && (
+      <slot name="body:debug-view">
+        <DebugGridContainer>
+          <AutoDebugGrid />
+        </DebugGridContainer>
+        <DebugView />
+      </slot>
+    )}
     <slot name="body:debug-info">
       <DebugInfo />
     </slot>
     <slot name="body:query-listeners">
-      {executedDraftQueries.map((q) => <QueryListener {...q} />)}
+      {executedDraftQueries.map((q) => (
+        <QueryListener {...q} />
+      ))}
     </slot>
     <slot name="body:visual-editing">
       {isVisualEditingEnabled() && <DastroContentLink />}

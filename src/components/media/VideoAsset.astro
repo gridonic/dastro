@@ -55,23 +55,21 @@ function getPosterUrl(): string | undefined {
   {...rest}
   style={{ aspectRatio }}
 >
-  {
-    video && (
-      <video
-        class="video"
-        width={video.width}
-        height={video.height}
-        autoplay
-        muted
-        loop
-        playsinline
-        poster={getPosterUrl()}
-      >
-        <source src={getVideoUrl()} type="video/mp4" />
-        Video is not supported
-      </video>
-    )
-  }
+  {video && (
+    <video
+      class="video"
+      width={video.width}
+      height={video.height}
+      autoplay
+      muted
+      loop
+      playsinline
+      poster={getPosterUrl()}
+    >
+      <source src={getVideoUrl()} type="video/mp4" />
+      Video is not supported
+    </video>
+  )}
 </div>
 
 <!--{-->

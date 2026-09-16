@@ -1,12 +1,12 @@
 ---
-import {StructuredText} from '@datocms/astro';
+import { StructuredText } from '@datocms/astro';
 import type { ComponentProps } from 'astro/types';
 import RecordLink from '../link/RecordLink.astro';
 
-interface Props extends ComponentProps<typeof StructuredText> {
-}
+interface Props extends ComponentProps<typeof StructuredText> {}
 
-const { data, linkToRecordComponents, inlineRecordComponents, ...rest } = Astro.props;
+const { data, linkToRecordComponents, inlineRecordComponents, ...rest } =
+  Astro.props;
 
 const { pageRecordTypes } = Astro.locals.dastro.routing();
 

@@ -52,12 +52,14 @@ const astroVersion = Astro.generator.match(/v(.*)/)?.[1] || 'unknown';
             d="M0.96875 8H15.0312"
             stroke="white"
             stroke-linecap="round"
-            stroke-linejoin="round"></path>
+            stroke-linejoin="round"
+          ></path>
           <path
             d="M8 0.96875V15.0312"
             stroke="white"
             stroke-linecap="round"
-            stroke-linejoin="round"></path>
+            stroke-linejoin="round"
+          ></path>
         </g>
         <defs>
           <clipPath id="clip0_6080_3145">
@@ -85,12 +87,14 @@ const astroVersion = Astro.generator.match(/v(.*)/)?.[1] || 'unknown';
             d="M3.02815 3.02815L12.9718 12.9718"
             stroke="white"
             stroke-linecap="round"
-            stroke-linejoin="round"></path>
+            stroke-linejoin="round"
+          ></path>
           <path
             d="M12.9718 3.02815L3.02816 12.9718"
             stroke="white"
             stroke-linecap="round"
-            stroke-linejoin="round"></path>
+            stroke-linejoin="round"
+          ></path>
         </svg>
       </label>
     </div>
@@ -117,9 +121,7 @@ const astroVersion = Astro.generator.match(/v(.*)/)?.[1] || 'unknown';
         </label>
       </div>
       <DebugCssVariables />
-      <pre
-        class="list"
-        data-debug-variables>
+      <pre class="list" data-debug-variables>
         <span class="variable" data-variable="--fluid-rem" data-type="font-size" />
         <span class="variable" data-variable="--fluid-outer-margin" data-type="height" />
         <span class="variable" data-variable="--scrollbar-width" data-type="width" />
@@ -148,9 +150,9 @@ const astroVersion = Astro.generator.match(/v(.*)/)?.[1] || 'unknown';
           data-shortcut="h"
         />
         <label for="debug-view-show-content-height">
-          <span class="label-text"
-            >Content Height <span data-contentheight-ratio></span></span
-          >
+          <span class="label-text">
+            Content Height <span data-contentheight-ratio></span>
+          </span>
           <span class="shortcut">Ctrl + H</span>
         </label>
       </div>
@@ -195,22 +197,20 @@ const astroVersion = Astro.generator.match(/v(.*)/)?.[1] || 'unknown';
       </div>
     </div>
 
-    {
-      datoEnvironment.switchAllowed && (
-        <div
-          class="datoenvironment"
-          class:list={{ '-custom': !datoEnvironment.isDefault }}
-        >
-          <div class="status">
-            <div class="title">DatoCMS Environment</div>
-            <div class="value">{datoEnvironment.environment}</div>
-          </div>
-          <button type="button" class="button debug-view-button">
-            Switch Environment
-          </button>
+    {datoEnvironment.switchAllowed && (
+      <div
+        class="datoenvironment"
+        class:list={{ '-custom': !datoEnvironment.isDefault }}
+      >
+        <div class="status">
+          <div class="title">DatoCMS Environment</div>
+          <div class="value">{datoEnvironment.environment}</div>
         </div>
-      )
-    }
+        <button type="button" class="button debug-view-button">
+          Switch Environment
+        </button>
+      </div>
+    )}
 
     <div
       class="draftmode"
@@ -221,9 +221,9 @@ const astroVersion = Astro.generator.match(/v(.*)/)?.[1] || 'unknown';
         <div class="value -enabled">enabled</div>
         <div class="value -disabled">disabled</div>
       </div>
-      <button type="button" class="button debug-view-button"
-        >Toggle Draft Mode</button
-      >
+      <button type="button" class="button debug-view-button">
+        Toggle Draft Mode
+      </button>
     </div>
   </div>
 
