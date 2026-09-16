@@ -5,10 +5,7 @@ import {
   json,
 } from '../utils.ts';
 import { buildClient } from '@datocms/cma-client-node';
-import type {
-  Environment,
-  Site,
-} from '@datocms/cma-client/dist/types/generated/ApiTypes';
+import type { ApiTypes } from '@datocms/cma-client';
 import pkg from '../../../package.json';
 
 export const GET: APIRoute = async (context) => {
@@ -23,8 +20,8 @@ export const GET: APIRoute = async (context) => {
 
   const { config } = context.locals.dastro;
 
-  let datoCmsEnvironments: Environment[] = [];
-  let site: Site | null = null;
+  let datoCmsEnvironments: ApiTypes.Environment[] = [];
+  let site: ApiTypes.Site | null = null;
 
   try {
     const datocmsClient = buildClient({

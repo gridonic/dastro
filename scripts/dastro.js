@@ -11,7 +11,7 @@ import {
 } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { execSync } from 'child_process';
+import { execSync, spawn } from 'child_process';
 import { createInterface } from 'readline';
 import chalk from 'chalk';
 import { createProject, runStandaloneStep } from './create.js';
@@ -69,9 +69,9 @@ async function runCommand() {
       // Resolve deps to (re)install alongside dastro:
       //  - peerDependencies the consumer declares are *always* pinned to
       //    dastro's new range so they stay in lockstep with the boilerplate.
-      //  - non-peer dependencies are included only on a major bump (e.g.
-      //    astro-embed 0.9 → 0.13) so npm can resolve the new ranges in a
-      //    single install instead of failing on a mismatched hoist.
+      //  - non-peer dependencies are included only when the project is a major
+      //    behind dastro (e.g. astro-embed 0.12 → 0.13) so npm can resolve the
+      //    new ranges in a single install instead of failing on a stale peer.
       const { peerAlignments, majorBumps } =
         await getUpgradeAlignments(latestTag);
 
@@ -108,7 +108,37 @@ async function runCommand() {
         .map((p) => `"${p}"`)
         .join(' ')}`;
       console.log(`🔄 Running: ${installCmd}`);
-      execSync(installCmd, { stdio: 'inherit' });
+      let install = await runInstall(installCmd);
+
+      // Crossing an astro major, any project dependency still declaring a peer
+      // range for the old astro aborts the whole install — including the ones
+      // this command cannot bump because dastro does not declare them (e.g.
+      // @sentry/astro). The install we are running is the one that carries the
+      // fix, so relax peer resolution and retry rather than leaving the project
+      // on the old dastro.
+      if (install.code !== 0 && install.stderr.includes('ERESOLVE')) {
+        console.log(
+          chalk.yellow(
+            '\n⚠️  npm could not resolve the peer dependency tree (ERESOLVE).',
+          ),
+        );
+        console.log(
+          chalk.yellow(
+            '   Retrying with --legacy-peer-deps. Some packages likely still declare',
+          ),
+        );
+        console.log(
+          chalk.yellow(
+            '   peer ranges for the previous astro major — review them afterwards.\n',
+          ),
+        );
+        install = await runInstall(`${installCmd} --legacy-peer-deps`);
+      }
+
+      if (install.code !== 0) {
+        throw new Error(`Install failed (exit code ${install.code})`);
+      }
+
       console.log(`\n✅ Upgraded to ${latestTag}`);
 
       // Copy cursor rules and sync AGENTS.md from the installed dastro package
@@ -203,11 +233,35 @@ async function runCommand() {
 }
 
 runCommand()
-  .catch(console.error)
+  .catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  })
   .finally(() => {
     rl.close();
-    process.exit(0);
+    process.exit(process.exitCode ?? 0);
   });
+
+// Runs an npm command, streaming its output while also capturing stderr so the
+// caller can tell an ERESOLVE peer conflict apart from any other failure.
+// Resolves instead of throwing — a non-zero exit is an expected outcome here.
+function runInstall(cmd) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(cmd, {
+      shell: true,
+      stdio: ['inherit', 'inherit', 'pipe'],
+    });
+
+    let stderr = '';
+    child.stderr.on('data', (chunk) => {
+      stderr += chunk;
+      process.stderr.write(chunk);
+    });
+
+    child.on('error', reject);
+    child.on('close', (code) => resolve({ code, stderr }));
+  });
+}
 
 const AGENTS_MANAGED_START = '<!-- @dastro:managed -->';
 const AGENTS_MANAGED_END = '<!-- @dastro:managed:end -->';
@@ -442,10 +496,9 @@ function applyPatches(previousVersion) {
 async function getUpgradeAlignments(latestTag) {
   const empty = { peerAlignments: [], majorBumps: [] };
 
-  let newPkg, currentPkg;
+  let newPkg;
   try {
     newPkg = await fetchRemoteDastroPackage(latestTag);
-    currentPkg = getCurrentDastroPackage();
   } catch (err) {
     console.log(
       chalk.yellow(
@@ -470,10 +523,6 @@ async function getUpgradeAlignments(latestTag) {
 
   const newPeers = newPkg.peerDependencies || {};
   const newDeps = newPkg.dependencies || {};
-  const currentDeps = {
-    ...currentPkg.peerDependencies,
-    ...currentPkg.dependencies,
-  };
 
   const peerAlignments = [];
   for (const [name, newRange] of Object.entries(newPeers)) {
@@ -485,27 +534,23 @@ async function getUpgradeAlignments(latestTag) {
     });
   }
 
+  // The baseline is the range the *consumer* declares, not the one the
+  // installed dastro declared: a project can lag several dastro releases behind
+  // on a shared dependency (e.g. still on astro-embed ^0.12 long after dastro
+  // moved to ^0.13), and comparing dastro-old → dastro-new would report no bump
+  // while that stale range is exactly what makes npm's peer resolution fail
+  // once astro crosses a major.
   const majorBumps = [];
   for (const [name, newRange] of Object.entries(newDeps)) {
-    if (!consumerDeps[name]) continue;
-    if (peerAlignments.some((a) => a.name === name)) continue;
-    const currentRange = currentDeps[name];
+    const currentRange = consumerDeps[name];
     if (!currentRange) continue;
+    if (peerAlignments.some((a) => a.name === name)) continue;
     if (isMajorBump(currentRange, newRange)) {
       majorBumps.push({ name, currentRange, newRange });
     }
   }
 
   return { peerAlignments, majorBumps };
-}
-
-function getCurrentDastroPackage() {
-  return JSON.parse(
-    readFileSync(
-      join(process.cwd(), 'node_modules', 'dastro', 'package.json'),
-      'utf8',
-    ),
-  );
 }
 
 async function fetchRemoteDastroPackage(tag) {

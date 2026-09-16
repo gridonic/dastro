@@ -1,0 +1,69 @@
+# Dastro 3.0 — manual patch
+
+Dastro 3.0 upgrades to Astro 7. `dastro upgrade` already installed `astro@^7`,
+`astro-embed@^0.13.1` and `@astrojs/alpinejs@^1` alongside dastro. The steps
+below cover what the CLI cannot bump on its own.
+
+## 1. Update the remaining local dependencies
+
+```sh
+npm update --save
+```
+
+If this fails with `ERESOLVE`, a dependency still declares a peer range for
+Astro 5/6. The usual suspect is `astro-embed`: `^0.12.x` peer-depends on
+`astro@^5 || ^6` only, so it blocks every Astro 7 install. Bump it explicitly
+and retry:
+
+```sh
+npm i -S astro-embed@^0.13.1
+```
+
+## 2. Bump third-party Astro integrations
+
+Integrations dastro does not declare are not touched by `dastro upgrade`. If the
+upgrade had to fall back to `--legacy-peer-deps`, the tree contains packages
+that do not accept Astro 7 yet. List them:
+
+```sh
+npm ls astro
+```
+
+For the boilerplate stack this usually means:
+
+```sh
+npm i -S @sentry/astro@^10.69.0 @sentry/profiling-node@^10.69.0
+npm i -S datocms-structured-text-to-plain-text@^6.0.0
+npm i -D concurrently@^10
+```
+
+Re-run `npm install` without `--legacy-peer-deps` afterwards to confirm the tree
+resolves cleanly again.
+
+## 3. Do not bump these yet
+
+- **eslint 9 stack** — `eslint-plugin-astro@3` requires eslint 10.
+- **typescript 6** — `astro check` and `typescript-eslint` do not support TS 7 yet.
+
+## 4. Remove any explicit `compressHTML` from `astro.config.ts`
+
+Astro 7 changed the default to `'jsx'`, which strips whitespace between inline
+elements and breaks text spacing in rendered HTML. Dastro's integration now sets
+`compressHTML: true` for you, so a project-level override is only useful if it
+also sets `true` — otherwise drop it:
+
+```diff
+ export default defineConfig({
+   adapter: dastroAdapterConfig(),
+-  compressHTML: 'jsx',
+```
+
+## 5. Verify
+
+```sh
+npm run astro:check
+npm run build
+```
+
+For anything beyond the above, see the official Astro 7 upgrade guide:
+https://docs.astro.build/en/guides/upgrade-to/v7/
