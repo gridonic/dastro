@@ -141,9 +141,9 @@ async function runCommand() {
 
       console.log(`\n✅ Upgraded to ${latestTag}`);
 
-      // Copy cursor rules and sync AGENTS.md from the installed dastro package
+      // Copy cursor rules and sync managed consumer docs from the installed dastro package
       copyCursorRules();
-      syncAgentsMd();
+      syncManagedDocs();
 
       // Apply patches for versions between current and latest
       applyPatches(currentVersion);
@@ -263,19 +263,45 @@ function runInstall(cmd) {
   });
 }
 
-const AGENTS_MANAGED_START = '<!-- @dastro:managed -->';
-const AGENTS_MANAGED_END = '<!-- @dastro:managed:end -->';
+const MANAGED_START = '<!-- @dastro:managed -->';
+const MANAGED_END = '<!-- @dastro:managed:end -->';
 
-function syncAgentsMd() {
+// Consumer docs shipped in the dastro package, synced into the consuming project on upgrade
+const MANAGED_DOCS = [
+  { source: 'consumer-docs/agents/CONSUMER-AGENTS.md', target: 'AGENTS.md' },
+];
+
+function syncManagedDocs() {
+  for (const doc of MANAGED_DOCS) {
+    syncManagedDoc(doc);
+  }
+  ensureClaudeMd();
+}
+
+// Claude Code reads CLAUDE.md, not AGENTS.md — import it so both agents share one source
+function ensureClaudeMd() {
+  const claudeFile = join(process.cwd(), 'CLAUDE.md');
+  if (existsSync(claudeFile)) {
+    return;
+  }
   try {
-    console.log('\n📋 Syncing AGENTS.md from dastro package...');
+    writeFileSync(claudeFile, '@AGENTS.md\n');
+    console.log('📄 Created CLAUDE.md');
+  } catch (error) {
+    console.log(`\n⚠️  Warning: Could not create CLAUDE.md: ${error.message}`);
+  }
+}
+
+function syncManagedDoc({ source, target }) {
+  try {
+    console.log(`\n📋 Syncing ${target} from dastro package...`);
 
     const dastroPackagePath = join(process.cwd(), 'node_modules', 'dastro');
-    const sourceFile = join(dastroPackagePath, 'AGENTS.md');
-    const targetFile = join(process.cwd(), 'AGENTS.md');
+    const sourceFile = join(dastroPackagePath, source);
+    const targetFile = join(process.cwd(), target);
 
     if (!existsSync(sourceFile)) {
-      console.log('ℹ️  No AGENTS.md found in dastro package, skipping...');
+      console.log(`ℹ️  No ${source} found in dastro package, skipping...`);
       return;
     }
 
@@ -283,43 +309,41 @@ function syncAgentsMd() {
 
     if (!existsSync(targetFile)) {
       copyFileSync(sourceFile, targetFile);
-      console.log('📄 Created AGENTS.md');
+      console.log(`📄 Created ${target}`);
       return;
     }
 
     const targetContent = readFileSync(targetFile, 'utf8');
 
     if (
-      !targetContent.includes(AGENTS_MANAGED_START) ||
-      !targetContent.includes(AGENTS_MANAGED_END)
+      !targetContent.includes(MANAGED_START) ||
+      !targetContent.includes(MANAGED_END)
     ) {
       console.log(
-        'ℹ️  AGENTS.md exists but has no @dastro:managed section — skipping sync',
+        `ℹ️  ${target} exists but has no @dastro:managed section — skipping sync`,
       );
       console.log(
-        '   Add <!-- @dastro:managed --> markers to enable automatic updates',
+        `   Add ${MANAGED_START} markers to enable automatic updates`,
       );
       return;
     }
 
     if (
-      !sourceContent.includes(AGENTS_MANAGED_START) ||
-      !sourceContent.includes(AGENTS_MANAGED_END)
+      !sourceContent.includes(MANAGED_START) ||
+      !sourceContent.includes(MANAGED_END)
     ) {
       console.log(
-        '⚠️  Dastro AGENTS.md is missing @dastro:managed markers, skipping...',
+        `⚠️  Dastro ${source} is missing @dastro:managed markers, skipping...`,
       );
       return;
     }
 
-    const sourceStart = sourceContent.indexOf(AGENTS_MANAGED_START);
-    const sourceEnd =
-      sourceContent.indexOf(AGENTS_MANAGED_END) + AGENTS_MANAGED_END.length;
+    const sourceStart = sourceContent.indexOf(MANAGED_START);
+    const sourceEnd = sourceContent.indexOf(MANAGED_END) + MANAGED_END.length;
     const managedBlock = sourceContent.slice(sourceStart, sourceEnd);
 
-    const targetStart = targetContent.indexOf(AGENTS_MANAGED_START);
-    const targetEnd =
-      targetContent.indexOf(AGENTS_MANAGED_END) + AGENTS_MANAGED_END.length;
+    const targetStart = targetContent.indexOf(MANAGED_START);
+    const targetEnd = targetContent.indexOf(MANAGED_END) + MANAGED_END.length;
 
     writeFileSync(
       targetFile,
@@ -327,11 +351,11 @@ function syncAgentsMd() {
         managedBlock +
         targetContent.slice(targetEnd),
     );
-    console.log('📄 Updated @dastro:managed section in AGENTS.md');
+    console.log(`📄 Updated @dastro:managed section in ${target}`);
   } catch (error) {
-    console.log(`\n⚠️  Warning: Could not sync AGENTS.md: ${error.message}`);
+    console.log(`\n⚠️  Warning: Could not sync ${target}: ${error.message}`);
     console.log(
-      '   You can manually copy it from node_modules/dastro/AGENTS.md',
+      `   You can manually copy it from node_modules/dastro/${source}`,
     );
   }
 }

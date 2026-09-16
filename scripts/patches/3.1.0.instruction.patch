@@ -1,0 +1,110 @@
+# Dastro 3.1 — manual patch
+
+## 1. Add the DatoCMS CLI as a dev dependency
+
+Every dastro project should have the official DatoCMS CLI available locally so
+schema migrations, `schema:inspect`, `cma:call` and environment operations run
+the same way in each project and in CI.
+
+```sh
+npm i -D datocms@latest
+```
+
+## 2. Add `datocms.config.json`
+
+If the file does not exist yet, create it next to `package.json` with exactly
+this content:
+
+```json
+{
+  "profiles": {
+    "default": {
+      "apiTokenEnvName": "DATO_CMS_CMA_TOKEN",
+      "logLevel": "BASIC"
+    }
+  }
+}
+```
+
+The CLI then authenticates with the `DATO_CMS_CMA_TOKEN` already in your `.env`
+(and in CI), so no `datocms login` or `datocms link` is needed. Commit the
+file — it contains no tokens.
+
+## 3. Sync the managed `AGENTS.md` section
+
+Dastro now ships its agent doc at
+`node_modules/dastro/consumer-docs/agents/CONSUMER-AGENTS.md`. Upgrades from an
+older dastro CLI still look for `node_modules/dastro/AGENTS.md`, so this sync
+was skipped. Replace the block between `<!-- @dastro:managed -->` and
+`<!-- @dastro:managed:end -->` in your `AGENTS.md` with the same block from
+`CONSUMER-AGENTS.md` (or copy the whole file if `AGENTS.md` does not exist).
+Later upgrades sync it automatically.
+
+## 4. Remove the boilerplate-specific section from `AGENTS.md`
+
+If `AGENTS.md` has a `## Boilerplate-specific` section (e.g. "Gridonic headless
+website boilerplate. Local dev server runs at `https://localhost:4321`"),
+delete it: from that heading up to, but not including, the next `## ` heading
+(or end of file if none follows).
+
+## 5. Add agent skill docs
+
+Copy these files from `node_modules/dastro/consumer-docs/agents/` into
+`docs/agents/`, skipping any that already exist:
+
+- `domain.md`
+- `issue-tracker.md`
+- `triage-labels.md`
+
+If `AGENTS.md` has no `## Agent skills` section yet, append the following,
+replacing `<owner>/<repo>` with the GitHub repo from `git remote -v`:
+
+```md
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues  via `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default canonical labels (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: root `CONTEXT.md` + `docs/adr/`. See `docs/agents/domain.md`.
+```
+
+## 6. Add a `## Links` section to `AGENTS.md`
+
+If `AGENTS.md` has no `## Links` section yet, append one as the last section:
+a table of project links, one row per link, each labelled by what it is.
+
+Discover links from the project itself. Sources, in order:
+
+- `README.md` (the `## Links` table and any other project URLs)
+- `git remote -v` → GitHub repo
+- `.netlify/state.json` `siteId` or `netlify status` → Netlify site and
+  production / preview URLs
+- `.env` / `datocms.config.json` / `npx datocms cma:call site find` → DatoCMS
+  admin URL (never copy tokens)
+- Boilerplate Radar (https://boilerplate-radar.gridonic.io) → instances, CMS
+- Figma, prototype (`prototype.gridonic.io`), scoping board, Jira / Confluence
+  URLs found in the repo, open issues, or PR descriptions
+
+Include only links you found and verified; omit a category rather than
+guessing. Example shape:
+
+```md
+## Links
+
+| What          | URL                                   |
+|---------------|---------------------------------------|
+| Production    | https://example.ch                    |
+| DatoCMS       | https://example.admin.datocms.com     |
+| GitHub        | https://github.com/gridonic/example   |
+| Netlify       | https://app.netlify.com/projects/example |
+| Prototype     | https://prototype.gridonic.io/example |
+| Scoping board | https://…                             |
+```
