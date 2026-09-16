@@ -14,7 +14,7 @@ Headless website built with **Astro**, **DatoCMS**, and **[Dastro](https://githu
 | `src/components/header-modules/` | Header module components (`Header*` prefix) |
 | `src/components/content-modules/` | Content module components (`Content*`, `Cta*`, `Teaser*`, etc.) |
 | `src/components/page/` | Page-level components |
-| `src/datocms/data/` | GraphQL queries and fragments for datacms |
+| `src/datocms/data/` | GraphQL queries and fragments for datocms |
 | `src/config/` | App configuration (`dastro.config.ts`, `modules.config.ts`, `pages.config.ts`) |
 | `.astro/generated/datocms.types.ts` | Generated TypeScript types from GraphQL |
 
@@ -48,7 +48,7 @@ Dastro rules are synced automatically when running `dastro upgrade`.
 - **Page types**: GraphQL query → page component → register in `src/config/pages.config.ts`.
 - **Types**: Import generated types from `@generated/datocms.types.ts`.
 - **Commits**: Follow [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) — single-line subject, no body unless needed (see `commits.mdc`).
-- **Styling**: Use RSCSS component naming (at least two words, dash-separated). Typography via `_font-types.scss`, layout via `_ui-grid.scss`.
+- **Styling**: Use RSCSS component naming (at least two words, dash-separated). See `rscss.mdc`. Typography via `_font-types.scss`, layout via `_ui-grid.scss`.
 - **Boilerplate markers**: Files may contain `@boilerplate:init` comments — these indicate placeholder content to adjust when forking this repo.
 
 ## Scope
