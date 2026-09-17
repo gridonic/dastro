@@ -108,3 +108,28 @@ guessing. Example shape:
 | Prototype     | https://prototype.gridonic.io/example |
 | Scoping board | https://…                             |
 ```
+
+## 7. Refactor `className` props to `class` (if necessary)
+
+Astro 7 compiles `.astro` files with the Rust compiler, which adds the parent's
+scope class (`astro-xxxx`) only to `class` on components, no longer to
+`className`. So when a parent passes `className="…"` to a child component
+**and** styles that class in its scoped `<style>`, those styles silently stop
+applying.
+
+Find component `className` usages, including multi-line tags and
+`className={…}`, plus `className` in child `Props`:
+
+```sh
+grep -rnE 'className(=|\?:|:)' src --include='*.astro'
+```
+
+Refactor each one where the parent's scoped styles target the class. Skip
+it if they don't:
+
+- Child: `const { class: className } = Astro.props;` and `class?: string` in
+  `interface Props`.
+- Parent: pass `class="…"` instead of `className="…"`.
+
+Don't use `:global()` in the parent as a workaround. Afterwards, compare the
+affected modules against production.
