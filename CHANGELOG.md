@@ -1,3 +1,7 @@
+### [3.1.1](https://github.com/gridonic/dastro/compare/v3.1.0...v3.1.1)
+
+- update consumer docs
+
 ### [3.1.0](https://github.com/gridonic/dastro/compare/v3.0.0...v3.1.0)
 
 - remove obsolete dastro-upgrade-all skill and associated docs, it is moved to our skills repo
