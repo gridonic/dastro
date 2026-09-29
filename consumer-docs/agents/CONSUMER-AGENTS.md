@@ -59,10 +59,15 @@ Dastro rules are synced automatically when running `dastro upgrade`.
 
 ## DatoCMS schema changes
 
-- If not stated otherwise, apply schema changes **directly via the CMA** (script or MCP) — migration files are not part of this project's workflow (nothing replays them). The audit trail is the schema manifest comment on the ticket.
+- If not stated otherwise, apply schema changes **directly via the CMA** — migration files are not part of this project's workflow (nothing replays them). The audit trail is the schema manifest comment on the ticket.
 - Rehearse each change set as a **throwaway script**: run it against a fresh fork of `main`, verify, run the same script against `main`, then discard it — never committed. One fork per ticket, destroyed at the end.
 - Changing the primary `main` env in place is **sanctioned** while the project is pre-launch (placeholder content only). Revisit at launch.
 - Destructive changes (deleting or retyping fields, blocks, models): export the affected records as JSON into the ticket before applying.
+
+### DatoCMS handling
+- Use the `datocms:datocms-cli` / `datocms-cma` skills via `npx datocms cma:script`. Use mcp as fallback only.
+- Either the user is already authorized for the datocms cli or then auth comes from the profile in `datocms.config.json`; don't read `.env`.
+- Scripts go in a gitignored `.tmp/` inside the repo, not `/tmp`.
 
 ## Dev server for browser testing
 
