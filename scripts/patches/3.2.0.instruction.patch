@@ -1,0 +1,50 @@
+# Dastro 3.2 — manual patch
+
+## 1. Pass `DRAFT_MODE_ENABLED_BY_DEFAULT` to the dastro config
+
+Dastro 3.2 can turn on draft mode without the draft mode cookie (e.g. on a
+pre-launch stage), with a per-browser opt-out. It reads the setting from
+`datocms.draftModeEnabledByDefault`, so the project config must pass the env
+var through — otherwise it always stays `false`.
+
+In `src/config/dastro.config.ts`, add the import from `astro:env/server`:
+
+```ts
+import {
+  // ...
+  DRAFT_MODE_ENABLED_BY_DEFAULT,
+} from 'astro:env/server';
+```
+
+and pass it in the `datocms` section:
+
+```ts
+  datocms: {
+    // ...
+    baseEditingUrl: DATO_CMS_BASE_EDITING_URL,
+    draftModeEnabledByDefault: DRAFT_MODE_ENABLED_BY_DEFAULT,
+  },
+```
+
+## 2. Add the env var to `.env.example`
+
+Below `ALLOW_DATO_ENVIRONMENT_SWITCH`, add:
+
+```sh
+# Show drafts without the draft mode cookie (e.g. pre-launch stage). Ignored when ENVIRONMENT=production.
+DRAFT_MODE_ENABLED_BY_DEFAULT=false
+```
+
+## 3. Optional: enable it on Netlify for non-production contexts
+
+New projects created with `dastro create` get this automatically. For an
+existing project that should show drafts by default on stage and previews, set
+it for the non-production contexts only (it is ignored when
+`ENVIRONMENT=production` anyway):
+
+```sh
+netlify env:set DRAFT_MODE_ENABLED_BY_DEFAULT true --context deploy-preview branch-deploy dev
+```
+
+Run it in a directory linked to the site (`netlify link`), or prefix it with
+`NETLIFY_SITE_ID=<site-id>`. Existing deploys pick it up on the next deploy.
