@@ -1,3 +1,7 @@
+### [3.2.1](https://github.com/gridonic/dastro/compare/v3.2.0...v3.2.1)
+
+- added patch instructions for new draft mode variable
+
 ### [3.2.0](https://github.com/gridonic/dastro/compare/v3.1.1...v3.2.0)
 
 - add `DRAFT_MODE_ENABLED_BY_DEFAULT` to turn on draft mode by default (e.g. pre-launch stage, ignored in production), with a per-browser opt-out; `dastro create` enables it for stage contexts
