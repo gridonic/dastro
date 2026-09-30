@@ -22,6 +22,10 @@ export type {
   ExportTypes,
 } from './core/lib-types.ts';
 export type { AstroContext } from './astro.context.ts';
+export type {
+  DraftModeSource,
+  DraftModeState,
+} from './datocms/draft-mode.ts';
 export type { MetaTag } from './core/page.ts';
 export type { TranslationMessages } from './core/translations.ts';
 

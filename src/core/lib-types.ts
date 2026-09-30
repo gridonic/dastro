@@ -44,6 +44,8 @@ export interface DastroConfig<T extends DastroTypes> {
     environment: string;
     allowEnvironmentSwitch: boolean;
     baseEditingUrl: string;
+    /** Enables draft mode without a cookie (e.g. pre-launch stage). Ignored in production. */
+    draftModeEnabledByDefault?: boolean;
   };
   api: {
     secretApiToken: string;

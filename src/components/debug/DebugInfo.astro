@@ -3,11 +3,12 @@ import pkg from '../../../package.json';
 
 const { environmentSwitch, draftMode, config } = Astro.locals.dastro;
 
-const { isDraftModeEnabled } = draftMode();
+const { getDraftModeState } = draftMode();
 const { getDatoEnvironment } = environmentSwitch();
 
 const env = config.environment || 'no env';
-const draftModeEnabled = isDraftModeEnabled(Astro);
+const { enabled: draftModeEnabled, source: draftModeSource } =
+  getDraftModeState(Astro);
 
 const dastroVersion = pkg.version;
 const astroVersion = Astro.generator.match(/v(.*)/)?.[1] || 'unknown';
@@ -20,11 +21,16 @@ const datoEnvironment = getDatoEnvironment(Astro);
   data-debug-info
   data-environment={env}
   data-draft-mode-enabled={draftModeEnabled}
+  data-draft-mode-source={draftModeSource}
   data-dastro-version={dastroVersion}
   data-astro-version={astroVersion}
   data-dato-environment={datoEnvironment}
 >
-  {draftModeEnabled && <div class="draft-mode-enabled">Draft Mode</div>}
+  {draftModeEnabled && (
+    <div class="draft-mode-enabled">
+      Draft Mode{draftModeSource === 'default' && '*'}
+    </div>
+  )}
 </div>
 
 <script>
@@ -45,7 +51,7 @@ const datoEnvironment = getDatoEnvironment(Astro);
           `Dato Environment: ${this.$el.dataset.datoEnvironment ?? '?'}`,
         );
         log.debug(
-          `Draft Mode enabled: ${(this.$el.dataset.draftModeEnabled === 'true').toString()}`,
+          `Draft Mode enabled: ${(this.$el.dataset.draftModeEnabled === 'true').toString()} (source: ${this.$el.dataset.draftModeSource ?? '?'})`,
         );
       }
     },

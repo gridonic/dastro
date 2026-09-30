@@ -20,7 +20,11 @@ export function caching<T extends DastroTypes>(config: DastroConfig<T>) {
   ) {
     const { provider = { type: 'netlify' } } = options;
 
-    const { isDraftModeEnabled, DRAFT_MODE_COOKIE_NAME } = draftMode(config);
+    const {
+      getDraftModeState,
+      isDraftModeEnabledByDefault,
+      DRAFT_MODE_COOKIE_NAME,
+    } = draftMode(config);
 
     const {
       usesDefaultDatoEnvironment,
@@ -30,11 +34,19 @@ export function caching<T extends DastroTypes>(config: DastroConfig<T>) {
 
     context.response.headers.set('X-Gridonic-Cache-Provider', provider.type);
 
-    const draftModeEnabled = isDraftModeEnabled(context);
+    const { enabled: draftModeEnabled, source: draftModeSource } =
+      getDraftModeState(context);
     context.response.headers.set(
       'X-Gridonic-Draft-Mode',
       draftModeEnabled ? 'true' : 'false',
     );
+    context.response.headers.set(
+      'X-Gridonic-Draft-Mode-Source',
+      draftModeSource,
+    );
+
+    // Also bypass the cache after an opt-out, so no shared cache exists on draft-by-default deploys
+    const draftModeByDefault = isDraftModeEnabledByDefault();
 
     const usesCustomDatoEnvironment = !usesDefaultDatoEnvironment(context);
     context.response.headers.set(
@@ -46,6 +58,7 @@ export function caching<T extends DastroTypes>(config: DastroConfig<T>) {
     if (
       provider.type === 'nocache' ||
       draftModeEnabled ||
+      draftModeByDefault ||
       usesCustomDatoEnvironment
     ) {
       noCache();
@@ -61,7 +74,11 @@ export function caching<T extends DastroTypes>(config: DastroConfig<T>) {
       context.response.headers.set('Cache-Control', 'no-cache');
 
       const bypassCacheReasons = [
-        draftModeEnabled ? 'draft mode' : null,
+        draftModeByDefault
+          ? 'draft mode by default'
+          : draftModeEnabled
+            ? 'draft mode'
+            : null,
         usesCustomDatoEnvironment ? 'custom environment' : null,
       ].filter((v) => !!v);
 

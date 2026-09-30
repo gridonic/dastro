@@ -147,6 +147,11 @@ export default function dastroIntegration(options?: Options): AstroIntegration {
                 context: 'server',
                 default: false,
               }),
+              DRAFT_MODE_ENABLED_BY_DEFAULT: envField.boolean({
+                access: 'public',
+                context: 'server',
+                default: false,
+              }),
               DEVELOPMENT_DEBUG_VIEW_ENABLED: envField.boolean({
                 access: 'public',
                 context: 'server',

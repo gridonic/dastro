@@ -201,6 +201,7 @@ export async function setupNetlifySite({
     APP_BASE_URL: stageUrl,
     ENVIRONMENT: 'stage',
     NETLIFY_BACKUP_KEEP_AT_LEAST_DAYS: '0',
+    DRAFT_MODE_ENABLED_BY_DEFAULT: 'true',
   };
   const stageContexts = ['deploy-preview', 'branch-deploy', 'dev'];
 

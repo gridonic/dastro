@@ -4,7 +4,11 @@ import pkg from '../../../package.json';
 
 const { environmentSwitch, draftMode, config } = Astro.locals.dastro;
 
-const { isDraftModeEnabled } = draftMode();
+const {
+  getDraftModeState,
+  isDraftModeEnabledByDefault,
+  isDraftModeDefaultRefused,
+} = draftMode();
 const {
   isDatoEnvironmentSwitchAllowed,
   usesDefaultDatoEnvironment,
@@ -12,7 +16,10 @@ const {
 } = environmentSwitch();
 
 const env = config.environment || 'no env';
-const draftModeEnabled = isDraftModeEnabled(Astro);
+const { enabled: draftModeEnabled, source: draftModeSource } =
+  getDraftModeState(Astro);
+const draftModeByDefault = isDraftModeEnabledByDefault();
+const draftModeDefaultRefused = isDraftModeDefaultRefused();
 
 const datoEnvironment = {
   switchAllowed: isDatoEnvironmentSwitchAllowed(),
@@ -29,6 +36,7 @@ const astroVersion = Astro.generator.match(/v(.*)/)?.[1] || 'unknown';
   data-debug-view
   data-environment={env}
   data-draft-mode-enabled={draftModeEnabled}
+  data-draft-mode-by-default={draftModeByDefault}
   data-dastro-version={dastroVersion}
   data-astro-version={astroVersion}
 >
@@ -218,8 +226,17 @@ const astroVersion = Astro.generator.match(/v(.*)/)?.[1] || 'unknown';
     >
       <div class="status">
         <div class="title">Draft Mode</div>
-        <div class="value -enabled">enabled</div>
-        <div class="value -disabled">disabled</div>
+        <div class="value -enabled">
+          enabled{draftModeSource === 'default' && ' (env default)'}
+        </div>
+        <div class="value -disabled">
+          disabled{draftModeSource === 'opt-out' && ' (opted out)'}
+        </div>
+        {draftModeDefaultRefused && (
+          <div class="note">
+            DRAFT_MODE_ENABLED_BY_DEFAULT ignored in production
+          </div>
+        )}
       </div>
       <button type="button" class="button debug-view-button">
         Toggle Draft Mode
@@ -238,6 +255,7 @@ const astroVersion = Astro.generator.match(/v(.*)/)?.[1] || 'unknown';
     '[data-debug-view]',
     class DebugView extends BaseComponent {
       private draftModeEnabled = false;
+      private draftModeByDefault = false;
       private environment: string = '';
       private readonly dragStorageKey = 'debug-view-position';
       private dragPointerId: number | null = null;
@@ -272,6 +290,8 @@ const astroVersion = Astro.generator.match(/v(.*)/)?.[1] || 'unknown';
         );
 
         this.draftModeEnabled = this.$el.dataset.draftModeEnabled === 'true';
+        this.draftModeByDefault =
+          this.$el.dataset.draftModeByDefault === 'true';
         this.environment = this.$el.dataset.environment ?? '?';
       }
 
@@ -329,8 +349,9 @@ const astroVersion = Astro.generator.match(/v(.*)/)?.[1] || 'unknown';
           if (this.draftModeEnabled) {
             window.location.href = `/api/cms/draft-mode/disable?redirect=${encodeURIComponent(window.location.pathname)}`;
           } else {
+            // No token needed to remove the opt-out when draft mode is on by default
             const token =
-              this.environment !== 'local'
+              this.environment !== 'local' && !this.draftModeByDefault
                 ? prompt('Enter a token to toggle draft mode')
                 : '';
             window.location.href = `/api/cms/draft-mode/enable?token=${token}&redirect=${encodeURIComponent(window.location.pathname)}`;
@@ -911,6 +932,12 @@ const astroVersion = Astro.generator.match(/v(.*)/)?.[1] || 'unknown';
             margin-bottom: 2px;
             text-transform: uppercase;
             letter-spacing: 0.64px;
+            font-size: 10px;
+            color: rgba(0, 0, 0, 0.6);
+          }
+
+          > .note {
+            margin-top: 2px;
             font-size: 10px;
             color: rgba(0, 0, 0, 0.6);
           }

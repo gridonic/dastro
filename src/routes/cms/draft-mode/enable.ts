@@ -9,8 +9,11 @@ import {
  * This route handler enables Draft Mode and redirects to the given URL.
  */
 export const GET: APIRoute = async (event) => {
-  const { enableDraftMode, redirectUrlWithoutDraftModeSwitch } =
-    event.locals.dastro.draftMode();
+  const {
+    enableDraftMode,
+    isDraftModeEnabledByDefault,
+    redirectUrlWithoutDraftModeSwitch,
+  } = event.locals.dastro.draftMode();
   const { isDatoEnvironmentSwitchAllowed, switchDatoEnvironment } =
     event.locals.dastro.environmentSwitch();
 
@@ -21,8 +24,14 @@ export const GET: APIRoute = async (event) => {
   const environment = url.searchParams.get('environment');
 
   try {
-    // Ensure that the request is coming from a trusted source
-    if (!checkSecretApiTokenCorrectness(event.locals.dastro.config, token)) {
+    const tokenCorrect = checkSecretApiTokenCorrectness(
+      event.locals.dastro.config,
+      token,
+    );
+
+    // Ensure that the request is coming from a trusted source. Not needed when
+    // draft mode is on by default: drafts are public on that deploy anyway.
+    if (!isDraftModeEnabledByDefault() && !tokenCorrect) {
       return invalidRequestResponse('Invalid token', 401);
     }
 
@@ -36,7 +45,7 @@ export const GET: APIRoute = async (event) => {
 
     enableDraftMode(event);
 
-    if (environment && isDatoEnvironmentSwitchAllowed()) {
+    if (tokenCorrect && environment && isDatoEnvironmentSwitchAllowed()) {
       await switchDatoEnvironment(event, environment);
     }
   } catch (error) {
