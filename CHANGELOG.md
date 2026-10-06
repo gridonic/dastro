@@ -1,3 +1,7 @@
+### [3.2.3](https://github.com/gridonic/dastro/compare/v3.2.2...v3.2.3)
+
+- fix(lefthook): resolve package-lock hash file per worktree
+
 ### [3.2.2](https://github.com/gridonic/dastro/compare/v3.2.1...v3.2.2)
 
 - docs patch: rename CONTEXT.md to GLOSSARY.md
