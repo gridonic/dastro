@@ -124,14 +124,22 @@ export async function renderPage<T extends DastroTypes>(
     caching?: CachingOptions;
   } = {},
 ) {
-  const { routingStrategy, locales, defaultLocale, normalizedIsoLocale } =
+  const { routingStrategy, locales, defaultLocale, localePrefix } =
     i18n(dastroConfig);
-  const { resolveRecordUrl, pageRecordForUrl } = routing(dastroConfig);
+  const { resolveRecordUrl, pageRecordForUrl, lowerCaseLocalePrefixPath } =
+    routing(dastroConfig);
   const { setCachingHeaders } = caching(dastroConfig);
 
   setCachingHeaders(context, options.caching);
 
   const url = context.url.pathname;
+
+  // Locale prefixes are lower-case: one URL per page
+  const lowerCasePrefixPath = lowerCaseLocalePrefixPath(url);
+  if (lowerCasePrefixPath) {
+    return context.redirect(`${lowerCasePrefixPath}${context.url.search}`, 301);
+  }
+
   const { page, pageDefinition, locale, slug } = await pageRecordForUrl(
     context,
     url,
@@ -150,21 +158,7 @@ export async function renderPage<T extends DastroTypes>(
   if (routingStrategy === 'prefix-always' && !locale) {
     // if on the root page, redirect to the user's preferred locale
     if (url === '/') {
-      const acceptLanguage =
-        context.request.headers.get('Accept-Language') ?? '';
-
-      const preferredLanguage = acceptLanguage
-        .split(',')
-        .map((lang) => lang.split(';')[0].trim().substring(0, 2).toLowerCase())
-        .find((lang) =>
-          locales
-            .map((l) => normalizedIsoLocale(l))
-            ?.includes(lang as DastroTypes['SiteLocale']),
-        );
-
-      const redirectLocale = normalizedIsoLocale(
-        preferredLanguage ?? defaultLocale,
-      );
+      const redirectLocale = localePrefix(resolveRootLocale());
 
       if (process.env.NODE_ENV === 'development') {
         console.debug('redirectLocale: ', redirectLocale);
@@ -175,6 +169,23 @@ export async function renderPage<T extends DastroTypes>(
 
     // All non-root pages need a locale
     return context.rewrite('/404');
+  }
+
+  /** The locale the site root redirects to: first locale in the visitor's language, else the default locale. */
+  function resolveRootLocale(): T['SiteLocale'] {
+    const acceptLanguage = context.request.headers.get('Accept-Language') ?? '';
+    const languageOf = (locale: T['SiteLocale']) => locale.split('_')[0];
+
+    for (const entry of acceptLanguage.split(',')) {
+      const language = entry.split(';')[0].trim().substring(0, 2).toLowerCase();
+      const locale = locales.find((l) => languageOf(l) === language);
+
+      if (locale) {
+        return locale;
+      }
+    }
+
+    return defaultLocale;
   }
 
   // Make the page, locale and data store available for all components

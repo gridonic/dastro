@@ -25,8 +25,9 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
   const {
     isDefaultLocale,
     areLocalesEqual,
-    normalizedIsoLocale,
-    findLocaleWithVariant,
+    localePrefix,
+    localeFromPrefix,
+    localePrefixMode,
     routingStrategy,
   } = i18n(config);
 
@@ -52,7 +53,7 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
       return null;
     }
 
-    const normalizedLocale = normalizedIsoLocale(locale);
+    const normalizedLocale = localePrefix(locale);
 
     // Special case: Home
     if (record.__typename === 'PageRecord' && slug === 'home') {
@@ -85,6 +86,30 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
       .join('/')}`;
   }
 
+  /**
+   * `'locale'` mode only: the lower-case form of a path whose locale prefix is not written in
+   * lower case (`/de-CH/about` → `/de-ch/about`), or `null` when the path needs no redirect.
+   */
+  function lowerCaseLocalePrefixPath(path: string): string | null {
+    if (localePrefixMode !== 'locale') {
+      return null;
+    }
+
+    const [, prefix, rest = ''] = path.match(/^\/([^/]+)(\/.*)?$/) ?? [];
+    const lowerCasePrefix = prefix?.toLowerCase();
+
+    if (!prefix || prefix === lowerCasePrefix) {
+      return null;
+    }
+
+    const locale = localeFromPrefix(lowerCasePrefix);
+    const hasPrefix =
+      !!locale &&
+      (routingStrategy === 'prefix-always' || !isDefaultLocale(locale));
+
+    return hasPrefix ? `/${lowerCasePrefix}${rest}` : null;
+  }
+
   async function pageRecordForUrl(
     context: AstroContext<'locals' | 'cookies'>,
     url: string,
@@ -93,7 +118,7 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
 
     const regexLocaleUnion = locales
       .filter((l) => routingStrategy === 'prefix-always' || !isDefaultLocale(l))
-      .map((l) => normalizedIsoLocale(l))
+      .map((l) => localePrefix(l))
       .join('|');
 
     const regexPathPrefixUnion = [
@@ -110,11 +135,22 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
 
     const match = url.match(urlRegex) ?? [];
 
-    const locale = findLocaleWithVariant(
-      routingStrategy === 'prefix-always'
-        ? match[1]
-        : match[1] || defaultLocale,
-    ) as T['SiteLocale'];
+    const locale = resolveLocale(match[1]) as T['SiteLocale'];
+
+    function resolveLocale(prefix: string | undefined) {
+      if (localePrefixMode === 'locale') {
+        // Exact match only: `/de/...` is not a prefix of `de_CH`
+        return prefix
+          ? localeFromPrefix(prefix)
+          : routingStrategy === 'prefix-always'
+            ? undefined
+            : defaultLocale;
+      }
+
+      return localeFromPrefix(
+        routingStrategy === 'prefix-always' ? prefix! : prefix || defaultLocale,
+      );
+    }
 
     let pathPrefix = match[2] ?? '';
     let fullSlug = match[3]?.replace(/\/$/, '');
@@ -206,6 +242,7 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
   return {
     resolveRecordUrl,
     pageRecordForUrl,
+    lowerCaseLocalePrefixPath,
     getAllRoutes,
     pageDefinitionList,
     pageRecordTypes,

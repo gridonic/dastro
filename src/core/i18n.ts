@@ -2,7 +2,47 @@ import type { DastroConfig, DastroTypes } from './lib-types.ts';
 
 export function i18n<T extends DastroTypes>(config: DastroConfig<T>) {
   const { defaultLocale, locales, messages } = config.i18n;
+  const localePrefixMode = config.i18n.localePrefix ?? 'language';
 
+  /**
+   * The URL path segment of a locale, without slashes.
+   * `'language'` mode: `de_CH` → `de`. `'locale'` mode: `de_CH` → `de-ch`.
+   */
+  function localePrefix(locale: T['SiteLocale']): string | null {
+    if (!locale) {
+      return null;
+    }
+
+    return localePrefixMode === 'locale'
+      ? locale.replace(/_/g, '-').toLowerCase()
+      : locale.split('_')[0];
+  }
+
+  /**
+   * The value of a locale for `<html lang>` and hreflang.
+   * `'language'` mode: `de_CH` → `de`. `'locale'` mode: `de_CH` → `de-CH` (BCP 47 language tag).
+   */
+  function localeLangTag(locale: T['SiteLocale']): string | null {
+    if (!locale) {
+      return null;
+    }
+
+    return localePrefixMode === 'locale'
+      ? locale.replace(/_/g, '-')
+      : locale.split('_')[0];
+  }
+
+  /**
+   * The locale a URL prefix stands for (inverse of `localePrefix`).
+   * `'language'` mode: first locale starting with the prefix. `'locale'` mode: exact, case-sensitive match.
+   */
+  function localeFromPrefix(prefix: string): T['SiteLocale'] | undefined {
+    return localePrefixMode === 'locale'
+      ? locales.find((l) => localePrefix(l) === prefix)
+      : findLocaleWithVariant(prefix);
+  }
+
+  // Deprecated for consumers (see the returned object); kept for locale comparison
   function normalizedIsoLocale(
     locale: T['SiteLocale'],
     keepVariant = false,
@@ -42,6 +82,14 @@ export function i18n<T extends DastroTypes>(config: DastroConfig<T>) {
   }
 
   return {
+    localePrefix,
+    localeLangTag,
+    localeFromPrefix,
+    localePrefixMode,
+    /**
+     * @deprecated Use `localePrefix(locale)` for URL prefixes and `localeLangTag(locale)` for
+     * `<html lang>` / hreflang values. Unlike those, this helper ignores `i18n.localePrefix`.
+     */
     normalizedIsoLocale,
     normalizedSiteLocale,
     areLocalesEqual,

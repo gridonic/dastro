@@ -25,7 +25,7 @@ const { page, locale, bodyClass, faviconMetaTags } = Astro.props;
 
 const { routing, config, i18n, draftMode } = Astro.locals.dastro;
 const { resolveRecordUrl } = routing();
-const { normalizedIsoLocale } = i18n();
+const { localeLangTag } = i18n();
 const { getExecutedDraftQueries } = draftMode();
 
 const debugViewEnabled = config.dev.debugViewEnabled;
@@ -60,7 +60,7 @@ function i18nLinkTags(): MetaTag[] {
           tag: 'link',
           attributes: {
             rel: 'alternate',
-            hreflang: normalizedIsoLocale(l) ?? l,
+            hreflang: localeLangTag(l) ?? l,
             href: `${baseUrl}${resolveRecordUrl(page, l) ?? ''}`,
           },
         }))
@@ -78,7 +78,7 @@ const executedDraftQueries = getExecutedDraftQueries(Astro);
 ₍⸌̣ʷ̣̫⸍̣₎  Made with ♥ by gridonic.ch
 
 -->
-<html lang={normalizedIsoLocale(locale)}>
+<html lang={localeLangTag(locale)}>
   <head>
     <meta charset="UTF-8" />
     <slot name="head:before" />

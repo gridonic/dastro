@@ -38,6 +38,13 @@ export interface DastroConfig<T extends DastroTypes> {
     locales: T['SiteLocale'][];
     messages: Record<T['SiteLocale'], TranslationMessages<T>>;
     routingStrategy: 'prefix-except-default' | 'prefix-always';
+    /**
+     * What the locale prefix in URLs is derived from.
+     * - `'language'` (default): the language only (`de_CH` → `/de`). Two locales of one language collide.
+     * - `'locale'`: the full locale, lower-cased (`de_CH` → `/de-ch`, `en` → `/en`). Prefixes match exactly,
+     *   and `<html lang>` / hreflang values become language tags (`de-CH`).
+     */
+    localePrefix?: 'language' | 'locale';
   };
   datocms: {
     token: string;
