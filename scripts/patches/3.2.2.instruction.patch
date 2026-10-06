@@ -1,0 +1,32 @@
+# Dastro 3.2.2 — manual patch
+
+## 1. Rename `CONTEXT.md` to `GLOSSARY.md`
+
+mattpocock/skills v1.3 renamed the domain-doc convention: the engineering
+skills now only look for `GLOSSARY.md` / `GLOSSARY-MAP.md`. If the project has
+a `CONTEXT.md` or `CONTEXT-MAP.md` (at the repo root or per context), rename
+each one:
+
+```sh
+git mv CONTEXT.md GLOSSARY.md
+git mv CONTEXT-MAP.md GLOSSARY-MAP.md
+```
+
+Update any links to the old names, including the entries inside
+`GLOSSARY-MAP.md`.
+
+## 2. Refresh the agent skill docs
+
+Overwrite these files in `docs/agents/` with the versions from
+`node_modules/dastro/consumer-docs/agents/` (keep local edits, if any):
+
+- `domain.md`
+- `triage-labels.md`
+
+## 3. Update the `## Agent skills` section in `AGENTS.md`
+
+Under `### Domain docs`, replace `CONTEXT.md` with `GLOSSARY.md`:
+
+```md
+Single-context: root `GLOSSARY.md` + `docs/adr/`. See `docs/agents/domain.md`.
+```
