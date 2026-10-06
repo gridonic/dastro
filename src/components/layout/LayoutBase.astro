@@ -24,22 +24,21 @@ interface Props<T extends DastroTypes = DastroTypes> {
 const { page, locale, bodyClass, faviconMetaTags } = Astro.props;
 
 const { routing, config, i18n, draftMode } = Astro.locals.dastro;
-const { resolveRecordUrl } = routing();
+const { resolveRecordUrl, hreflangCluster } = routing();
 const { localeLangTag } = i18n();
 const { getExecutedDraftQueries } = draftMode();
 
 const debugViewEnabled = config.dev.debugViewEnabled;
 
-const isPageExcludedFromIndexing = !!page._seoMetaTags.find(
+const isPageExcludedFromIndexing = page._seoMetaTags.some(
   (mt) =>
-    mt.attributes?.name === 'robots' && mt.attributes?.content === 'noindex',
+    mt.attributes?.name === 'robots' &&
+    (mt.attributes?.content ?? '')
+      .split(',')
+      .some((directive) => directive.trim().toLowerCase() === 'noindex'),
 );
 
 function i18nLinkTags(): MetaTag[] {
-  const pageLocales = (page._allTranslatedSlugLocales ?? [])
-    .map((l) => l.locale)
-    .filter((l) => !!l) as DastroTypes['SiteLocale'][];
-
   const baseUrl = config.appBaseUrl.replace(/\/$/, '');
   const urlInCurrentLocale = resolveRecordUrl(page, locale) ?? '/';
 
@@ -55,16 +54,13 @@ function i18nLinkTags(): MetaTag[] {
       tag: 'link',
       attributes: { rel: 'canonical', href: `${baseUrl}${urlInCurrentLocale}` },
     },
-    ...(pageLocales.length > 1
-      ? pageLocales.map((l) => ({
+    // A page excluded from indexing carries no alternates: canonical only
+    ...(isPageExcludedFromIndexing
+      ? []
+      : hreflangCluster(page).map(({ hreflang, href }) => ({
           tag: 'link',
-          attributes: {
-            rel: 'alternate',
-            hreflang: localeLangTag(l) ?? l,
-            href: `${baseUrl}${resolveRecordUrl(page, l) ?? ''}`,
-          },
-        }))
-      : []),
+          attributes: { rel: 'alternate', hreflang, href: `${baseUrl}${href}` },
+        }))),
   ];
 }
 

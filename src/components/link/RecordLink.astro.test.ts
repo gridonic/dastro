@@ -57,3 +57,25 @@ test('record link combines query and hash on href', async () => {
 
   expect(result).toContain('href="/some-item-de?page=2#top"');
 });
+
+test('record link to a target without a slug in the current locale has no href', async () => {
+  const { renderToString } = await dastroContainerTest({ locale: 'fr_CH' });
+
+  const result = await renderToString(RecordLink, {
+    props: {
+      record: buildTestPageRecord('german-only', {
+        overrides: {
+          _allTranslatedSlugLocales: [
+            { locale: 'de', value: 'german-only-de' },
+          ],
+        },
+      }),
+      query: { page: 2 },
+    },
+  });
+
+  // Never a link into another locale, and no half-built URL
+  expect(result).toContain('<a ');
+  expect(result).not.toContain('href');
+  expect(result).not.toContain('german-only-de');
+});

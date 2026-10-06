@@ -56,6 +56,12 @@ export interface DastroConfig<T extends DastroTypes> {
      * `Accept-Language`. Dastro only reads it; write it with `setLocaleCookie` from `dastro/client`.
      */
     localeCookie?: string;
+    /**
+     * Emits an `x-default` hreflang alternate, in the page head and the sitemap, pointing at this
+     * locale's URL of the page. Only for pages that have a version in this locale and in at least one
+     * other. Default: none, no `x-default` is emitted.
+     */
+    xDefaultLocale?: T['SiteLocale'];
   };
   datocms: {
     token: string;
