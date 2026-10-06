@@ -16,6 +16,13 @@ export interface Route<T extends DastroTypes> {
   record: RoutingPageRecord<T>;
 }
 
+export interface HreflangAlternate {
+  /** A language tag (see `localeLangTag`) or `x-default` */
+  hreflang: string;
+  /** Path without the base URL */
+  href: string;
+}
+
 export interface RecordWithParent<T extends DastroTypes> {
   _allTranslatedSlugLocales?: TranslatedSlugLocale<T>[] | null;
   parent?: RecordWithParent<T> | null;
@@ -26,6 +33,7 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
     isDefaultLocale,
     areLocalesEqual,
     localePrefix,
+    localeLangTag,
     localeFromPrefix,
     localePrefixMode,
     routingStrategy,
@@ -84,6 +92,39 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
     ]
       .filter((p) => !!p)
       .join('/')}`;
+  }
+
+  /**
+   * The hreflang alternates of a page, for the page head and the sitemap alike: one entry per
+   * configured locale the record has a slug in (self included, in configured order), plus
+   * `x-default` when `i18n.xDefaultLocale` is one of them. Empty when the record exists in fewer
+   * than two locales. `href` is a path, like the result of `resolveRecordUrl`.
+   *
+   * Pages excluded from indexing must not emit alternates at all; that is the caller's decision.
+   */
+  function hreflangCluster(
+    record: Parameters<typeof resolveRecordUrl>[0],
+  ): HreflangAlternate[] {
+    const cluster = config.i18n.locales.flatMap((locale) => {
+      const href = resolveRecordUrl(record, locale);
+      const hreflang = localeLangTag(locale);
+
+      return href && hreflang ? [{ locale, hreflang, href }] : [];
+    });
+
+    if (cluster.length < 2) {
+      return [];
+    }
+
+    const { xDefaultLocale } = config.i18n;
+    const xDefault = xDefaultLocale
+      ? cluster.find((a) => areLocalesEqual(a.locale, xDefaultLocale))
+      : undefined;
+
+    return [
+      ...cluster.map(({ hreflang, href }) => ({ hreflang, href })),
+      ...(xDefault ? [{ hreflang: 'x-default', href: xDefault.href }] : []),
+    ];
   }
 
   /**
@@ -241,6 +282,7 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
 
   return {
     resolveRecordUrl,
+    hreflangCluster,
     pageRecordForUrl,
     lowerCaseLocalePrefixPath,
     getAllRoutes,

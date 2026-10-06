@@ -4,9 +4,8 @@ import type {DastroTypes} from "../core/lib-types.ts";
 import {isSearchIndexingPrevented} from "../core/page-indexing.ts";
 
 export const GET: APIRoute = async (context) => {
-  const { config, routing, i18n } = context.locals.dastro;
-  const { resolveRecordUrl, getAllRoutes } = routing();
-  const { localeLangTag, locales } = i18n();
+  const { config, routing } = context.locals.dastro;
+  const { hreflangCluster, getAllRoutes } = routing();
 
   const baseUrl = config.appBaseUrl.replace(/\/$/, '');
   const routesToIndex = await getRoutesToIndex();
@@ -44,7 +43,7 @@ ${routesToIndex
     return `
   <url>
     <loc>${baseUrl}${route.url}</loc>
-${localizedAlternates(route)
+${hreflangCluster(route.record)
   .map(
     (a) =>
       `    <xhtml:link rel="alternate" hreflang="${a.hreflang}" href="${baseUrl}${a.href}" />`,
@@ -52,24 +51,5 @@ ${localizedAlternates(route)
   .join('\n')}
     <lastmod>${route.record._updatedAt}</lastmod>
   </url>`;
-  }
-
-  function localizedAlternates(route: Route<DastroTypes>) {
-    // for single-locale apps, we do not need to specify alternatives
-    if (locales.length <= 1) {
-      return [];
-    }
-
-    return locales
-      .map((l) => {
-        const href = resolveRecordUrl(route.record, l);
-        return href
-          ? {
-              hreflang: localeLangTag(l),
-              href,
-            }
-          : null;
-      })
-      .filter((v) => !!v);
   }
 };
