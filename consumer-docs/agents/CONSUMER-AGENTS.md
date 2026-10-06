@@ -49,7 +49,7 @@ Dastro rules are synced automatically when running `dastro upgrade`.
 - **Types**: Import generated types from `@generated/datocms.types.ts`.
 - **Commits**: Follow [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) — single-line subject, no body unless needed (see `commits.mdc`).
 - **Styling**: Use RSCSS component naming (at least two words, dash-separated). See `rscss.mdc`. Typography via `_font-types.scss`, layout via `_ui-grid.scss`.
-- **Localization**: `i18n` options (`localePrefix`) and locale helpers (`localePrefix`, `localeLangTag`) are described in `node_modules/dastro/consumer-docs/i18n.md`. Never build locale prefixes or `lang` values by hand.
+- **Localization**: `node_modules/dastro/consumer-docs/i18n.md` describes the `i18n` options (`localePrefix`, `languageFallbacks`, `localeCookie`, `xDefaultLocale`), the locale helpers (`localePrefix`, `localeLangTag`), root resolution (which locale the site root redirects to), the client helper `setLocaleCookie`, and the hreflang cluster. Never build locale prefixes or `lang` values by hand.
 - **Boilerplate markers**: Files may contain `@boilerplate:init` comments — these indicate placeholder content to adjust when forking this repo.
 
 ## Scope

@@ -21,4 +21,4 @@ Not synced; read from the installed package (`node_modules/dastro/consumer-docs/
 
 | Doc | Topic |
 |-----|-------|
-| `i18n.md` | `i18n` config options (`localePrefix`) and locale helpers |
+| `i18n.md` | `i18n` config options (`localePrefix`, `languageFallbacks`, `localeCookie`, `xDefaultLocale`), locale helpers, root resolution, `setLocaleCookie`, hreflang and noindex per locale |
