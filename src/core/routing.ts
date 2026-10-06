@@ -9,6 +9,7 @@ import {
   type TranslatedSlugLocale,
 } from './page.ts';
 import { slugify } from '../util/route.util.ts';
+import { isRecordExcludedFromIndexing } from './page-indexing.ts';
 
 export interface Route<T extends DastroTypes> {
   locale: T['SiteLocale'];
@@ -100,12 +101,19 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
    * `x-default` when `i18n.xDefaultLocale` is one of them. Empty when the record exists in fewer
    * than two locales. `href` is a path, like the result of `resolveRecordUrl`.
    *
-   * Pages excluded from indexing must not emit alternates at all; that is the caller's decision.
+   * A locale the record is set to "no index" in is not an alternate (see
+   * `isRecordExcludedFromIndexing`). A page that is itself excluded from indexing must not emit
+   * alternates at all; that is the caller's decision.
    */
   function hreflangCluster(
-    record: Parameters<typeof resolveRecordUrl>[0],
+    record: Parameters<typeof resolveRecordUrl>[0] &
+      Parameters<typeof isRecordExcludedFromIndexing<T>>[0],
   ): HreflangAlternate[] {
     const cluster = config.i18n.locales.flatMap((locale) => {
+      if (isRecordExcludedFromIndexing(record, locale)) {
+        return [];
+      }
+
       const href = resolveRecordUrl(record, locale);
       const hreflang = localeLangTag(locale);
 

@@ -5,7 +5,10 @@ import { QueryListener, Seo } from '@datocms/astro';
 
 import type { Page, MetaTag } from '../../core/page';
 import type { DastroTypes } from '../../core/lib-types';
-import { isSearchIndexingPrevented } from '../../core/page-indexing';
+import {
+  hasNoindexDirective,
+  isSearchIndexingPrevented,
+} from '../../core/page-indexing';
 import type { ClassValue } from '../component.types.ts';
 import DebugGridContainer from '../debug/DebugGridContainer.astro';
 import AutoDebugGrid from '../debug/AutoDebugGrid.astro';
@@ -30,13 +33,7 @@ const { getExecutedDraftQueries } = draftMode();
 
 const debugViewEnabled = config.dev.debugViewEnabled;
 
-const isPageExcludedFromIndexing = page._seoMetaTags.some(
-  (mt) =>
-    mt.attributes?.name === 'robots' &&
-    (mt.attributes?.content ?? '')
-      .split(',')
-      .some((directive) => directive.trim().toLowerCase() === 'noindex'),
-);
+const isPageExcludedFromIndexing = hasNoindexDirective(page._seoMetaTags);
 
 function i18nLinkTags(): MetaTag[] {
   const baseUrl = config.appBaseUrl.replace(/\/$/, '');

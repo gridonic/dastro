@@ -23,6 +23,8 @@ export type RoutingPageRecord<T extends DastroTypes> = {
   seo?: {
     noIndex?: boolean | null;
   } | null;
+  /** Needed when the SEO field is localized: "no index" per locale */
+  _allSeoLocales?: LocalizedSeo<T>[] | null;
 };
 
 export type AllRecordsQueryType<T extends DastroTypes> = TypedDocumentNode<
@@ -54,6 +56,8 @@ export interface Page<T extends DastroTypes> {
   title: string;
   _seoMetaTags: MetaTag[];
   _allTranslatedSlugLocales?: TranslatedSlugLocale<T>[] | null;
+  /** Needed when the SEO field is localized: keeps "no index" locales out of the hreflang cluster */
+  _allSeoLocales?: LocalizedSeo<T>[] | null;
   // Note: Extend module data, allows to add module in cms before implementing them in code
   headerModule?: Partial<T['ModuleData'] | { __typename: string & {} }> | null;
   contentModules?: Partial<T['ModuleData'] | { __typename: string & {} }>[];
@@ -69,6 +73,11 @@ export interface MetaTag {
 export interface TranslatedSlugLocale<T extends DastroTypes> {
   locale?: T['SiteLocale'] | null;
   value: string;
+}
+
+export interface LocalizedSeo<T extends DastroTypes> {
+  locale?: T['SiteLocale'] | null;
+  value?: { noIndex?: boolean | null } | null;
 }
 
 export type InitGlobalDataStore<T extends DastroTypes, R = any> = (

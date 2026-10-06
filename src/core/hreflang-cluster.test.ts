@@ -50,7 +50,12 @@ beforeEach(() => {
 function pageRecord(
   name: string,
   locales: string[],
-  opts: { noIndex?: boolean; robots?: string } = {},
+  opts: {
+    noIndex?: boolean;
+    robots?: string;
+    /** Localized SEO field: the locales whose "no index" is set */
+    noIndexIn?: string[];
+  } = {},
 ) {
   const record = buildTestPageRecord(name, {
     overrides: {
@@ -58,7 +63,16 @@ function pageRecord(
         locale,
         value: name === 'home' ? 'home' : `${name}-${locale}`,
       })),
-      seo: { noIndex: !!opts.noIndex },
+      // A query without a locale answers with the value of the primary locale
+      seo: { noIndex: opts.noIndexIn?.includes(locales[0]) ?? !!opts.noIndex },
+      ...(opts.noIndexIn
+        ? {
+            _allSeoLocales: locales.map((locale) => ({
+              locale,
+              value: { noIndex: opts.noIndexIn!.includes(locale) },
+            })),
+          }
+        : {}),
     },
   });
 
@@ -109,7 +123,7 @@ async function site(i18n: Record<string, unknown> = {}) {
   async function head(record: TestRecord, locale: string) {
     const html = await containerTest.renderToString(LayoutBase, {
       locals: { ...containerTest.astroContext.locals, locale },
-      props: { locale, page: record },
+      props: { locale, page: inLocale(record, locale) },
     });
 
     const linkTags = html.match(/<link [^>]*>/g) ?? [];
@@ -141,6 +155,22 @@ async function site(i18n: Record<string, unknown> = {}) {
   }
 
   return { head, sitemapEntries };
+}
+
+/** The record as a page query in that locale returns it: `_seoMetaTags` follow that locale's SEO field. */
+function inLocale(record: TestRecord, locale: string): TestRecord {
+  const noIndex = record._allSeoLocales?.find((seo) => seo.locale === locale)
+    ?.value?.noIndex;
+
+  return noIndex
+    ? {
+        ...record,
+        _seoMetaTags: [
+          ...record._seoMetaTags,
+          { tag: 'meta', attributes: { name: 'robots', content: 'noindex' } },
+        ],
+      }
+    : record;
 }
 
 function attr(tag: string, name: string) {
@@ -339,5 +369,80 @@ describe('noindex pages', () => {
       `${BASE_URL}/en/about-en`,
     ]);
     expect(JSON.stringify(entries)).not.toContain('hidden');
+  });
+
+  describe('with a localized SEO field (noindex per locale)', () => {
+    test('a locale set to noindex is neither listed nor an alternate, in head and sitemap alike', async () => {
+      const { head, sitemapEntries } = await regionAwareSite({
+        xDefaultLocale: 'en',
+      });
+      const about = pageRecord('about', ['de_CH', 'en', 'de_DE'], {
+        noIndexIn: ['de_DE'],
+      });
+
+      const expected = [
+        ['de-CH', `${BASE_URL}/de-ch/about-de_CH`],
+        ['en', `${BASE_URL}/en/about-en`],
+        X_DEFAULT,
+      ];
+
+      expect(await sitemapEntries([about])).toEqual({
+        [`${BASE_URL}/de-ch/about-de_CH`]: expected,
+        [`${BASE_URL}/en/about-en`]: expected,
+      });
+      expect((await head(about, 'de_CH')).alternates).toEqual(expected);
+      expect((await head(about, 'en')).alternates).toEqual(expected);
+      expect(await head(about, 'de_DE')).toEqual({
+        canonical: [`${BASE_URL}/de-de/about-de_DE`],
+        alternates: [],
+      });
+    });
+
+    test('noindex in the primary locale only hides that locale', async () => {
+      const { head, sitemapEntries } = await regionAwareSite({
+        xDefaultLocale: 'en',
+      });
+      const about = pageRecord('about', ['de_CH', 'en', 'de_DE'], {
+        noIndexIn: ['de_CH'],
+      });
+
+      const expected = [
+        ['en', `${BASE_URL}/en/about-en`],
+        ['de-DE', `${BASE_URL}/de-de/about-de_DE`],
+        X_DEFAULT,
+      ];
+
+      expect(await sitemapEntries([about])).toEqual({
+        [`${BASE_URL}/en/about-en`]: expected,
+        [`${BASE_URL}/de-de/about-de_DE`]: expected,
+      });
+      expect((await head(about, 'de_DE')).alternates).toEqual(expected);
+      expect((await head(about, 'de_CH')).alternates).toEqual([]);
+    });
+
+    test('a noindex x-default locale takes x-default with it; one indexable locale left means no cluster', async () => {
+      const { head, sitemapEntries } = await regionAwareSite({
+        xDefaultLocale: 'en',
+      });
+      const about = pageRecord('about', ['de_CH', 'en', 'de_DE'], {
+        noIndexIn: ['en'],
+      });
+      const lonely = pageRecord('offer', ['de_CH', 'en'], {
+        noIndexIn: ['en'],
+      });
+
+      const expected = [
+        ['de-CH', `${BASE_URL}/de-ch/about-de_CH`],
+        ['de-DE', `${BASE_URL}/de-de/about-de_DE`],
+      ];
+
+      expect(await sitemapEntries([about, lonely])).toEqual({
+        [`${BASE_URL}/de-ch/about-de_CH`]: expected,
+        [`${BASE_URL}/de-de/about-de_DE`]: expected,
+        [`${BASE_URL}/de-ch/offer-de_CH`]: [],
+      });
+      expect((await head(about, 'de_CH')).alternates).toEqual(expected);
+      expect((await head(lonely, 'de_CH')).alternates).toEqual([]);
+    });
   });
 });
