@@ -88,7 +88,10 @@ export function dastroTest(
     moduleComponents: {},
   };
 
-  const dastroConfig = merge(defaultConfig, config || {});
+  const dastroConfig = merge(defaultConfig, config || {}, {
+    // Arrays in overrides (e.g. `i18n.locales`) replace the defaults
+    arrayMerge: (_, override) => override,
+  });
 
   const dastroContext = buildDastroContext(
     dastroConfig as DastroConfig<DastroTypes>,

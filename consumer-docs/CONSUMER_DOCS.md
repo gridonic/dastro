@@ -14,3 +14,11 @@ Docs shipped to **consumer projects** (projects that install dastro), not instru
 - A missing target gets the full source; a target without markers is left untouched.
 - A missing `CLAUDE.md` is created containing `@AGENTS.md`, so Claude Code loads the same doc.
 - Adding a doc: create it here with markers, then add a `MANAGED_DOCS` entry.
+
+## Reference docs
+
+Not synced; read from the installed package (`node_modules/dastro/consumer-docs/`).
+
+| Doc | Topic |
+|-----|-------|
+| `i18n.md` | `i18n` config options (`localePrefix`, `languageFallbacks`, `localeCookie`, `xDefaultLocale`), locale helpers, root resolution, `setLocaleCookie`, hreflang and noindex per locale |

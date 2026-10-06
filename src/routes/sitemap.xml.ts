@@ -1,12 +1,11 @@
 import type { APIRoute } from 'astro';
 import type {Route} from "../core/routing.ts";
 import type {DastroTypes} from "../core/lib-types.ts";
-import {isSearchIndexingPrevented} from "../core/page-indexing.ts";
+import {isRecordExcludedFromIndexing, isSearchIndexingPrevented} from "../core/page-indexing.ts";
 
 export const GET: APIRoute = async (context) => {
-  const { config, routing, i18n } = context.locals.dastro;
-  const { resolveRecordUrl, getAllRoutes } = routing();
-  const { normalizedIsoLocale, locales } = i18n();
+  const { config, routing } = context.locals.dastro;
+  const { hreflangCluster, getAllRoutes } = routing();
 
   const baseUrl = config.appBaseUrl.replace(/\/$/, '');
   const routesToIndex = await getRoutesToIndex();
@@ -15,7 +14,6 @@ export const GET: APIRoute = async (context) => {
 
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 ${routesToIndex
-  .filter((route) => !route.record.seo?.noIndex)
   .map((route) => urlEntry(route))
   .join('\n')}
 </urlset>`;
@@ -37,14 +35,16 @@ ${routesToIndex
       }
     }
 
-    return routes.filter((route) => !route.record.seo?.noIndex);
+    return routes.filter(
+      (route) => !isRecordExcludedFromIndexing(route.record, route.locale),
+    );
   }
 
   function urlEntry(route: Route<DastroTypes>) {
     return `
   <url>
     <loc>${baseUrl}${route.url}</loc>
-${localizedAlternates(route)
+${hreflangCluster(route.record)
   .map(
     (a) =>
       `    <xhtml:link rel="alternate" hreflang="${a.hreflang}" href="${baseUrl}${a.href}" />`,
@@ -52,24 +52,5 @@ ${localizedAlternates(route)
   .join('\n')}
     <lastmod>${route.record._updatedAt}</lastmod>
   </url>`;
-  }
-
-  function localizedAlternates(route: Route<DastroTypes>) {
-    // for single-locale apps, we do not need to specify alternatives
-    if (locales.length <= 1) {
-      return [];
-    }
-
-    return locales
-      .map((l) => {
-        const href = resolveRecordUrl(route.record, l);
-        return href
-          ? {
-              hreflang: normalizedIsoLocale(l),
-              href,
-            }
-          : null;
-      })
-      .filter((v) => !!v);
   }
 };

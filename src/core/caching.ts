@@ -166,8 +166,17 @@ export function caching<T extends DastroTypes>(config: DastroConfig<T>) {
     // }
   }
 
+  /** For responses that depend on the visitor: never stored, neither by the browser nor by the CDN. */
+  function preventCaching(headers: Headers) {
+    headers.set('Cache-Control', 'private, no-store');
+    headers.delete('Netlify-CDN-Cache-Control');
+    headers.delete('Netlify-Vary');
+    headers.set('X-Gridonic-Cache-Config', 'cache disabled: visitor-specific');
+  }
+
   return {
     setCachingHeaders,
+    preventCaching,
     withCache: contextAwareCacheWrapper(config),
   };
 
