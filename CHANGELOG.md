@@ -1,3 +1,7 @@
+### [3.2.2](https://github.com/gridonic/dastro/compare/v3.2.1...v3.2.2)
+
+- docs patch: rename CONTEXT.md to GLOSSARY.md
+
 ### [3.2.1](https://github.com/gridonic/dastro/compare/v3.2.0...v3.2.1)
 
 - added patch instructions for new draft mode variable
