@@ -1,5 +1,15 @@
 import type { DastroConfig, DastroTypes } from './lib-types.ts';
 
+/** The language tag of a site locale: `de_CH` → `de-CH`. */
+export function langTagOf(locale: string): string {
+  return locale.replace(/_/g, '-');
+}
+
+/** The language of a site locale or language tag: `de_CH`, `de-CH` → `de`. */
+export function languageOf(localeOrTag: string): string {
+  return localeOrTag.split(/[-_]/)[0];
+}
+
 export function i18n<T extends DastroTypes>(config: DastroConfig<T>) {
   const { defaultLocale, locales, messages } = config.i18n;
   const localePrefixMode = config.i18n.localePrefix ?? 'language';
@@ -14,8 +24,8 @@ export function i18n<T extends DastroTypes>(config: DastroConfig<T>) {
     }
 
     return localePrefixMode === 'locale'
-      ? locale.replace(/_/g, '-').toLowerCase()
-      : locale.split('_')[0];
+      ? langTagOf(locale).toLowerCase()
+      : languageOf(locale);
   }
 
   /**
@@ -28,8 +38,8 @@ export function i18n<T extends DastroTypes>(config: DastroConfig<T>) {
     }
 
     return localePrefixMode === 'locale'
-      ? locale.replace(/_/g, '-')
-      : locale.split('_')[0];
+      ? langTagOf(locale)
+      : languageOf(locale);
   }
 
   /**

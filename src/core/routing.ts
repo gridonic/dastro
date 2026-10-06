@@ -62,16 +62,16 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
       return null;
     }
 
-    const normalizedLocale = localePrefix(locale);
+    const prefix = localePrefix(locale);
 
     // Special case: Home
     if (record.__typename === 'PageRecord' && slug === 'home') {
       if (routingStrategy === 'prefix-always') {
-        return `/${normalizedLocale}`;
+        return `/${prefix}`;
       }
 
       if (!isDefaultLocale(locale)) {
-        return `/${normalizedLocale}`;
+        return `/${prefix}`;
       }
       return '/';
     }
@@ -80,10 +80,10 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
     const routeDefinition = config.pageDefinitions[record.__typename];
     const localeUrlPart =
       routingStrategy === 'prefix-always'
-        ? normalizedLocale
+        ? prefix
         : !locale || isDefaultLocale(locale)
           ? undefined
-          : normalizedLocale;
+          : prefix;
 
     return `/${[
       localeUrlPart, // Locale

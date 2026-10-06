@@ -1,3 +1,5 @@
+import { langTagOf, languageOf } from './i18n.ts';
+
 interface RootResolutionInput<Locale extends string> {
   /** Site locales, in configured order */
   locales: Locale[];
@@ -9,6 +11,9 @@ interface RootResolutionInput<Locale extends string> {
   /** Raw `Accept-Language` request header */
   acceptLanguage?: string | null;
 }
+
+const lowerCaseLanguageOf = (locale: string) =>
+  languageOf(locale).toLowerCase();
 
 const LANGUAGE_TAG = /^[a-z]{2,3}(-[a-z0-9]{1,8})*$/;
 
@@ -51,23 +56,24 @@ export function resolveRootLocale<Locale extends string>(
     return cookieLocale;
   }
 
-  const tagOf = (locale: Locale) => locale.replace(/_/g, '-').toLowerCase();
-  const languageOf = (tag: string) => tag.split(/[-_]/)[0].toLowerCase();
-
   const tags = preferredLanguageTags(input.acceptLanguage ?? '');
   const language = tags
     .map(languageOf)
-    .find((l) => locales.some((locale) => languageOf(locale) === l));
+    .find((l) => locales.some((locale) => lowerCaseLanguageOf(locale) === l));
 
   if (!language) {
     return defaultLocale;
   }
 
-  const localesOfLanguage = locales.filter((l) => languageOf(l) === language);
+  const localesOfLanguage = locales.filter(
+    (l) => lowerCaseLanguageOf(l) === language,
+  );
   const tagsOfLanguage = tags.filter((tag) => languageOf(tag) === language);
 
   for (const tag of tagsOfLanguage) {
-    const exact = localesOfLanguage.find((locale) => tagOf(locale) === tag);
+    const exact = localesOfLanguage.find(
+      (locale) => langTagOf(locale).toLowerCase() === tag,
+    );
 
     if (exact) {
       return exact;

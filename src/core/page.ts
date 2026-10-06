@@ -169,7 +169,7 @@ export async function renderPage<T extends DastroTypes>(
   if (routingStrategy === 'prefix-always' && !locale) {
     // if on the root page, redirect to the user's preferred locale
     if (url === '/') {
-      const redirectLocale = localePrefix(
+      const rootLocalePrefix = localePrefix(
         resolveRootLocale({
           locales,
           defaultLocale,
@@ -181,13 +181,9 @@ export async function renderPage<T extends DastroTypes>(
         }),
       );
 
-      if (process.env.NODE_ENV === 'development') {
-        console.debug('redirectLocale: ', redirectLocale);
-      }
-
       // The target depends on the visitor (cookie, Accept-Language): never cache it, neither in the browser nor in the CDN
       const response = context.redirect(
-        `/${redirectLocale}${url}${context.url.search}`,
+        `/${rootLocalePrefix}${url}${context.url.search}`,
       );
       for (const headers of [context.response.headers, response.headers]) {
         preventCaching(headers);
