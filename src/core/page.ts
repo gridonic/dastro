@@ -6,6 +6,7 @@ import type { AstroGlobal } from 'astro';
 import { routing } from './routing.ts';
 import { caching, type CachingOptions } from './caching.ts';
 import { i18n } from './i18n.ts';
+import { resolveRootLocale } from './root-resolution.ts';
 
 export type PageRecordType<T extends DastroTypes> =
   T['RecordLinkFragment']['__typename'];
@@ -126,9 +127,10 @@ export async function renderPage<T extends DastroTypes>(
 ) {
   const { routingStrategy, locales, defaultLocale, localePrefix } =
     i18n(dastroConfig);
+  const { languageFallbacks, localeCookie } = dastroConfig.i18n;
   const { resolveRecordUrl, pageRecordForUrl, lowerCaseLocalePrefixPath } =
     routing(dastroConfig);
-  const { setCachingHeaders } = caching(dastroConfig);
+  const { setCachingHeaders, preventCaching } = caching(dastroConfig);
 
   setCachingHeaders(context, options.caching);
 
@@ -158,34 +160,35 @@ export async function renderPage<T extends DastroTypes>(
   if (routingStrategy === 'prefix-always' && !locale) {
     // if on the root page, redirect to the user's preferred locale
     if (url === '/') {
-      const redirectLocale = localePrefix(resolveRootLocale());
+      const redirectLocale = localePrefix(
+        resolveRootLocale({
+          locales,
+          defaultLocale,
+          languageFallbacks,
+          cookieLocale: localeCookie
+            ? context.cookies.get(localeCookie)?.value
+            : undefined,
+          acceptLanguage: context.request.headers.get('Accept-Language'),
+        }),
+      );
 
       if (process.env.NODE_ENV === 'development') {
         console.debug('redirectLocale: ', redirectLocale);
       }
 
-      return context.redirect(`/${redirectLocale}${url}`);
+      // The target depends on the visitor (cookie, Accept-Language): never cache it, neither in the browser nor in the CDN
+      const response = context.redirect(
+        `/${redirectLocale}${url}${context.url.search}`,
+      );
+      for (const headers of [context.response.headers, response.headers]) {
+        preventCaching(headers);
+      }
+
+      return response;
     }
 
     // All non-root pages need a locale
     return context.rewrite('/404');
-  }
-
-  /** The locale the site root redirects to: first locale in the visitor's language, else the default locale. */
-  function resolveRootLocale(): T['SiteLocale'] {
-    const acceptLanguage = context.request.headers.get('Accept-Language') ?? '';
-    const languageOf = (locale: T['SiteLocale']) => locale.split('_')[0];
-
-    for (const entry of acceptLanguage.split(',')) {
-      const language = entry.split(';')[0].trim().substring(0, 2).toLowerCase();
-      const locale = locales.find((l) => languageOf(l) === language);
-
-      if (locale) {
-        return locale;
-      }
-    }
-
-    return defaultLocale;
   }
 
   // Make the page, locale and data store available for all components

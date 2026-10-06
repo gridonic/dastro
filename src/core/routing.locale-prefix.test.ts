@@ -251,7 +251,11 @@ describe("localePrefix: 'locale'", () => {
         locals: astroContext.locals,
         cookies: { get: () => undefined },
         response: { headers: new Headers() },
-        redirect: (location: string, status = 302) => ({ location, status }),
+        redirect: (location: string, status = 302) =>
+          // Hidden from `toEqual`: the root redirect sets headers on its response
+          Object.defineProperty({ location, status }, 'headers', {
+            value: new Headers(),
+          }),
         rewrite: (rewrite: string) => ({ rewrite }),
       };
 
@@ -407,7 +411,11 @@ describe("default 'language' mode is unchanged", () => {
       locals: astroContext.locals,
       cookies: { get: () => undefined },
       response: { headers: new Headers() },
-      redirect: (location: string, status = 302) => ({ location, status }),
+      redirect: (location: string, status = 302) =>
+        // Hidden from `toEqual`: the root redirect sets headers on its response
+        Object.defineProperty({ location, status }, 'headers', {
+          value: new Headers(),
+        }),
       rewrite: (rewrite: string) => ({ rewrite }),
     };
 

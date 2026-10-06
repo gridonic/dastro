@@ -45,6 +45,17 @@ export interface DastroConfig<T extends DastroTypes> {
      *   and `<html lang>` / hreflang values become language tags (`de-CH`).
      */
     localePrefix?: 'language' | 'locale';
+    /**
+     * Root resolution only: the locale for a visitor whose language (`de`) has several locales and whose
+     * `Accept-Language` names none of them exactly (`de`, `de-AT`). Without an entry, the first locale of
+     * the language in `locales` order is used.
+     */
+    languageFallbacks?: Partial<Record<string, T['SiteLocale']>>;
+    /**
+     * Root resolution only: name of a cookie holding a site locale (`de_CH`). A valid value wins over
+     * `Accept-Language`. Dastro only reads it; write it with `setLocaleCookie` from `dastro/client`.
+     */
+    localeCookie?: string;
   };
   datocms: {
     token: string;
