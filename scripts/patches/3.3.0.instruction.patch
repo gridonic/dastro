@@ -1,0 +1,38 @@
+# Dastro 3.3 — manual patch
+
+## 1. Replace `normalizedIsoLocale` (optional in `'language'` mode)
+
+Dastro 3.3 adds the `i18n.localePrefix` option and two helpers from `i18n()`
+that follow it:
+
+- `localePrefix(locale)` for URL prefixes (`/${localePrefix(locale)}`)
+- `localeLangTag(locale)` for `<html lang>`, hreflang, tracking and form values
+
+`normalizedIsoLocale` keeps working and, in the default `'language'` mode,
+returns the same values. Nothing breaks if you leave it. Replace its calls
+when you touch the code, and in any case before setting
+`i18n.localePrefix: 'locale'`:
+
+```sh
+grep -rn normalizedIsoLocale src
+```
+
+- `normalizedIsoLocale(locale)` building a URL → `localePrefix(locale)`
+- `normalizedIsoLocale(locale)` / `normalizedIsoLocale(locale, true)` as a
+  language value → `localeLangTag(locale)`
+
+See `node_modules/dastro/consumer-docs/i18n.md` for all new i18n options (`localePrefix`,
+`xDefaultLocale`, `languageFallbacks`, `localeCookie`, per-locale noindex via
+`_allSeoLocales`).
+
+## 2. Root redirect (`routingStrategy: 'prefix-always'` only)
+
+The redirect from `/` to a locale now:
+
+- sorts `Accept-Language` entries by q-value and ignores `q=0`, `*` and
+  malformed entries (browsers already send them sorted, so real visitors see
+  no change)
+- keeps the query string (`/?utm_source=x` → `/de/?utm_source=x`)
+- is never cached, neither in the browser nor in the Netlify CDN
+
+No action needed.

@@ -38,6 +38,30 @@ export interface DastroConfig<T extends DastroTypes> {
     locales: T['SiteLocale'][];
     messages: Record<T['SiteLocale'], TranslationMessages<T>>;
     routingStrategy: 'prefix-except-default' | 'prefix-always';
+    /**
+     * What the locale prefix in URLs is derived from.
+     * - `'language'` (default): the language only (`de_CH` → `/de`). Two locales of one language collide.
+     * - `'locale'`: the full locale, lower-cased (`de_CH` → `/de-ch`, `en` → `/en`). Prefixes match exactly,
+     *   and `<html lang>` / hreflang values become language tags (`de-CH`).
+     */
+    localePrefix?: 'language' | 'locale';
+    /**
+     * Root resolution only: the locale for a visitor whose language (`de`) has several locales and whose
+     * `Accept-Language` names none of them exactly (`de`, `de-AT`). Without an entry, the first locale of
+     * the language in `locales` order is used.
+     */
+    languageFallbacks?: Partial<Record<string, T['SiteLocale']>>;
+    /**
+     * Root resolution only: name of a cookie holding a site locale (`de_CH`). A valid value wins over
+     * `Accept-Language`. Dastro only reads it; write it with `setLocaleCookie` from `dastro/client`.
+     */
+    localeCookie?: string;
+    /**
+     * Emits an `x-default` hreflang alternate, in the page head and the sitemap, pointing at this
+     * locale's URL of the page. Only for pages that have a version in this locale and in at least one
+     * other. Default: none, no `x-default` is emitted.
+     */
+    xDefaultLocale?: T['SiteLocale'];
   };
   datocms: {
     token: string;

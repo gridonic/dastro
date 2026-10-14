@@ -9,11 +9,19 @@ import {
   type TranslatedSlugLocale,
 } from './page.ts';
 import { slugify } from '../util/route.util.ts';
+import { isRecordExcludedFromIndexing } from './page-indexing.ts';
 
 export interface Route<T extends DastroTypes> {
   locale: T['SiteLocale'];
   url: string | undefined;
   record: RoutingPageRecord<T>;
+}
+
+export interface HreflangAlternate {
+  /** A language tag (see `localeLangTag`) or `x-default` */
+  hreflang: string;
+  /** Path without the base URL */
+  href: string;
 }
 
 export interface RecordWithParent<T extends DastroTypes> {
@@ -25,8 +33,10 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
   const {
     isDefaultLocale,
     areLocalesEqual,
-    normalizedIsoLocale,
-    findLocaleWithVariant,
+    localePrefix,
+    localeLangTag,
+    localeFromPrefix,
+    localePrefixMode,
     routingStrategy,
   } = i18n(config);
 
@@ -52,16 +62,16 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
       return null;
     }
 
-    const normalizedLocale = normalizedIsoLocale(locale);
+    const prefix = localePrefix(locale);
 
     // Special case: Home
     if (record.__typename === 'PageRecord' && slug === 'home') {
       if (routingStrategy === 'prefix-always') {
-        return `/${normalizedLocale}`;
+        return `/${prefix}`;
       }
 
       if (!isDefaultLocale(locale)) {
-        return `/${normalizedLocale}`;
+        return `/${prefix}`;
       }
       return '/';
     }
@@ -70,10 +80,10 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
     const routeDefinition = config.pageDefinitions[record.__typename];
     const localeUrlPart =
       routingStrategy === 'prefix-always'
-        ? normalizedLocale
+        ? prefix
         : !locale || isDefaultLocale(locale)
           ? undefined
-          : normalizedLocale;
+          : prefix;
 
     return `/${[
       localeUrlPart, // Locale
@@ -85,6 +95,70 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
       .join('/')}`;
   }
 
+  /**
+   * The hreflang alternates of a page, for the page head and the sitemap alike: one entry per
+   * configured locale the record has a slug in (self included, in configured order), plus
+   * `x-default` when `i18n.xDefaultLocale` is one of them. Empty when the record exists in fewer
+   * than two locales. `href` is a path, like the result of `resolveRecordUrl`.
+   *
+   * A locale the record is set to "no index" in is not an alternate (see
+   * `isRecordExcludedFromIndexing`). A page that is itself excluded from indexing must not emit
+   * alternates at all; that is the caller's decision.
+   */
+  function hreflangCluster(
+    record: Parameters<typeof resolveRecordUrl>[0] &
+      Parameters<typeof isRecordExcludedFromIndexing<T>>[0],
+  ): HreflangAlternate[] {
+    const cluster = config.i18n.locales.flatMap((locale) => {
+      if (isRecordExcludedFromIndexing(record, locale)) {
+        return [];
+      }
+
+      const href = resolveRecordUrl(record, locale);
+      const hreflang = localeLangTag(locale);
+
+      return href && hreflang ? [{ locale, hreflang, href }] : [];
+    });
+
+    if (cluster.length < 2) {
+      return [];
+    }
+
+    const { xDefaultLocale } = config.i18n;
+    const xDefault = xDefaultLocale
+      ? cluster.find((a) => areLocalesEqual(a.locale, xDefaultLocale))
+      : undefined;
+
+    return [
+      ...cluster.map(({ hreflang, href }) => ({ hreflang, href })),
+      ...(xDefault ? [{ hreflang: 'x-default', href: xDefault.href }] : []),
+    ];
+  }
+
+  /**
+   * `'locale'` mode only: the lower-case form of a path whose locale prefix is not written in
+   * lower case (`/de-CH/about` → `/de-ch/about`), or `null` when the path needs no redirect.
+   */
+  function lowerCaseLocalePrefixPath(path: string): string | null {
+    if (localePrefixMode !== 'locale') {
+      return null;
+    }
+
+    const [, prefix, rest = ''] = path.match(/^\/([^/]+)(\/.*)?$/) ?? [];
+    const lowerCasePrefix = prefix?.toLowerCase();
+
+    if (!prefix || prefix === lowerCasePrefix) {
+      return null;
+    }
+
+    const locale = localeFromPrefix(lowerCasePrefix);
+    const hasPrefix =
+      !!locale &&
+      (routingStrategy === 'prefix-always' || !isDefaultLocale(locale));
+
+    return hasPrefix ? `/${lowerCasePrefix}${rest}` : null;
+  }
+
   async function pageRecordForUrl(
     context: AstroContext<'locals' | 'cookies'>,
     url: string,
@@ -93,7 +167,7 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
 
     const regexLocaleUnion = locales
       .filter((l) => routingStrategy === 'prefix-always' || !isDefaultLocale(l))
-      .map((l) => normalizedIsoLocale(l))
+      .map((l) => localePrefix(l))
       .join('|');
 
     const regexPathPrefixUnion = [
@@ -110,11 +184,22 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
 
     const match = url.match(urlRegex) ?? [];
 
-    const locale = findLocaleWithVariant(
-      routingStrategy === 'prefix-always'
-        ? match[1]
-        : match[1] || defaultLocale,
-    ) as T['SiteLocale'];
+    const locale = resolveLocale(match[1]) as T['SiteLocale'];
+
+    function resolveLocale(prefix: string | undefined) {
+      if (localePrefixMode === 'locale') {
+        // Exact match only: `/de/...` is not a prefix of `de_CH`
+        return prefix
+          ? localeFromPrefix(prefix)
+          : routingStrategy === 'prefix-always'
+            ? undefined
+            : defaultLocale;
+      }
+
+      return localeFromPrefix(
+        routingStrategy === 'prefix-always' ? prefix! : prefix || defaultLocale,
+      );
+    }
 
     let pathPrefix = match[2] ?? '';
     let fullSlug = match[3]?.replace(/\/$/, '');
@@ -205,7 +290,9 @@ export function routing<T extends DastroTypes>(config: DastroConfig<T>) {
 
   return {
     resolveRecordUrl,
+    hreflangCluster,
     pageRecordForUrl,
+    lowerCaseLocalePrefixPath,
     getAllRoutes,
     pageDefinitionList,
     pageRecordTypes,

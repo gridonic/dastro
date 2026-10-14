@@ -5,7 +5,10 @@ import { QueryListener, Seo } from '@datocms/astro';
 
 import type { Page, MetaTag } from '../../core/page';
 import type { DastroTypes } from '../../core/lib-types';
-import { isSearchIndexingPrevented } from '../../core/page-indexing';
+import {
+  hasNoindexDirective,
+  isSearchIndexingPrevented,
+} from '../../core/page-indexing';
 import type { ClassValue } from '../component.types.ts';
 import DebugGridContainer from '../debug/DebugGridContainer.astro';
 import AutoDebugGrid from '../debug/AutoDebugGrid.astro';
@@ -24,22 +27,15 @@ interface Props<T extends DastroTypes = DastroTypes> {
 const { page, locale, bodyClass, faviconMetaTags } = Astro.props;
 
 const { routing, config, i18n, draftMode } = Astro.locals.dastro;
-const { resolveRecordUrl } = routing();
-const { normalizedIsoLocale } = i18n();
+const { resolveRecordUrl, hreflangCluster } = routing();
+const { localeLangTag } = i18n();
 const { getExecutedDraftQueries } = draftMode();
 
 const debugViewEnabled = config.dev.debugViewEnabled;
 
-const isPageExcludedFromIndexing = !!page._seoMetaTags.find(
-  (mt) =>
-    mt.attributes?.name === 'robots' && mt.attributes?.content === 'noindex',
-);
+const isPageExcludedFromIndexing = hasNoindexDirective(page._seoMetaTags);
 
 function i18nLinkTags(): MetaTag[] {
-  const pageLocales = (page._allTranslatedSlugLocales ?? [])
-    .map((l) => l.locale)
-    .filter((l) => !!l) as DastroTypes['SiteLocale'][];
-
   const baseUrl = config.appBaseUrl.replace(/\/$/, '');
   const urlInCurrentLocale = resolveRecordUrl(page, locale) ?? '/';
 
@@ -55,16 +51,13 @@ function i18nLinkTags(): MetaTag[] {
       tag: 'link',
       attributes: { rel: 'canonical', href: `${baseUrl}${urlInCurrentLocale}` },
     },
-    ...(pageLocales.length > 1
-      ? pageLocales.map((l) => ({
+    // A page excluded from indexing carries no alternates: canonical only
+    ...(isPageExcludedFromIndexing
+      ? []
+      : hreflangCluster(page).map(({ hreflang, href }) => ({
           tag: 'link',
-          attributes: {
-            rel: 'alternate',
-            hreflang: normalizedIsoLocale(l) ?? l,
-            href: `${baseUrl}${resolveRecordUrl(page, l) ?? ''}`,
-          },
-        }))
-      : []),
+          attributes: { rel: 'alternate', hreflang, href: `${baseUrl}${href}` },
+        }))),
   ];
 }
 
@@ -78,7 +71,7 @@ const executedDraftQueries = getExecutedDraftQueries(Astro);
 ₍⸌̣ʷ̣̫⸍̣₎  Made with ♥ by gridonic.ch
 
 -->
-<html lang={normalizedIsoLocale(locale)}>
+<html lang={localeLangTag(locale)}>
   <head>
     <meta charset="UTF-8" />
     <slot name="head:before" />
