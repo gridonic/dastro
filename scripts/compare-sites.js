@@ -156,24 +156,28 @@ async function snapshot(origin, { path, acceptLanguage }) {
     response.headers.get(name),
   ])
     .filter(([, value]) => value !== null)
-    .map(([name, value]) => `${name}: ${normalize(value, origin)}`);
+    .map(([name, value]) => `${name}: ${normalize(value)}`);
 
-  const body = normalize(await response.text(), origin);
+  const body = normalize(await response.text());
 
   return [`status: ${response.status}`, ...headers, '', body].join('\n');
 }
 
 // Removes what legitimately differs between two instances of the same site
-function normalize(text, origin) {
+function normalize(text) {
   return (
     text
-      .replaceAll(origin, 'ORIGIN')
+      // Either side may link to the other, e.g. a preview whose APP_BASE_URL is the main deploy
+      .replaceAll(baseUrl, 'ORIGIN')
+      .replaceAll(candidateUrl, 'ORIGIN')
       // Build and dev asset hashes, dev-only ids and paths
       .replace(
         /(\/_astro\/[^"'\s?]*?)[.-][A-Za-z0-9_-]{8}(\.[a-z0-9]+)/g,
         '$1$2',
       )
       .replace(/\?v=[0-9a-f]{8}/g, '')
+      // Netlify skew protection: deploy id on every asset URL
+      .replace(/([?&])dpl=[^"'\s&)]+/g, '$1dpl=DEPLOY')
       .replace(/ data-vite-dev-id="[^"]*"/g, '')
       .replace(/ data-astro-source-(file|loc)="[^"]*"/g, '')
       .replace(/<script>window\.__astro_dev_toolbar__ = .*?<\/script>/gs, '')
@@ -185,6 +189,8 @@ function normalize(text, origin) {
         'UUID',
       )
       .replace(/astro-island-[a-z0-9]+/g, 'astro-island')
+      // Scoped style hashes differ between builds
+      .replace(/\bastro-[a-z0-9]{8}\b/g, 'astro-CID')
       // One tag per line, so the diff shows the changed element
       .replace(/>\s*</g, '>\n<')
   );
