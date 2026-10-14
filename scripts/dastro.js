@@ -20,6 +20,7 @@ import * as netlify from './steps/netlify.js';
 import * as datoConfig from './steps/dato-config.js';
 import * as datoSeed from './steps/dato-seed.js';
 import { deploy } from './deploy.js';
+import { compareVersions } from './versions.js';
 
 const command = process.argv[2];
 
@@ -456,17 +457,6 @@ function printPatchInstructions(patchContent) {
     //
     // console.log();
   }
-}
-
-function compareVersions(a, b) {
-  const partsA = a.split('.').map(Number);
-  const partsB = b.split('.').map(Number);
-  for (let i = 0; i < Math.max(partsA.length, partsB.length); i++) {
-    const numA = partsA[i] || 0;
-    const numB = partsB[i] || 0;
-    if (numA !== numB) return numA - numB;
-  }
-  return 0;
 }
 
 function applyPatches(previousVersion) {
