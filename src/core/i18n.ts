@@ -52,7 +52,7 @@ export function i18n<T extends DastroTypes>(config: DastroConfig<T>) {
       : findLocaleWithVariant(prefix);
   }
 
-  // Deprecated for consumers (see the returned object); kept for locale comparison
+  // Superseded for consumers (see the returned object); kept for locale comparison
   function normalizedIsoLocale(
     locale: T['SiteLocale'],
     keepVariant = false,
@@ -97,8 +97,9 @@ export function i18n<T extends DastroTypes>(config: DastroConfig<T>) {
     localeFromPrefix,
     localePrefixMode,
     /**
-     * @deprecated Use `localePrefix(locale)` for URL prefixes and `localeLangTag(locale)` for
-     * `<html lang>` / hreflang values. Unlike those, this helper ignores `i18n.localePrefix`.
+     * Prefer `localePrefix(locale)` for URL prefixes and `localeLangTag(locale)` for
+     * `<html lang>` / hreflang values. Unlike those, this helper ignores `i18n.localePrefix`:
+     * in the default `'language'` mode all three return the same value.
      */
     normalizedIsoLocale,
     normalizedSiteLocale,
