@@ -1,3 +1,16 @@
+### [3.3.0](https://github.com/gridonic/dastro/compare/v3.2.3...v3.3.0)
+
+- add `i18n.localePrefix` (`'language'` default, `'locale'` for region locales like `/de-ch`), with the helpers `localePrefix`, `localeLangTag` and `localeFromPrefix` on `i18n()`
+- add `i18n.languageFallbacks` and `i18n.localeCookie` to resolve the root redirect (`prefix-always`), with client helper `setLocaleCookie`
+- add `i18n.xDefaultLocale` for an `x-default` hreflang in head and sitemap
+- fix: the root redirect sorts `Accept-Language` by q-value, keeps the query string and is never cached (it was cached by the CDN without varying by language)
+- fix: noindex pages get no hreflang and are left out of the hreflang cluster
+- fix: head and sitemap share one hreflang cluster; head links follow the configured locale order, the sitemap lists no self-only hreflang
+- `normalizedIsoLocale` is superseded by `localePrefix` / `localeLangTag` (not deprecated); switching is optional, see `3.3.0.instruction.patch`
+- add `consumer-docs/i18n.md`
+- add `scripts/compare-upgrade.sh` to compare a consumer project before and after a dastro upgrade, see `RELEASING.md`
+- `dastro upgrade` ranks prereleases below their release when applying patches
+
 ### [3.2.3](https://github.com/gridonic/dastro/compare/v3.2.2...v3.2.3)
 
 - fix(lefthook): resolve package-lock hash file per worktree

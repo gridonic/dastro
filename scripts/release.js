@@ -203,11 +203,23 @@ const runRelease = async () => {
     // Show commit messages since last version
     getCommitMessagesSinceLastVersion();
 
+    // Keep a changelog entry that was already written for this version
+    const changelogPath = join(__dirname, '..', 'CHANGELOG.md');
+    const hasChangelogEntry = readFileSync(changelogPath, 'utf-8').startsWith(
+      `### [${newVersion}](`,
+    );
+
     // Collect changelog entries
-    const changelogEntries = await collectChangelogEntries(newVersion);
+    const changelogEntries = hasChangelogEntry
+      ? []
+      : await collectChangelogEntries(newVersion);
 
     // Update CHANGELOG.md (skip in dry run)
-    if (isDryRun) {
+    if (hasChangelogEntry) {
+      console.log(
+        `\n✅ CHANGELOG.md already has an entry for ${newVersion}, keeping it`,
+      );
+    } else if (isDryRun) {
       console.log('\n🔍 DRY RUN MODE - Skipping CHANGELOG.md update');
       console.log(`📋 Would add to CHANGELOG.md:`);
       changelogEntries.forEach((entry) => console.log(`   - ${entry}`));

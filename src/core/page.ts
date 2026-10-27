@@ -6,6 +6,7 @@ import type { AstroGlobal } from 'astro';
 import { routing } from './routing.ts';
 import { caching, type CachingOptions } from './caching.ts';
 import { i18n } from './i18n.ts';
+import { resolveRootLocale } from './root-resolution.ts';
 
 export type PageRecordType<T extends DastroTypes> =
   T['RecordLinkFragment']['__typename'];
@@ -22,6 +23,8 @@ export type RoutingPageRecord<T extends DastroTypes> = {
   seo?: {
     noIndex?: boolean | null;
   } | null;
+  /** Needed when the SEO field is localized: "no index" per locale */
+  _allSeoLocales?: LocalizedSeo<T>[] | null;
 };
 
 export type AllRecordsQueryType<T extends DastroTypes> = TypedDocumentNode<
@@ -53,6 +56,8 @@ export interface Page<T extends DastroTypes> {
   title: string;
   _seoMetaTags: MetaTag[];
   _allTranslatedSlugLocales?: TranslatedSlugLocale<T>[] | null;
+  /** Needed when the SEO field is localized: keeps "no index" locales out of the hreflang cluster */
+  _allSeoLocales?: LocalizedSeo<T>[] | null;
   // Note: Extend module data, allows to add module in cms before implementing them in code
   headerModule?: Partial<T['ModuleData'] | { __typename: string & {} }> | null;
   contentModules?: Partial<T['ModuleData'] | { __typename: string & {} }>[];
@@ -68,6 +73,11 @@ export interface MetaTag {
 export interface TranslatedSlugLocale<T extends DastroTypes> {
   locale?: T['SiteLocale'] | null;
   value: string;
+}
+
+export interface LocalizedSeo<T extends DastroTypes> {
+  locale?: T['SiteLocale'] | null;
+  value?: { noIndex?: boolean | null } | null;
 }
 
 export type InitGlobalDataStore<T extends DastroTypes, R = any> = (
@@ -124,14 +134,23 @@ export async function renderPage<T extends DastroTypes>(
     caching?: CachingOptions;
   } = {},
 ) {
-  const { routingStrategy, locales, defaultLocale, normalizedIsoLocale } =
+  const { routingStrategy, locales, defaultLocale, localePrefix } =
     i18n(dastroConfig);
-  const { resolveRecordUrl, pageRecordForUrl } = routing(dastroConfig);
-  const { setCachingHeaders } = caching(dastroConfig);
+  const { languageFallbacks, localeCookie } = dastroConfig.i18n;
+  const { resolveRecordUrl, pageRecordForUrl, lowerCaseLocalePrefixPath } =
+    routing(dastroConfig);
+  const { setCachingHeaders, preventCaching } = caching(dastroConfig);
 
   setCachingHeaders(context, options.caching);
 
   const url = context.url.pathname;
+
+  // Locale prefixes are lower-case: one URL per page
+  const lowerCasePrefixPath = lowerCaseLocalePrefixPath(url);
+  if (lowerCasePrefixPath) {
+    return context.redirect(`${lowerCasePrefixPath}${context.url.search}`, 301);
+  }
+
   const { page, pageDefinition, locale, slug } = await pageRecordForUrl(
     context,
     url,
@@ -150,27 +169,27 @@ export async function renderPage<T extends DastroTypes>(
   if (routingStrategy === 'prefix-always' && !locale) {
     // if on the root page, redirect to the user's preferred locale
     if (url === '/') {
-      const acceptLanguage =
-        context.request.headers.get('Accept-Language') ?? '';
-
-      const preferredLanguage = acceptLanguage
-        .split(',')
-        .map((lang) => lang.split(';')[0].trim().substring(0, 2).toLowerCase())
-        .find((lang) =>
-          locales
-            .map((l) => normalizedIsoLocale(l))
-            ?.includes(lang as DastroTypes['SiteLocale']),
-        );
-
-      const redirectLocale = normalizedIsoLocale(
-        preferredLanguage ?? defaultLocale,
+      const rootLocalePrefix = localePrefix(
+        resolveRootLocale({
+          locales,
+          defaultLocale,
+          languageFallbacks,
+          cookieLocale: localeCookie
+            ? context.cookies.get(localeCookie)?.value
+            : undefined,
+          acceptLanguage: context.request.headers.get('Accept-Language'),
+        }),
       );
 
-      if (process.env.NODE_ENV === 'development') {
-        console.debug('redirectLocale: ', redirectLocale);
+      // The target depends on the visitor (cookie, Accept-Language): never cache it, neither in the browser nor in the CDN
+      const response = context.redirect(
+        `/${rootLocalePrefix}${url}${context.url.search}`,
+      );
+      for (const headers of [context.response.headers, response.headers]) {
+        preventCaching(headers);
       }
 
-      return context.redirect(`/${redirectLocale}${url}`);
+      return response;
     }
 
     // All non-root pages need a locale
