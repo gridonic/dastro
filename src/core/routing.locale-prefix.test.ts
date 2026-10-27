@@ -380,15 +380,9 @@ describe('locale helpers', () => {
     expect(localeFromPrefix('fr')).toBe('fr_CH');
   });
 
-  test('the deprecated normalizedIsoLocale still works, in both modes', () => {
+  test('the superseded normalizedIsoLocale still works, in both modes', () => {
     for (const { i18n } of [dastroTest(), localePrefixTest()]) {
-      // Typed loosely so the deprecation does not fail `astro check`
-      const { normalizedIsoLocale } = i18n() as {
-        normalizedIsoLocale: (
-          l: string,
-          keepVariant?: boolean,
-        ) => string | null;
-      };
+      const { normalizedIsoLocale } = i18n();
 
       expect(normalizedIsoLocale('de_CH')).toBe('de');
       expect(normalizedIsoLocale('de_CH', true)).toBe('de-CH');
