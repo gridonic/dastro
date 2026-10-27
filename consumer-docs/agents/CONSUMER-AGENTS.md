@@ -92,4 +92,8 @@ Why each part of the command:
 - `--ignore-lock` — runs alongside the human's server, untracked: `astro dev stop`/`status`/`logs` can't see it, and its logs land in your background shell's output.
 
 Type-checking is separate: run `npx astro check` on demand (`npm run dev` bundles a check watcher for humans). `astro preview --background` for production builds needs Astro ≥ 7.2.
+
+## Verification
+
+After changes, run the `dastro-verify` skill: it checks every sitemap URL and renders each page type, locale and module in a browser. Project-specific logic beyond CMS modules (forms, shop, search, …) is checked from `docs/agents/verify/<feature>.md`; update that file when you add or change such a feature.
 <!-- @dastro:managed:end -->
