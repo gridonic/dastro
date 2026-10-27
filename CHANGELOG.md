@@ -1,3 +1,8 @@
+### [3.3.1](https://github.com/gridonic/dastro/compare/v3.3.0...v3.3.1)
+
+- add `--base-ref` to `scripts/compare-upgrade.sh` to compare two refs of a project (e.g. an upgrade branch against `main`), see `RELEASING.md`
+- consumer `AGENTS.md`: run the `dastro-verify` skill after changes, keep project-specific checks in `docs/agents/verify/`
+
 ### [3.3.0](https://github.com/gridonic/dastro/compare/v3.2.3...v3.3.0)
 
 - add `i18n.localePrefix` (`'language'` default, `'locale'` for region locales like `/de-ch`), with the helpers `localePrefix`, `localeLangTag` and `localeFromPrefix` on `i18n()`
