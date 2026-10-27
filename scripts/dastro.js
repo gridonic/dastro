@@ -20,7 +20,7 @@ import * as netlify from './steps/netlify.js';
 import * as datoConfig from './steps/dato-config.js';
 import * as datoSeed from './steps/dato-seed.js';
 import { deploy } from './deploy.js';
-import { compareVersions } from './versions.js';
+import { compareVersions, rangeWithinPeer } from './versions.js';
 
 const command = process.argv[2];
 
@@ -547,6 +547,7 @@ async function getUpgradeAlignments(latestTag) {
   const peerAlignments = [];
   for (const [name, newRange] of Object.entries(newPeers)) {
     if (!consumerDeps[name]) continue;
+    if (rangeWithinPeer(consumerDeps[name], newRange)) continue;
     peerAlignments.push({
       name,
       currentRange: consumerDeps[name],

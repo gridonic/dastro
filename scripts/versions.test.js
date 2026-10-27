@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { compareVersions } from './versions.js';
+import { compareVersions, rangeWithinPeer } from './versions.js';
 
 describe('compareVersions', () => {
   it('orders releases by major, minor and patch', () => {
@@ -31,5 +31,30 @@ describe('compareVersions', () => {
     expect(
       patchVersions.filter((v) => compareVersions(v, '3.3.0-beta.1') > 0),
     ).toEqual(['3.3.0']);
+  });
+});
+
+describe('rangeWithinPeer', () => {
+  it('accepts a range at or above the peer minimum in the same major', () => {
+    expect(rangeWithinPeer('^7.4.2', '^7.0.0')).toBe(true);
+    expect(rangeWithinPeer('^7.0.0', '^7.0.0')).toBe(true);
+  });
+
+  it('rejects a range below the peer minimum', () => {
+    expect(rangeWithinPeer('^7.0.0', '^7.2.0')).toBe(false);
+  });
+
+  it('rejects a range in another major', () => {
+    expect(rangeWithinPeer('^6.3.0', '^7.0.0')).toBe(false);
+    expect(rangeWithinPeer('^8.0.0', '^7.0.0')).toBe(false);
+  });
+
+  it('treats the minor as the breaking segment on 0.x', () => {
+    expect(rangeWithinPeer('^0.13.2', '^0.13.0')).toBe(true);
+    expect(rangeWithinPeer('^0.12.0', '^0.13.0')).toBe(false);
+  });
+
+  it('rejects ranges without a version', () => {
+    expect(rangeWithinPeer('latest', '^7.0.0')).toBe(false);
   });
 });

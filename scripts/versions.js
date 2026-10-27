@@ -18,3 +18,23 @@ export function compareVersions(a, b) {
 
   return prereleaseA.localeCompare(prereleaseB, 'en', { numeric: true });
 }
+
+// Whether a consumer's dependency range already sits within dastro's peer range: same breaking
+// segment (major, or minor on 0.x) and a minimum at or above the peer's. `^7.4.2` needs no
+// alignment to `^7.0.0`; rewriting it would only loosen the project's floor.
+export function rangeWithinPeer(currentRange, peerRange) {
+  const current = minimumVersion(currentRange);
+  const peer = minimumVersion(peerRange);
+  if (!current || !peer) return false;
+  const [currentMajor, currentMinor] = current.split('.').map(Number);
+  const [peerMajor, peerMinor] = peer.split('.').map(Number);
+  if (currentMajor !== peerMajor) return false;
+  if (peerMajor === 0 && currentMinor !== peerMinor) return false;
+  return compareVersions(current, peer) >= 0;
+}
+
+function minimumVersion(range) {
+  const match = String(range).match(/(\d+)(?:\.(\d+))?(?:\.(\d+))?/);
+  if (!match) return null;
+  return [match[1], match[2] ?? 0, match[3] ?? 0].join('.');
+}
