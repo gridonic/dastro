@@ -72,6 +72,7 @@ Run several projects in parallel with different ports (4351, 4361, …). The rep
 
 - Pass the previous release as base, so only the new release's changes show up.
 - `REF=origin/main` compares a branch other than the project's checked-out `HEAD`.
+- `scripts/compare-upgrade.sh --base-ref main <project-dir> [port]` compares two refs of the project instead of two dastro versions, each on its locked dependencies, e.g. a dastro upgrade branch (with its patches and dependency updates) against `main`. The `dastro-verify` skill runs this from the project's `node_modules/dastro/scripts/`.
 - Read the "Base responses" summary first: if pages fail on both sides, the comparison proves nothing. Fix the project setup first.
 - Each difference is either intended (list it in the changelog) or a bug (fix it, cut the next beta).
 
