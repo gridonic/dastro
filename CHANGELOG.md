@@ -10,6 +10,7 @@
 - add `consumer-docs/i18n.md`
 - add `scripts/compare-upgrade.sh` to compare a consumer project before and after a dastro upgrade, see `RELEASING.md`
 - `dastro upgrade` ranks prereleases below their release when applying patches
+- update minor and patch dependencies and `@astrojs/compiler-rs` to 0.5 (used by Astro 7.4)
 
 ### [3.2.3](https://github.com/gridonic/dastro/compare/v3.2.2...v3.2.3)
 
