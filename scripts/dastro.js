@@ -64,8 +64,14 @@ async function runCommand() {
       const currentVersion = getPackageVersion();
       console.log(`ℹ️  Current version: v${currentVersion}`);
 
-      const latestTag = getLatestRemoteVersionTag();
-      console.log(`ℹ️  Latest version: ${latestTag}\n`);
+      // DASTRO_UPGRADE_REF targets a branch or prerelease tag for testing, see RELEASING.md
+      const latestTag =
+        process.env.DASTRO_UPGRADE_REF || getLatestRemoteVersionTag();
+      console.log(
+        process.env.DASTRO_UPGRADE_REF
+          ? chalk.yellow(`⚠️  Target ref (DASTRO_UPGRADE_REF): ${latestTag}\n`)
+          : `ℹ️  Latest version: ${latestTag}\n`,
+      );
 
       // Resolve deps to (re)install alongside dastro:
       //  - peerDependencies the consumer declares are *always* pinned to
