@@ -41,10 +41,18 @@ Pick the project that needs the feature plus at least one that does not use it.
 npm install "dastro@github:gridonic/dastro#vX.Y.Z-beta.N"
 ```
 
+Or let the upgrade command do it, with the dependency alignment, consumer docs sync and instruction patches of a regular upgrade. Run the candidate's own CLI, since the installed one may not know the override:
+
+```bash
+DASTRO_UPGRADE_REF=vX.Y.Z-beta.N node <dastro-checkout>/scripts/dastro.js upgrade
+```
+
+`DASTRO_UPGRADE_REF` takes any pushed ref, including a branch (`feat/my-feature`) for a local test before cutting a beta.
+
 Open the pull request as a draft marked "do not merge", so Netlify builds a deploy preview.
 
-- Do not run `dastro upgrade` in a beta project: it would install the latest stable release, i.e. downgrade.
-- The beta does not sync consumer docs or print instruction patches. Read `node_modules/dastro/consumer-docs/` and `scripts/patches/` by hand.
+- Do not run a plain `dastro upgrade` in a beta project: it would install the latest stable release, i.e. downgrade.
+- A plain `npm install` of the beta does not sync consumer docs or print instruction patches. Read `node_modules/dastro/consumer-docs/` and `scripts/patches/` by hand.
 - If the local npm rewrites unrelated parts of `package-lock.json` (e.g. drops `libc` fields), keep only the dastro entries.
 
 ### 3. Collect evidence
