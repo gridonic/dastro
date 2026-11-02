@@ -208,11 +208,6 @@ async function printSummary(ctx, projectPath, results, fresh) {
   console.log('   npm run dev');
   console.log('\n📚 Documentation: https://github.com/gridonic/dastro');
 
-  console.log('\n🚀 Next steps:');
-  console.log(
-    '   🤖 Run the dastro-init-project.mdc rule to remove unnecessary prototype code',
-  );
-
   if (ctx.notes.length > 0) {
     console.log('\n📝 Manual follow-up:');
     ctx.notes.forEach((note) => console.log(`   • ${note}`));

@@ -128,7 +128,22 @@ export async function seedDatoCmsData({ cmaToken, projectName }) {
     created.push('Home page');
   }
 
-  // 404 page
+  // 404 page, "Prevent indexing" (SEO no_index) set in every locale
+  const pageFields = await client.fields.list(typeRef('page').id);
+  const seoField = pageFields.find((f) => f.api_key === 'seo');
+  const noIndexSeo = () => ({
+    title: null,
+    description: null,
+    image: null,
+    twitter_card: null,
+    no_index: true,
+  });
+  const notFoundSeo = seoField
+    ? {
+        seo: seoField.localized ? perLocale(noIndexSeo) : noIndexSeo(),
+      }
+    : {};
+
   let notFoundPage = findPageBySlug('404');
   if (!notFoundPage) {
     notFoundPage = await client.items.create({
@@ -136,6 +151,7 @@ export async function seedDatoCmsData({ cmaToken, projectName }) {
       title: localize({ de: '404', en: '404' }),
       translated_slug: localize({ de: '404', en: '404' }),
       header_module: perLocale(() => headerModule('404')),
+      ...notFoundSeo,
     });
     created.push('404 page');
   }
