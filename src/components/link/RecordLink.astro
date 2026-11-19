@@ -31,6 +31,10 @@ const {
 
 const { resolveRecordUrl } = Astro.locals.dastro.routing();
 
+const linkTarget = stripStega(target);
+// a rel passed in props (via rest) still wins
+const rel = linkTarget === '_blank' ? 'noopener noreferrer' : undefined;
+
 const resolvedUrl = resolveRecordUrl(record, Astro.locals.locale);
 const href =
   resolvedUrl !== null ? withUrlExtras(resolvedUrl, { query, hash }) : null;
@@ -43,7 +47,8 @@ const href =
     class:list={stripStega(classNames)}
     data-astro-prefetch
     href={href}
-    target={stripStega(target)}
+    target={linkTarget}
+    rel={rel}
     title={stripStega(linkTitle) || undefined}
     {...contentLinkAttrs({ boundary: true })}
     {...rest}

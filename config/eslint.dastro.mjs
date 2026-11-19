@@ -10,6 +10,13 @@ const attr = (node, name) =>
 const staticValue = (attribute) =>
   attribute?.value?.type === 'Literal' ? attribute.value.value : undefined;
 
+// target="_blank", or an expression that can yield '_blank' (target={external ? '_blank' : '_self'})
+const mayBeBlank = (context, target) => {
+  if (!target?.value) return false;
+  if (target.value.type === 'Literal') return target.value.value === '_blank';
+  return /(['"`])_blank\1/.test(context.sourceCode.getText(target.value));
+};
+
 // HTML elements only; components (Link, Seo, …) handle their own attributes
 const isHtmlElement = (node) =>
   node.name?.type === 'JSXIdentifier' && /^[a-z]/.test(node.name.name);
@@ -29,10 +36,10 @@ const dastroPlugin = {
         return {
           JSXOpeningElement(node) {
             if (!isHtmlElement(node)) return;
-            if (staticValue(attr(node, 'target')) !== '_blank') return;
+            if (!mayBeBlank(context, attr(node, 'target'))) return;
+            // a spread may carry rel at runtime, but the rel has to be visible here
             const rel = attr(node, 'rel');
             if (rel && (staticValue(rel) === undefined || /\bnoopener\b/.test(staticValue(rel)))) return;
-            if (node.attributes.some((a) => a.type === 'JSXSpreadAttribute')) return;
             context.report({
               node,
               message:
@@ -75,6 +82,8 @@ const a11yWarnings = eslintPluginAstro.configs['jsx-a11y-recommended'].map(
             Object.entries(config.rules).map(([rule, setting]) => {
               const [level, ...options] = [setting].flat();
               const off = level === 'off' || level === 0;
+              // skip links set accesskey on purpose
+              if (rule.endsWith('/no-access-key')) return [rule, 'off'];
               return [rule, off ? setting : ['warn', ...options]];
             }),
           ),

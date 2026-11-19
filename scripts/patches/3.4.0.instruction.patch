@@ -43,21 +43,40 @@ stylelint ships with dastro; no install needed. Extend the `lint` script in
 
 The rules: colours and fonts come from the token files
 (`src/sass/root/_colors.scss`, `src/sass/typography/_font-types.scss`) — no hex,
-named or literal `rgb()`/`hsl()` colours (`rgba(var(--x), .5)` is fine), no
-absolute `font-size` (px/rem/pt) or literal `font-family` elsewhere — and no
-`transition: all`. The pre-commit hook lints the same `src/` files as
-`npm run lint`. Token files, print
-styles and the styleguide/debug components are exempt.
+named or literal `rgb()`/`hsl()` colours, no absolute `font-size` (px/rem/pt)
+or literal `font-family` elsewhere — and no `transition: all` (also not inside a
+`--*transition*` custom property or `$*transition*` variable). The pre-commit
+hook lints the same `src/` files as `npm run lint`. Token files, print styles,
+the styleguide/debug components, `@property` initial values and `mask` colours
+are exempt.
+
+Other print or PDF output (e.g. a PDF page using `pt` and hex) is exempted in
+the project's own config:
+
+```js
+import dastro from 'dastro/config/stylelint';
+
+export default {
+  ...dastro,
+  ignoreFiles: [...dastro.ignoreFiles, 'src/pages/report-pdf/**'],
+};
+```
 
 ## 3. Fix every lint error
 
 Run `npm run lint` and fix each error at its source:
 
 - **Colour literal** → the matching token (`var(--…)` from `_colors.scss`). A
-  colour with no token gets one in `_colors.scss`, named for its role.
+  colour with no token gets one in `_colors.scss`, named for its role. A
+  translucent variant of a token (overlay, scrim, shadow) is
+  `color-mix(in srgb, var(--x) 50%, transparent)`; this works whether the
+  token holds a hex, `rgb()` or `hsl()` value.
 - **Font literal** → the design's font type (`$font-types` / `text-*` class) or
   a font token.
-- **`transition: all`** → list the transitioned properties.
+- **`transition: all`** → list the transitioned properties. When a token such
+  as `--base-transition-all` holds `all`, fix the token's value.
+- **Boilerplate examples** (`src/components/examples/`, `src/pages/examples.astro`)
+  → delete them; they are demo code, not site output.
 - **`target="_blank"` without `rel`** → use the `Link` component, or add
   `rel="noopener noreferrer"`.
 - **Empty `title=""`** → omit the attribute.
