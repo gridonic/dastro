@@ -3,6 +3,18 @@ pre-commit:
   jobs:
     - name: astro check
       run: npx astro check --minimumFailingSeverity hint
+    - name: eslint
+      glob:
+        - 'src/*.{js,mjs,ts,jsx,tsx,astro}'
+        - 'src/**/*.{js,mjs,ts,jsx,tsx,astro}'
+      run: npx eslint --no-warn-ignored {staged_files}
+    - name: stylelint
+      glob:
+        - 'src/*.{css,scss,astro}'
+        - 'src/**/*.{css,scss,astro}'
+      run: npx stylelint --allow-empty-input {staged_files}
+    - name: test
+      run: npm run test --if-present
 
 post-merge:
   jobs:

@@ -1,0 +1,100 @@
+# Dastro 3.4 — manual patch: lint guardrails and worktree setup
+
+The pre-commit hook now runs ESLint and stylelint on staged files, plus
+`npm test` when the project has a `test` script. These steps wire the shared
+dastro rules into the project and leave it with **zero lint errors**, so the
+next commit passes. Warnings (accessibility hints) may stay.
+
+## 1. ESLint: add the shared dastro rules
+
+In `eslint.config.mjs`, import the shared config and spread it right after
+`...eslintPluginAstro.configs.recommended` (before project overrides):
+
+```js
+import dastroEslint from 'dastro/config/eslint';
+
+export default defineConfig(
+  // …existing presets…
+  ...eslintPluginAstro.configs.recommended,
+  ...dastroEslint,
+  // …project overrides…
+);
+```
+
+It adds the jsx-a11y preset as warnings, and two errors: `target="_blank"`
+without `rel`, and an empty `title=""`. It needs `eslint-plugin-astro` and
+`eslint-plugin-jsx-a11y` (boilerplate defaults); install whichever is missing
+with `npm i -D`.
+
+## 2. stylelint: add the config and the lint script
+
+Create `stylelint.config.mjs` next to `package.json`:
+
+```js
+export { default } from 'dastro/config/stylelint';
+```
+
+stylelint ships with dastro; no install needed. Extend the `lint` script in
+`package.json` so it covers styles:
+
+```json
+"lint": "eslint \"src/**/*.{js,mjs,ts,jsx,tsx,astro}\" && stylelint \"src/**/*.{css,scss,astro}\""
+```
+
+The rules: colours and fonts come from the token files
+(`src/sass/root/_colors.scss`, `src/sass/typography/_font-types.scss`) — no hex,
+named or literal `rgb()`/`hsl()` colours, no absolute `font-size` (px/rem/pt)
+or literal `font-family` elsewhere — and no `transition: all` (also not inside a
+`--*transition*` custom property or `$*transition*` variable). The pre-commit
+hook lints the same `src/` files as `npm run lint`. Token files, print styles,
+the styleguide/debug components, `@property` initial values and `mask` colours
+are exempt.
+
+Other print or PDF output (e.g. a PDF page using `pt` and hex) is exempted in
+the project's own config:
+
+```js
+import dastro from 'dastro/config/stylelint';
+
+export default {
+  ...dastro,
+  ignoreFiles: [...dastro.ignoreFiles, 'src/pages/report-pdf/**'],
+};
+```
+
+## 3. Fix every lint error
+
+Run `npm run lint` and fix each error at its source:
+
+- **Colour literal** → the matching token (`var(--…)` from `_colors.scss`). A
+  colour with no token gets one in `_colors.scss`, named for its role. A
+  translucent variant of a token (overlay, scrim, shadow) is
+  `color-mix(in srgb, var(--x) 50%, transparent)`; this works whether the
+  token holds a hex, `rgb()` or `hsl()` value.
+- **Font literal** → the design's font type (`$font-types` / `text-*` class) or
+  a font token.
+- **`transition: all`** → list the transitioned properties. When a token such
+  as `--base-transition-all` holds `all`, fix the token's value.
+- **Boilerplate examples** (`src/components/examples/`, `src/pages/examples.astro`)
+  → delete them; they are demo code, not site output.
+- **`target="_blank"` without `rel`** → use the `Link` component, or add
+  `rel="noopener noreferrer"`.
+- **Empty `title=""`** → omit the attribute.
+
+A `stylelint-disable-next-line <rule> -- <reason>` comment is the last resort,
+for a value that is genuinely outside the token system. Done when
+`npm run lint` reports 0 errors. Check the changed modules in the browser
+against production.
+
+## 4. Worktree setup
+
+If `.worktreeinclude` does not exist, create it with one line:
+
+```
+.env
+```
+
+Fresh worktrees are then set up with `npm ci && npx dastro worktree-setup`
+(links the listed files from the main checkout and installs the git hooks).
+If the project is used in T3 Code, set that command as the project's setup
+script.
