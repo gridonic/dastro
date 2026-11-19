@@ -5,4 +5,8 @@ pre-commit:
   jobs:
     - name: test
       run: npm run test
-
+    # consumer-only jobs: dastro itself has no ESLint/stylelint setup
+    - name: eslint
+      skip: true
+    - name: stylelint
+      skip: true

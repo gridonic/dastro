@@ -20,6 +20,7 @@ import * as netlify from './steps/netlify.js';
 import * as datoConfig from './steps/dato-config.js';
 import * as datoSeed from './steps/dato-seed.js';
 import { deploy } from './deploy.js';
+import { worktreeSetup } from './worktree-setup.js';
 import { compareVersions, rangeWithinPeer } from './versions.js';
 
 const command = process.argv[2];
@@ -53,6 +54,9 @@ async function runCommand() {
       }
       break;
     }
+    case 'worktree-setup':
+      worktreeSetup();
+      break;
     case 'link':
       execSync('npm link dastro', { stdio: 'inherit' });
       break;
@@ -227,6 +231,9 @@ async function runCommand() {
         '  create dato-config - configure DatoCMS preview & SEO plugins',
       );
       console.log('  create dato-seed - seed baseline DatoCMS records');
+      console.log(
+        '  worktree-setup - link .worktreeinclude files from the main checkout and install git hooks (after npm ci)',
+      );
       console.log('  link - link the local dastro package');
       console.log('  unlink - unlink the local dastro package');
       console.log(

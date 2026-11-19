@@ -44,7 +44,7 @@ const href =
     data-astro-prefetch
     href={href}
     target={stripStega(target)}
-    title={stripStega(linkTitle)}
+    title={stripStega(linkTitle) || undefined}
     {...contentLinkAttrs({ boundary: true })}
     {...rest}
   >

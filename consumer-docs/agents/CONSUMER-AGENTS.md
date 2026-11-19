@@ -24,8 +24,13 @@ Headless website built with **Astro**, **DatoCMS**, and **[Dastro](https://githu
 npm run dev                    # Start local dev server
 npm run build                  # Type-check and build for production
 npm run dato:generate-types    # Regenerate GraphQL types after schema changes
+npm run lint                   # ESLint + stylelint (shared dastro rules)
 dastro upgrade                 # Upgrade Dastro and sync agent assets
 ```
+
+The pre-commit hook runs `astro check`, ESLint and stylelint on staged files, and `npm test` when the project has one. Commit only with green hooks; fix the finding rather than bypassing the hook.
+
+**Fresh git worktree** (yours or a delegate's): run `npm ci && npx dastro worktree-setup`. It links `.env` and the other files listed in `.worktreeinclude` from the main checkout and installs the git hooks, so you never copy `.env` yourself.
 
 Run `npm run dato:generate-types` after any DatoCMS schema change before implementing new modules or page types.
 
