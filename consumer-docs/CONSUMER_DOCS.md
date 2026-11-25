@@ -22,3 +22,5 @@ Not synced; read from the installed package (`node_modules/dastro/consumer-docs/
 | Doc | Topic |
 |-----|-------|
 | `i18n.md` | `i18n` config options (`localePrefix`, `languageFallbacks`, `localeCookie`, `xDefaultLocale`), locale helpers, root resolution, `setLocaleCookie`, hreflang and noindex per locale |
+| `datocms-schema-changes.md` | Applying DatoCMS schema changes via the CMA (throwaway script, fork rehearsal, export before destructive changes, manifest comment) and CLI handling (skills, auth, `.tmp/` scripts) |
+| `dev-server.md` | Running an agent-owned dev server beside the human's for browser testing: start command with flag rationale, status poll, shutdown |
