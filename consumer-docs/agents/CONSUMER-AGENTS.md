@@ -1,37 +1,17 @@
 <!-- @dastro:managed -->
 # AGENTS.md
 
-Entry point for AI agents working on this Dastro project. For human setup and deployment, see [README.md](./README.md).
-
 ## Project Overview
 
-Headless website built with **Astro**, **DatoCMS**, and **[Dastro](https://github.com/gridonic/dastro)**. Content comes from DatoCMS via GraphQL; pages and modules are rendered as Astro components.
-
-## Key Directories
-
-| Path | Purpose |
-|------|---------|
-| `src/components/header-modules/` | Header module components (`Header*` prefix) |
-| `src/components/content-modules/` | Content module components (`Content*`, `Cta*`, `Teaser*`, etc.) |
-| `src/components/page/` | Page-level components |
-| `src/datocms/data/` | GraphQL queries and fragments for datocms |
-| `src/config/` | App configuration (`dastro.config.ts`, `modules.config.ts`, `pages.config.ts`) |
-| `.astro/generated/datocms.types.ts` | Generated TypeScript types from GraphQL |
+Headless website built with **Astro**, **DatoCMS**, and **[Dastro](https://github.com/gridonic/dastro)**.
 
 ## Common Commands
-
-```bash
-npm run dev                    # Start local dev server
-npm run build                  # Type-check and build for production
-npm run dato:generate-types    # Regenerate GraphQL types after schema changes
-dastro upgrade                 # Upgrade Dastro and sync agent assets
-```
 
 Run `npm run dato:generate-types` after any DatoCMS schema change before implementing new modules or page types.
 
 ## Cursor Rules (Dastro)
 
-Detailed workflows live in `.cursor/rules/`. Read the relevant rule before starting a task — do not duplicate or override them here.
+Detailed workflows live in `.cursor/rules/`. Read the relevant rule before starting a task.
 
 | Task | Rule |
 |------|------|
@@ -44,31 +24,27 @@ Dastro rules are synced automatically when running `dastro upgrade`.
 
 ## Conventions
 
-- **Modules**: GraphQL fragment → Astro component → register in `src/config/modules.config.ts`. Header modules go in `header-modules/`, content modules in `content-modules/`.
-- **Page types**: GraphQL query → page component → register in `src/config/pages.config.ts`.
 - **Types**: Import generated types from `@generated/datocms.types.ts`.
 - **Commits**: Follow [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) — single-line subject, no body unless needed (see `commits.mdc`).
 - **Styling**: Use RSCSS component naming (at least two words, dash-separated). See `rscss.mdc`. Typography via `_font-types.scss`, layout via `_ui-grid.scss`.
-- **Localization**: `node_modules/dastro/consumer-docs/i18n.md` describes the `i18n` options (`localePrefix`, `languageFallbacks`, `localeCookie`, `xDefaultLocale`), the locale helpers (`localePrefix`, `localeLangTag`), root resolution (which locale the site root redirects to), the client helper `setLocaleCookie`, and the hreflang cluster. Never build locale prefixes or `lang` values by hand.
+- **Localization**: `node_modules/dastro/consumer-docs/i18n.md` describes the `i18n` options (`localePrefix`, `languageFallbacks`, `localeCookie`, `xDefaultLocale`), the locale helpers (`localePrefix`, `localeLangTag`), root resolution (which locale the site root redirects to), the client helper `setLocaleCookie`, and the hreflang cluster. Take locale prefixes and `lang` values from the locale helpers.
 - **Boilerplate markers**: Files may contain `@boilerplate:init` comments — these indicate placeholder content to adjust when forking this repo.
 
 ## Scope
 
-- Match existing patterns in neighboring files before introducing new abstractions.
-- Keep changes focused; do not modify unrelated code.
 - Only create git commits when explicitly asked.
 
 ## DatoCMS schema changes
 
 - If not stated otherwise, apply schema changes **directly via the CMA** — migration files are not part of this project's workflow (nothing replays them). The audit trail is the schema manifest comment on the ticket.
 - Rehearse each change set as a **throwaway script**: run it against a fresh fork of `main`, verify, run the same script against `main`, then discard it — never committed. One fork per ticket, destroyed at the end.
-- Changing the primary `main` env in place is **sanctioned** while the project is pre-launch (placeholder content only). Revisit at launch.
+- Changing the primary `main` env in place is **sanctioned** while the project is pre-launch (placeholder content only).
 - Destructive changes (deleting or retyping fields, blocks, models): export the affected records as JSON into the ticket before applying.
 
 ### DatoCMS handling
 - Use the `datocms:datocms-cli` / `datocms-cma` skills via `npx datocms cma:script`. Use mcp as fallback only.
 - Either the user is already authorized for the datocms cli or then auth comes from the profile in `datocms.config.json`; don't read `.env`.
-- Scripts go in a gitignored `.tmp/` inside the repo, not `/tmp`.
+- Scripts go in a gitignored `.tmp/` inside the repo.
 
 ## Dev server for browser testing
 
