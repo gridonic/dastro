@@ -9,11 +9,13 @@ Docs shipped to **consumer projects** (projects that install dastro), not instru
 | Source | Consumer target |
 |--------|-----------------|
 | `agents/CONSUMER-AGENTS.md` | `AGENTS.md` |
+| `agents/CONSUMER-CODING-STANDARDS.md` | `CODING_STANDARDS.md` |
 
 - Only the block between `<!-- @dastro:managed -->` and `<!-- @dastro:managed:end -->` syncs; consumer content outside it survives upgrades. Keep both markers in every source.
 - A missing target gets the full source; a target without markers is left untouched.
 - A missing `CLAUDE.md` is created containing `@AGENTS.md`, so Claude Code loads the same doc.
 - Adding a doc: create it here with markers, then add a `MANAGED_DOCS` entry.
+- The upgrade that installs a release still runs the previous CLI with its `MANAGED_DOCS`, so a newly added doc reaches projects one upgrade late. Ship the copy command in that release's instruction patch.
 
 ## Reference docs
 

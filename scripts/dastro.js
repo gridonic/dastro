@@ -276,6 +276,10 @@ const MANAGED_END = '<!-- @dastro:managed:end -->';
 // Consumer docs shipped in the dastro package, synced into the consuming project on upgrade
 const MANAGED_DOCS = [
   { source: 'consumer-docs/agents/CONSUMER-AGENTS.md', target: 'AGENTS.md' },
+  {
+    source: 'consumer-docs/agents/CONSUMER-CODING-STANDARDS.md',
+    target: 'CODING_STANDARDS.md',
+  },
 ];
 
 function syncManagedDocs() {

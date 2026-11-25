@@ -1,0 +1,55 @@
+# Dastro 3.4 — manual patch
+
+Coding conventions moved out of the managed `AGENTS.md` block into a new
+managed doc, `CODING_STANDARDS.md` (repo root). `AGENTS.md` is now an index
+that points to it. Review tooling reads `CODING_STANDARDS.md` as the project's
+documented standards.
+
+## 1. Create `CODING_STANDARDS.md` if the upgrade did not
+
+The upgrade that installs this version still runs the previous CLI, which does
+not know the new doc. If the file is missing:
+
+```sh
+cp node_modules/dastro/consumer-docs/agents/CONSUMER-CODING-STANDARDS.md CODING_STANDARDS.md
+```
+
+Later upgrades keep the block between the `@dastro:managed` markers in sync.
+
+## 2. Project already has its own `CODING_STANDARDS.md`
+
+A file without the markers is left untouched, so the dastro standards are
+missing from it, while `AGENTS.md`, `dastro-ai-linter.mdc` and
+`dastro-create-modules.mdc` now rely on them. Append the managed block
+(markers included) from
+`node_modules/dastro/consumer-docs/agents/CONSUMER-CODING-STANDARDS.md` and
+keep the project's own standards outside the markers. Where both state a rule,
+keep one: delete the project's copy, or keep it outside the markers if it
+differs on purpose.
+
+## 3. Conventions kept outside the managed `AGENTS.md` block
+
+The `## Conventions` section left `AGENTS.md`. Look for project copies of the
+moved conventions:
+
+```sh
+grep -n "datocms.types\|dato:generate-types\|RSCSS\|rscss\|_font-types\|_ui-grid\|localePrefix\|localeLangTag\|boilerplate:init\|Conventional Commits\|isEmptyDocument" AGENTS.md CLAUDE.md
+```
+
+- A copy that says the same as `CODING_STANDARDS.md`: delete it.
+- A project-specific rule about how code is written: move it into
+  `CODING_STANDARDS.md`, outside the markers.
+- Anything else (procedures, project facts) stays in `AGENTS.md`.
+
+## 4. Custom rule files
+
+`dastro-ai-linter.mdc` now lints against `CODING_STANDARDS.md` instead of
+carrying its own rule. Project rule files that reference the linter rule for
+the `isEmptyDocument` check should point at `CODING_STANDARDS.md`:
+
+```sh
+grep -rln "dastro-ai-linter" .cursor/rules
+```
+
+The reference docs `datocms-schema-changes.md` and `dev-server.md` are read
+from `node_modules/dastro/consumer-docs/`. No action needed.
